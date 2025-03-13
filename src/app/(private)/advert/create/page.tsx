@@ -312,7 +312,6 @@ export default function Page() {
     const board = form.watch("marca");
     if (type && board) {
       getModels.mutate({ type, board });
-      form.setValue("modelo", "");
     }
   }, [form.watch("marca")]);
 

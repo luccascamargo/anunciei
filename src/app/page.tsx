@@ -33,6 +33,7 @@ import {
 import { PriceInput } from "@/components/priceInput";
 import { QuilometerInput } from "@/components/quilometerInput";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardAdvert } from "@/components/cardAdvert";
@@ -44,32 +45,26 @@ export interface iTypes {
   name: string;
 }
 
-const formSchema = z.object({
-  marca: z.string().optional(),
-  modelo: z.string().optional(),
-  busca: z.string().optional(),
-  estado: z.string().optional(),
-  cidade: z.string().optional(),
+export const formSchemaFilter = z.object({
+  marca: z.string(),
+  modelo: z.string(),
+  busca: z.string(),
+  estado: z.string(),
+  cidade: z.string(),
   ano_modelo_min: z.coerce
     .string()
-    .optional()
+
     .transform((value) => value?.toString()),
   ano_modelo_max: z.coerce
     .string()
-    .optional()
+
     .transform((value) => value?.toString()),
-  quilometragem_min: z
-    .string()
-    .transform((val) => (Number(val) * 100).toString())
-    .optional(),
+  quilometragem_min: z.string(),
   tipo: z.string(),
-  quilometragem_max: z
-    .string()
-    .transform((val) => (Number(val) * 100).toString())
-    .optional(),
-  portas: z.string().optional(),
-  preco_min: z.number().optional(),
-  preco_max: z.number().optional(),
+  quilometragem_max: z.string(),
+  portas: z.string(),
+  preco_min: z.string(),
+  preco_max: z.string(),
   opcionais: z.array(z.string().optional()).optional(),
 });
 
@@ -78,12 +73,24 @@ interface iOptional {
   nome: string;
 }
 
+interface iModel {
+  Label: string;
+  Value: number;
+  codigoTipoVeiculo: string;
+}
+interface iBrand {
+  Label: string;
+  Value: string;
+  codigoTipoVeiculo: string;
+}
+
 export default function Filter() {
-  const [page, setPage] = useState(0);
+  const [brand, setBrand] = useState<iBrand | null>(null);
+  const [model, setModel] = useState<iModel | null>(null);
   const [apiUrl, setApiUrl] = useState("http://localhost:8080/adverts/filter");
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchemaFilter>>({
+    resolver: zodResolver(formSchemaFilter),
     defaultValues: {
       portas: "",
       marca: "",
@@ -97,13 +104,12 @@ export default function Filter() {
       ano_modelo_min: "",
       quilometragem_max: "",
       quilometragem_min: "",
-      preco_max: 0,
-      preco_min: 0,
+      preco_max: "",
+      preco_min: "",
     },
   });
 
   async function fetchAdverts(url: string): Promise<FilterAdverts> {
-    console.log(url);
     const res = await fetch(url, {
       method: "GET",
       headers: {
@@ -134,6 +140,22 @@ export default function Filter() {
 
   function onSubmit() {
     const filters = form.getValues();
+
+    if (filters.ano_modelo_min > filters.ano_modelo_max) {
+      toast("O ano mínimo não pode ser maior que o ano máximo");
+      return;
+    }
+    if (filters.preco_min > filters.preco_max) {
+      toast("O valor mínimo não pode ser maior que o valor máximo");
+      return;
+    }
+    if (filters.quilometragem_min > filters.quilometragem_max) {
+      toast(
+        "A quilometragem mínima não pode ser maior que a quilometragem máxima"
+      );
+      return;
+    }
+
     if (filters.busca) {
       filters.busca = normalizeText(filters.busca);
     }
@@ -158,34 +180,31 @@ export default function Filter() {
 
   const getBoards = useMutation({
     mutationKey: ["getBoards"],
-    mutationFn: async (type: number) => {
+    mutationFn: async (type: string) => {
       return await api(`/fipe/brands/${type}`);
     },
   });
 
   const getModels = useMutation({
     mutationKey: ["getModels"],
-    mutationFn: async ({ type, board }: { type: number; board: string }) => {
-      return await api(`/fipe/models/${type}/${board}`);
+    mutationFn: async ({ type, brand }: { type: string; brand: string }) => {
+      return await api(`/fipe/models/${type}/${brand}`);
     },
   });
 
   useEffect(() => {
     const value = form.watch("tipo");
     if (value) {
-      const type = value === "carros" ? 1 : value === "motos" ? 2 : 3;
-      getBoards.mutate(type);
+      getBoards.mutate(value);
     }
   }, [form.watch("tipo")]);
 
   useEffect(() => {
     const type = form.watch("tipo");
-    const board = form.watch("marca");
-    if (type && board) {
-      const typeFormat = type === "carros" ? 1 : type === "motos" ? 2 : 3;
-      getModels.mutate({ type: typeFormat, board });
+    if (type && brand) {
+      getModels.mutate({ type, brand: brand.Value });
     }
-  }, [form.watch("marca")]);
+  }, [brand]);
 
   const fetchStates = useQuery({
     queryKey: ["fetchStates"],
@@ -217,6 +236,20 @@ export default function Filter() {
       getCities.mutate(state);
     }
   }, [form.watch("estado")]);
+
+  const handleSelectChangeBrand = (event: string) => {
+    const selectedObject = getBoards.data.filter(
+      (brand: iBrand) => event === brand.Value
+    );
+    setBrand(selectedObject[0]);
+  };
+
+  const handleSelectChangeModel = (event: string) => {
+    const selectedObject = getModels.data.filter(
+      (model: iModel) => Number(event) === model.Value
+    );
+    setModel(selectedObject[0]);
+  };
 
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
@@ -369,80 +402,56 @@ export default function Filter() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="marca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Marca</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                          disabled={getBoards.isSuccess !== true}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder={
-                                getBoards.isPending
-                                  ? "Buscando Marcas"
-                                  : "Selecione"
-                              }
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {getBoards.data?.map((brand: any, idx: number) => (
-                              <SelectItem value={brand.Value} key={idx}>
-                                {brand.Label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="modelo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Modelo</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                          disabled={getModels.isSuccess !== true}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder={
-                                getModels.isPending
-                                  ? "Buscando Modelos"
-                                  : "Selecione"
-                              }
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {getModels?.data?.map((model: any, idx: number) => (
-                              <SelectItem value={model.Label} key={idx}>
-                                {model.Label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormItem>
+                  <FormLabel>Marca</FormLabel>
+                  <Select
+                    onValueChange={(e) => handleSelectChangeBrand(e)}
+                    value={brand?.Value}
+                    disabled={getBoards.isSuccess !== true}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          getBoards.isPending ? "Buscando Modelos" : "Selecione"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Selecione</SelectItem>
+                      {getBoards?.data?.map((model: any, idx: number) => (
+                        <SelectItem value={model.Value.toString()} key={idx}>
+                          {model.Label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel>Modelo</FormLabel>
+                  <Select
+                    onValueChange={(e) => handleSelectChangeModel(e)}
+                    value={model?.Value.toString()}
+                    disabled={getModels.isSuccess !== true}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          getModels.isPending ? "Buscando Modelos" : "Selecione"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Selecione</SelectItem>
+                      {getModels?.data?.map((model: any, idx: number) => (
+                        <SelectItem value={model.Value.toString()} key={idx}>
+                          {model.Label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+
                 <div className="w-full flex gap-2">
                   <div>
                     <FormLabel>Ano</FormLabel>
@@ -619,4 +628,3 @@ export default function Filter() {
     </div>
   );
 }
-

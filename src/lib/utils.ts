@@ -156,4 +156,3 @@ export const colors = [
     code: "indefinida",
   },
 ];
-

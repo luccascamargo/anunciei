@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { api, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,25 +20,57 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
+  name: z.string().min(3),
+  lastName: z.string(),
+  email: z.string().email(),
+  password: z.string().min(6),
 });
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      name: "",
+      lastName: "",
+      email: "",
+      password: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await api("/auth/register", {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          nome: values.name,
+          sobrenome: values.lastName,
+          email: values.email,
+          senha: values.password,
+        }),
+      });
+      toast("Conta criada com sucesso!");
+      router.refresh();
+      return;
+    } catch (error) {
+      console.log(error);
+      toast("Algo de errado aconteceu!", {
+        description:
+          "Entre em contato com nosso suporte ou tente novamente mais tarde!",
+      });
+      console.error("Erro na requisição:");
+      return;
+    }
   }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -53,12 +85,12 @@ export function RegisterForm({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <Input placeholder="Email" {...field} />
+                      <Input placeholder="Lucas" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -66,12 +98,38 @@ export function RegisterForm({
               />
               <FormField
                 control={form.control}
-                name="username"
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sobrenome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Silva" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Email" type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
                     <FormControl>
-                      <Input placeholder="Senha" {...field} />
+                      <Input placeholder="Senha" type="password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

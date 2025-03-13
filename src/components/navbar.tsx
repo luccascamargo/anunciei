@@ -21,7 +21,7 @@ export function Navbar() {
       <Wrapper>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-primary text-3xl font-semibold">
+            <Link href="/" className="text-primary text-3xl font-semibold">
               iGarage
             </Link>
             <Link href="/">

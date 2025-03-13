@@ -20,8 +20,9 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { useToast } from "@/hooks/use-toast";
+
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -33,7 +34,6 @@ export function SiginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
-  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,14 +49,12 @@ export function SiginForm({
         credentials: "include",
         body: JSON.stringify({ email: values.email, senha: values.password }),
       });
-      toast({
-        title: "Login bem sucedido!",
-      });
+      toast("Login bem sucedido!");
       router.refresh();
+      return;
     } catch (error) {
       console.log(error);
-      toast({
-        title: "Algo de errado aconteceu!",
+      toast("Algo de errado aconteceu!", {
         description:
           "Entre em contato com nosso suporte ou tente novamente mais tarde!",
       });

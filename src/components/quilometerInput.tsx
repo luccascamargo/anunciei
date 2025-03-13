@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useReducer } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
@@ -10,7 +11,6 @@ import {
 import { Input } from "./ui/input";
 
 type TextInputProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<any>;
   name: string;
   label: string;
@@ -18,35 +18,43 @@ type TextInputProps = {
   defaultValue?: string;
 };
 
-// Brazilian currency config
-const moneyFormatter = new Intl.NumberFormat("pt-BR");
+const numberFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "decimal",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
+const formatValue = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  return numberFormatter.format(Number(digits));
+};
 
 export function QuilometerInput(props: TextInputProps) {
   const initialValue = props.form.getValues()[props.name]
-    ? moneyFormatter.format(props.form.getValues()[props.name])
+    ? formatValue(props.form.getValues()[props.name])
     : props.defaultValue
-    ? moneyFormatter.format(Number(props.defaultValue))
+    ? formatValue(props.defaultValue)
     : "";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [value, setValue] = useReducer((_: any, next: string) => {
-    const digits = next.replace(/\D/g, "");
-    return moneyFormatter.format(Number(digits));
-  }, initialValue);
+  const [value, setValue] = useReducer(
+    (_: string, next: string) => formatValue(next),
+    initialValue
+  );
 
   useEffect(() => {
-    if (props.defaultValue) {
-      return;
+    if (!props.defaultValue) {
+      setValue(initialValue);
     }
-    setValue(initialValue);
-  }, [initialValue]);
+  }, [initialValue, props.defaultValue]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  function handleChange(realChangeFn: Function, formattedValue: string) {
+  const handleChange = (
+    realChangeFn: (value: string) => void,
+    formattedValue: string
+  ) => {
     const digits = formattedValue.replace(/\D/g, "");
-    const realValue = Number(digits);
+    const realValue = numberFormatter.format(Number(digits)).toString();
     realChangeFn(realValue);
-  }
+  };
 
   return (
     <FormField

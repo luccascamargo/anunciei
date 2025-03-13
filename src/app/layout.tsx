@@ -3,10 +3,10 @@ import { AuthProvider } from "@/contexts/userContext";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
-import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Providers } from "@/provider/queryClientProvider";
+import { Toaster } from "sonner";
 
 const soraSans = Sora({
   variable: "--font-sora-sans",
@@ -54,4 +54,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

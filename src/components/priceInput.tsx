@@ -18,7 +18,6 @@ type TextInputProps = {
   defaultValue?: string;
 };
 
-// Brazilian currency config
 const moneyFormatter = Intl.NumberFormat("pt-BR", {
   currency: "BRL",
   currencyDisplay: "symbol",
@@ -52,7 +51,7 @@ export function PriceInput(props: TextInputProps) {
   function handleChange(realChangeFn: Function, formattedValue: string) {
     const digits = formattedValue.replace(/\D/g, "");
     const realValue = Number(digits) / 100;
-    realChangeFn(realValue);
+    realChangeFn(realValue.toString());
   }
 
   return (
