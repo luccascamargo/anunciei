@@ -102,7 +102,7 @@ export function SiginForm({
               />
               <div className="space-y-2">
                 <Button type="submit" className="w-full">
-                  Entrar
+                  {form.formState.isSubmitting ? "Enviando..." : "Entrar"}
                 </Button>
                 <Button variant="outline" className="w-full">
                   Entrar com Google

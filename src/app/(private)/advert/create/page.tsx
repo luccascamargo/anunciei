@@ -30,13 +30,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { api, colors, GetCities, GetStates } from "@/lib/utils";
+import { api, apiFormData, colors, GetCities, GetStates } from "@/lib/utils";
 import { iTypes } from "@/app/page";
 import { Textarea } from "@/components/ui/textarea";
-import { PriceInput } from "@/components/priceInput";
-import { QuilometerInput } from "@/components/quilometerInput";
+import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
-import { UploadImagesToS3 } from "./uploadImages";
 
 const formSchema = z.object({
   tipo: z
@@ -61,13 +59,11 @@ const formSchema = z.object({
     .refine((value) => value !== "", {
       message: "Este campo é obrigatório",
     }),
-  preco: z.coerce
-    .number()
-    .refine((value) => value !== 0, { message: "Este campo é obrigatório" }),
+  preco: z.string().transform((value) => value.replace(/\D/g, "")),
   placa: z.string().refine((value) => value !== "", {
     message: "Este campo é obrigatório",
   }),
-  quilometragem: z.number(),
+  quilometragem: z.string().transform((value) => value.replace(/\D/g, "")),
   estado: z
     .string({ message: "Este campo é obrigatório" })
     .refine((value) => value !== "", {
@@ -94,10 +90,31 @@ interface iOptional {
   nome: string;
 }
 
+type FileInput = {
+  id: string;
+  file: File;
+  url: string;
+};
+
+type Brand = {
+  _id: string;
+  Label: string;
+  Value: string;
+  codigoTipoVeiculo: string;
+};
+
+type Model = {
+  _id: string;
+  Label: string;
+  Value: number;
+  codigoTipoVeiculo: string;
+  codigoMarcaVeiculo: string;
+};
+
 export default function Page() {
   const { user } = useAuth();
   const { push } = useRouter();
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileInput[]>([]);
   const [photos, setPhotos] = useState<{ key: string; uri: string }[]>([]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -113,12 +130,15 @@ export default function Page() {
       estado: "",
       cidade: "",
       portas: "",
-      preco: 0,
-      quilometragem: 0,
+      preco: "",
+      quilometragem: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      return;
+    }
     const imagesUploaded = photos.length + selectedFiles.length;
 
     if (selectedFiles.length === 0) {
@@ -133,81 +153,116 @@ export default function Page() {
       return toast("Seu plano não permite mais que 5 fotos");
     }
 
-    const { uploads, error } = await UploadImagesToS3(selectedFiles);
-
-    if (error) {
-      return toast(`Erro ao enviar imagens: ${error}`);
+    switch (values.tipo) {
+      case "1":
+        values.tipo = "carros";
+        break;
+      case "2":
+        values.tipo = "motos";
+        break;
+      case "3":
+        values.tipo = "caminhoes";
+        break;
+      default:
+        break;
     }
 
-    if (uploads) {
-      for (const upload of uploads) {
-        const formData = new FormData();
-        Object.entries(upload.fields).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-        formData.append(
-          "file",
-          selectedFiles.find((file) => file.name === upload.key)!
-        );
+    const selectedBrand = getBrands.data?.find(
+      (brand: Brand) => brand.Value === values.marca
+    );
 
-        const uploadResponse = await fetch(upload.url, {
-          method: "POST",
-          body: formData,
-          mode: "cors",
-        });
-
-        if (!uploadResponse.ok) {
-          console.error("Falha ao enviar arquivo:", upload.key);
-          toast("Erro ao anexar sua imagem");
-        }
-      }
-
-      toast("Imagens enviadas com sucesso!");
-
-      setSelectedFiles([]); // Limpa os arquivos selecionados após o upload
-      console.log(values);
-      // createAdvert.mutate(values);
+    if (!selectedBrand) {
+      return toast("Marca não encontrada");
     }
+
+    values.marca = selectedBrand.Label;
+
+    const selectedModel = getModels.data?.find(
+      (model: Model) => model.Value === Number(values.modelo)
+    );
+
+    if (!selectedModel) {
+      return toast("Modelo não encontrado");
+    }
+
+    values.modelo = selectedModel.Label;
+
+    const selectedState = fetchStates.data?.find(
+      ({ id }: { nome: string; id: number }) => id === Number(values.estado)
+    );
+
+    if (!selectedState) {
+      return toast("Estado não encontrado");
+    }
+
+    values.estado = selectedState.nome;
+
+    const formData = new FormData();
+
+    for (const image of selectedFiles) {
+      formData.append("file", image.file);
+    }
+
+    formData.append("tipo", values.tipo);
+    formData.append("marca", values.marca);
+    formData.append("modelo", values.modelo);
+    formData.append("ano_modelo", values.ano_modelo);
+    formData.append("descricao", values.descricao || "");
+    formData.append("cor", values.cor);
+    formData.append("preco", values.preco);
+    formData.append("placa", values.placa);
+    formData.append("quilometragem", values.quilometragem);
+    formData.append("estado", values.estado);
+    formData.append("cidade", values.cidade);
+    formData.append("portas", values.portas);
+    formData.append("cambio", values.cambio);
+    formData.append("usuario_id", user.id);
+
+    if (values.opcionais) {
+      values.opcionais.forEach((opcional) =>
+        formData.append("opcionais", opcional || "")
+      );
+    }
+
+    const entries = Array.from(formData.entries());
+    console.log(entries);
+
+    createAdvert.mutate(formData);
   }
 
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const files = Array.from(e.target.files || []);
     if (files && files.length > 0) {
-      setSelectedFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
+      const newImagesWithId = files.map((file) => ({
+        id: `temp-${Date.now()}-${Math.random()}`, // ID temporário
+        file, // Arquivo da imagem
+        url: URL.createObjectURL(file), // URL temporária para pré-visualização
+      }));
+      setSelectedFiles((prevFiles) => [...prevFiles, ...newImagesWithId]);
     }
   };
 
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = (id: string) => {
     setSelectedFiles((prevFiles) => {
-      const updatedFiles = prevFiles.filter((_, i) => i !== index);
+      const updatedFiles = prevFiles.filter((file) => file.id !== id);
       return [...updatedFiles];
     });
+
+    const fileInput = document.getElementById("photoInput") as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
   };
 
   const createAdvert = useMutation({
     mutationKey: ["create_advert"],
-    mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const data = {
-        imagens: photos,
-        marca: values.marca,
-        cor: values.cor,
-        descricao: values.descricao,
-        portas: values.portas,
-        quilometragem: values.quilometragem.toString(),
-        modelo: values.modelo,
-        placa: values.placa,
-        cidade: values.cidade,
-        estado: values.estado,
-        preco: values.preco.toString(),
-        cambio: values.cambio,
-        tipo: values.tipo,
-        ano_modelo: values.ano_modelo,
-        opcionais: values.opcionais || [],
-      };
-
-      const result = await api("/adverts", {
-        body: JSON.stringify(data),
+    mutationFn: async (formData: FormData) => {
+      const result = await apiFormData("/adverts", formData, {
         method: "POST",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer`,
+        },
       });
       return result;
     },
@@ -259,8 +314,8 @@ export default function Page() {
     },
   });
 
-  const getBoards = useMutation({
-    mutationKey: ["getBoards"],
+  const getBrands = useMutation({
+    mutationKey: ["getBrands"],
     mutationFn: async (type: string) => {
       return await api(`/fipe/brands/${type}`);
     },
@@ -303,7 +358,7 @@ export default function Page() {
   useEffect(() => {
     const value = form.watch("tipo");
     if (value) {
-      getBoards.mutate(value);
+      getBrands.mutate(value);
     }
   }, [form.watch("tipo")]);
 
@@ -336,8 +391,8 @@ export default function Page() {
   }, [form.watch("estado")]);
 
   return (
-    <div className=" container m-auto flex items-center justify-center">
-      <Card className="mt-10 w-full max-w-">
+    <div className="container m-auto flex items-center justify-center">
+      <Card className="mt-10 w-full">
         <CardHeader>
           <CardTitle>Crie seu anúncio</CardTitle>
         </CardHeader>
@@ -376,12 +431,12 @@ export default function Page() {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                       >
-                        {selectedFiles.map((photo, index) => (
+                        {selectedFiles.map((file, index) => (
                           <ImageDragDrop
-                            id={index}
+                            id={file.id}
                             key={index}
                             index={index}
-                            thumb={photo}
+                            thumb={file.url}
                             handleRemoveImage={handleRemoveImage}
                           />
                         ))}
@@ -451,7 +506,7 @@ export default function Page() {
                           <SelectTrigger className="w-full">
                             <SelectValue
                               placeholder={
-                                getBoards.isPending
+                                getBrands.isPending
                                   ? "Buscando Marcas"
                                   : "Selecione"
                               }
@@ -460,7 +515,7 @@ export default function Page() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
-                            {getBoards.data?.map((brand: any, idx: number) => (
+                            {getBrands.data?.map((brand: any, idx: number) => (
                               <SelectItem value={brand.Value} key={idx}>
                                 {brand.Label}
                               </SelectItem>
@@ -565,6 +620,7 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="cor"
@@ -594,11 +650,12 @@ export default function Page() {
                     </FormItem>
                   )}
                 />
-                <PriceInput
+
+                <CustomInputValue
                   form={form}
-                  label="Preço"
+                  label="R$"
                   name="preco"
-                  placeholder="R$"
+                  placeholder="R$ 99.999.999"
                 />
 
                 <FormField
@@ -617,7 +674,7 @@ export default function Page() {
                   )}
                 />
 
-                <QuilometerInput
+                <CustomInputValue
                   form={form}
                   label="Km"
                   name="quilometragem"
@@ -770,20 +827,20 @@ export default function Page() {
                               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={field.value?.includes(item.nome)}
+                                    checked={field.value?.includes(item.id)}
                                     onCheckedChange={(checked) => {
                                       const currentItems =
                                         form.getValues("opcionais") || [];
                                       if (checked) {
                                         form.setValue("opcionais", [
                                           ...currentItems,
-                                          item.nome,
+                                          item.id,
                                         ]);
                                       } else
                                         form.setValue(
                                           "opcionais",
                                           currentItems.filter(
-                                            (value) => value !== item.nome
+                                            (value) => value !== item.id
                                           )
                                         );
                                     }}

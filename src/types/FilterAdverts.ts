@@ -50,4 +50,5 @@ export interface Usuario {
   email: string;
   telefone: string | null;
   data_criacao: string;
+  anuncios?: Advert[];
 }

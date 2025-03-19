@@ -29,7 +29,7 @@ const formatValue = (value: string) => {
   return numberFormatter.format(Number(digits));
 };
 
-export function QuilometerInput(props: TextInputProps) {
+export function CustomInputValue(props: TextInputProps) {
   const initialValue = props.form.getValues()[props.name]
     ? formatValue(props.form.getValues()[props.name])
     : props.defaultValue
@@ -73,8 +73,14 @@ export function QuilometerInput(props: TextInputProps) {
                 type="text"
                 {...field}
                 onChange={(ev) => {
-                  setValue(ev.target.value);
-                  handleChange(_change, ev.target.value);
+                  const inputValue = ev.target.value;
+                  const digits = inputValue.replace(/\D/g, "");
+                  const caracteres = props.name === "preco" ? 8 : 6;
+
+                  if (digits.length <= caracteres) {
+                    setValue(inputValue);
+                    handleChange(_change, inputValue);
+                  }
                 }}
                 value={value}
               />

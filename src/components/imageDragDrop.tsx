@@ -5,9 +5,9 @@ import Image from "next/image";
 
 interface iImageProp {
   index: number;
-  id: number;
-  thumb: File;
-  handleRemoveImage: (key: number) => void;
+  id: string;
+  thumb: string;
+  handleRemoveImage: (id: string) => void;
 }
 
 export function ImageDragDrop({
@@ -26,7 +26,7 @@ export function ImageDragDrop({
           className="flex flex-col items-center w-32 h-32 shadow rounded-md relative"
         >
           <Image
-            src={URL.createObjectURL(thumb)}
+            src={thumb}
             alt={`Preview ${index}`}
             fill
             className=" object-cover absolute top-0 left-0 rounded-md"

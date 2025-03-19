@@ -10,9 +10,14 @@ const nextConfig: NextConfig = {
         port: "",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "igarageapp.s3.sa-east-1.amazonaws.com",
+        port: "",
+        search: "",
+      },
     ],
   },
 };
 
 export default nextConfig;
-

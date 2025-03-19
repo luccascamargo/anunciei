@@ -30,8 +30,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PriceInput } from "@/components/priceInput";
-import { QuilometerInput } from "@/components/quilometerInput";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -39,6 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CardAdvert } from "@/components/cardAdvert";
 import { api, GetCities, GetStates, normalizeText } from "@/lib/utils";
 import { FilterAdverts } from "@/types/FilterAdverts";
+import { CustomInputValue } from "@/components/customInputValue";
 
 export interface iTypes {
   value: number;
@@ -272,28 +271,24 @@ export default function Filter() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input
-                            placeholder="Audi, Gol..."
-                            type="text"
-                            {...field}
-                          />
+                          <Input placeholder="Buscar" type="text" {...field} />
                         </FormControl>
                       </FormItem>
                     )}
                   />
                 </div>
                 <div className="w-full flex gap-2 ">
-                  <PriceInput
+                  <CustomInputValue
                     form={form}
-                    label="Valor"
-                    name="preco_min"
-                    placeholder="R$"
+                    label="R$"
+                    name="preco"
+                    placeholder="R$ 99.999.999"
                   />
-                  <PriceInput
+                  <CustomInputValue
                     form={form}
-                    label="Até"
-                    name="preco_max"
-                    placeholder="R$"
+                    label="R$"
+                    name="preco"
+                    placeholder="R$ 99.999.999"
                   />
                 </div>
                 <FormField
@@ -492,17 +487,17 @@ export default function Filter() {
                 </div>
                 <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex gap-2 ">
-                    <QuilometerInput
+                    <CustomInputValue
                       form={form}
-                      label="Km"
-                      name="quilometragem_min"
-                      placeholder="0"
+                      label="R$"
+                      name="preco"
+                      placeholder="R$ 99.999.999"
                     />
-                    <QuilometerInput
+                    <CustomInputValue
                       form={form}
-                      label="Até"
-                      name="quilometragem_max"
-                      placeholder="0"
+                      label="R$"
+                      name="preco"
+                      placeholder="R$ 99.999.999"
                     />
                   </div>
                 </div>

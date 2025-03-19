@@ -11,16 +11,17 @@ interface iCardAd {
 export function CardAdvert({ className, data }: iCardAd) {
   return (
     <Link
-      href={`/anuncio/${data.slug}`}
+      href={`/ad/${data.id}`}
       className={cn(
         className,
-        "rounded-md border pb-5 h-fit w-[250px] transition-all hover:shadow"
+        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow"
       )}
     >
       <div className="w-full h-[125px] relative">
         <Image
-          src={"/default-car.png"}
+          src={data.imagens[0].url || "/default-car.png"}
           fill
+          quality={100}
           alt={data.modelo}
           className="object-cover rounded-t"
         />

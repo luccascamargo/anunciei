@@ -137,7 +137,7 @@ export function RegisterForm({
               />
               <div className="space-y-2">
                 <Button type="submit" className="w-full">
-                  Registrar
+                  {form.formState.isSubmitting ? "Enviando..." : "Registrar"}
                 </Button>
                 <Button variant="outline" className="w-full">
                   Entrar com Google

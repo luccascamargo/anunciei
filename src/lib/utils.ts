@@ -98,6 +98,45 @@ export async function api(url: string, options?: RequestInit) {
   }
 }
 
+export async function apiFormData(
+  url: string,
+  formData: FormData,
+  options?: RequestInit
+) {
+  if (!process.env.NEXT_PUBLIC_SERVER_URL) {
+    throw new Error("URL base da API não está configurada.");
+  }
+
+  const headers = {
+    ...options?.headers,
+  };
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${url}`, {
+      ...options,
+      headers,
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(
+        `Erro na requisição: ${res.status} - ${
+          errorData?.message || "Erro desconhecido"
+        }`
+      );
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Requisição excedeu o tempo limite.");
+    }
+    throw error;
+  }
+}
+
 export const colors = [
   {
     name: "Branco",

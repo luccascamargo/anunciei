@@ -38,6 +38,9 @@ export function Navbar() {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-1 text-primary">
                     <CircleUserRound />
+                    <span className="text-sm">
+                      {user?.nome} {user?.sobrenome}
+                    </span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel>Minhas configurações</DropdownMenuLabel>
@@ -52,7 +55,7 @@ export function Navbar() {
                           Criar anúncio
                         </DropdownMenuItem>
                       </Link>
-                      <Link href="/meus-anuncios">
+                      <Link href="/account/ads">
                         <DropdownMenuItem className="cursor-pointer">
                           Meus anúncios
                         </DropdownMenuItem>

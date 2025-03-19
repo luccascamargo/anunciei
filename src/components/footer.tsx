@@ -4,7 +4,7 @@ import { Wrapper } from "./wrapper";
 
 export function Footer() {
   return (
-    <div className="w-screen h-[150px]">
+    <div className="w-screen h-[150px] border-t">
       <Wrapper className="flex items-center justify-between h-full">
         <div className="flex items-center gap-6">
           <Link href="#" className="text-primary text-3xl font-semibold">

@@ -2,6 +2,7 @@
 import { createContext, ReactNode } from "react";
 
 export interface iUser {
+  id: string;
   nome: string;
   sobrenome: string;
   email: string;
