@@ -7,7 +7,7 @@ interface iImageProp {
   index: number;
   id: string;
   thumb: string;
-  handleRemoveImage: (id: string) => void;
+  handleRemoveImage: (thumb: string) => void;
 }
 
 export function ImageDragDrop({
@@ -23,7 +23,7 @@ export function ImageDragDrop({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="flex flex-col items-center w-32 h-32 shadow rounded-md relative"
+          className="flex flex-col items-center w-32 h-32 shadow-sm rounded-md relative"
         >
           <Image
             src={thumb}
@@ -32,8 +32,8 @@ export function ImageDragDrop({
             className=" object-cover absolute top-0 left-0 rounded-md"
           />
           <button
-            onClick={() => handleRemoveImage(id)}
-            className="absolute -right-4 -top-4 p-1 rounded-full bg-primary-foreground shadow"
+            onClick={() => handleRemoveImage(thumb)}
+            className="absolute -right-4 -top-4 p-1 rounded-full bg-primary-foreground shadow-sm cursor-pointer"
           >
             <X />
           </button>

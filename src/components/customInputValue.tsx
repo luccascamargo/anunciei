@@ -16,6 +16,7 @@ type TextInputProps = {
   label: string;
   placeholder: string;
   defaultValue?: string;
+  isPrice?: boolean;
 };
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", {
@@ -29,7 +30,10 @@ const formatValue = (value: string) => {
   return numberFormatter.format(Number(digits));
 };
 
-export function CustomInputValue(props: TextInputProps) {
+export function CustomInputValue({
+  isPrice = false,
+  ...props
+}: TextInputProps) {
   const initialValue = props.form.getValues()[props.name]
     ? formatValue(props.form.getValues()[props.name])
     : props.defaultValue
@@ -75,7 +79,7 @@ export function CustomInputValue(props: TextInputProps) {
                 onChange={(ev) => {
                   const inputValue = ev.target.value;
                   const digits = inputValue.replace(/\D/g, "");
-                  const caracteres = props.name === "preco" ? 8 : 6;
+                  const caracteres = isPrice ? 8 : 6;
 
                   if (digits.length <= caracteres) {
                     setValue(inputValue);

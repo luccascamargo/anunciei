@@ -1,7 +1,7 @@
 import { JwtPayload, verify } from "jsonwebtoken";
 
 import { cookies } from "next/headers";
-import { api } from "./utils";
+import { apiClient } from "./utils";
 import { iUser } from "@/contexts/userContext";
 
 async function getAccessToken() {
@@ -43,12 +43,9 @@ export async function auth(): Promise<null | iUser> {
   }
 
   try {
-    const user = await api(`/auth/me/${userId}`, {
-      cache: "no-cache",
-      method: "GET",
-    });
+    const { data } = await apiClient.get(`/auth/me/${userId}`);
 
-    return user;
+    return data;
   } catch {
     return null;
   }

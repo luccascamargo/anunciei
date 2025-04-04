@@ -1,5 +1,5 @@
 "use client";
-import { api, cn } from "@/lib/utils";
+import { apiClient, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,15 +47,13 @@ export function RegisterForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await api("/auth/register", {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify({
+      await apiClient.post("/auth/register", {
+        data: {
           nome: values.name,
           sobrenome: values.lastName,
           email: values.email,
           senha: values.password,
-        }),
+        },
       });
       toast("Conta criada com sucesso!");
       router.refresh();
@@ -66,8 +64,6 @@ export function RegisterForm({
         description:
           "Entre em contato com nosso suporte ou tente novamente mais tarde!",
       });
-      console.error("Erro na requisição:");
-      return;
     }
   }
 

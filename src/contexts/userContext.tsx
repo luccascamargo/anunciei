@@ -9,7 +9,16 @@ export interface iUser {
   imagem: string | null;
   telefone: string | null;
   plano: "GRATIS" | "BASICO" | "PRO";
+  inscricoes: Array<iSubscription>;
 }
+
+type iSubscription = {
+  status: "active" | "paused" | "canceled" | "unpaid";
+  ciclo: "month" | "year" | null;
+  inscricao_id: string | null;
+  periodo_final: string | Date | undefined;
+  cancelar_ao_final_do_periodo: boolean;
+};
 
 interface iAuthContext {
   user: iUser | null;

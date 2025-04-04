@@ -5,11 +5,19 @@ export interface FilterAdverts {
   totalPages: number;
 }
 
+export interface Modelo {
+  nome: string;
+}
+
+export interface Marca {
+  nome: string;
+}
+
 export interface Advert {
   id: string;
   tipo: string;
-  marca: string;
-  modelo: string;
+  marca: Marca;
+  modelo: Modelo;
   ano_modelo: number;
   cor: string;
   cep: string;

@@ -2,15 +2,11 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import { api } from "@/lib/utils";
-import { Imagen } from "@/types/FilterAdverts";
 
 type CardAdClient = {
   id: string;
-  image: Imagen;
+  image: string;
   brand: string;
   year: number;
   model: string;
@@ -18,30 +14,15 @@ type CardAdClient = {
   color: string;
   city: string;
   mileage: number;
-  controls: boolean;
+  toggleFavorite: (id: string) => void;
 };
 
-export function CardAdClient({ controls = true, ...props }: CardAdClient) {
-  const deleteAd = useMutation({
-    mutationKey: ["deleteAd"],
-    mutationFn: (id: string) => {
-      const res = api(`/delete-advert/${id}`, { method: "DELETE" });
-      return res;
-    },
-    onSuccess: () => {
-      toast("Anúncio deletado com sucesso!");
-    },
-    onError: (err) => {
-      console.log(err);
-      toast("Falha ao deletar este anúncio");
-    },
-  });
-
+export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
   return (
     <Card className="w-[900px] h-[200px] flex items-center p-5 gap-6">
       <div className="relative w-[150px] h-[150px]">
         <Image
-          src={props.image.url || "/default-car.png"}
+          src={props.image || "/default-car.png"}
           fill
           alt="1"
           className="object-cover rounded-md"
@@ -69,29 +50,22 @@ export function CardAdClient({ controls = true, ...props }: CardAdClient) {
         </div>
 
         <div className="flex items-center justify-between">
-          {controls && (
-            <div className="flex items-center gap-4">
-              <>
-                <Button variant={"link"}>
-                  <Link href={`/ad/${props.id}`} className="text-sm ">
-                    Ver
-                  </Link>
-                </Button>
-                <Button variant={"link"}>
-                  <Link href={`/editar/`} className="text-sm">
-                    Editar
-                  </Link>
-                </Button>
-              </>
-              <Button
-                variant={"link"}
-                className="text-red-800"
-                onClick={() => deleteAd.mutate("")}
-              >
-                Excluir
+          <div className="flex items-center gap-4">
+            <>
+              <Button variant={"link"}>
+                <Link href={`/ad/${props.id}`} className="text-sm ">
+                  Ver
+                </Link>
               </Button>
-            </div>
-          )}
+            </>
+            <Button
+              variant={"link"}
+              className="text-red-800"
+              onClick={() => toggleFavorite(props.id)}
+            >
+              Excluir
+            </Button>
+          </div>
 
           <div className="flex items-center gap-4">
             <span className="text-sm">

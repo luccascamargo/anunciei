@@ -1,625 +1,406 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-"use client";
+import Link from "next/link";
+import {
+  Search,
+  Car,
+  TrendingUp,
+  Shield,
+  Users,
+  CheckCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import {
   Card,
   CardContent,
-  CardFooter,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CardAdvert } from "@/components/cardAdvert";
-import { api, GetCities, GetStates, normalizeText } from "@/lib/utils";
-import { FilterAdverts } from "@/types/FilterAdverts";
-import { CustomInputValue } from "@/components/customInputValue";
 
-export interface iTypes {
-  value: number;
-  name: string;
-}
-
-export const formSchemaFilter = z.object({
-  marca: z.string(),
-  modelo: z.string(),
-  busca: z.string(),
-  estado: z.string(),
-  cidade: z.string(),
-  ano_modelo_min: z.coerce
-    .string()
-
-    .transform((value) => value?.toString()),
-  ano_modelo_max: z.coerce
-    .string()
-
-    .transform((value) => value?.toString()),
-  quilometragem_min: z.string(),
-  tipo: z.string(),
-  quilometragem_max: z.string(),
-  portas: z.string(),
-  preco_min: z.string(),
-  preco_max: z.string(),
-  opcionais: z.array(z.string().optional()).optional(),
-});
-
-interface iOptional {
-  id: string;
-  nome: string;
-}
-
-interface iModel {
-  Label: string;
-  Value: number;
-  codigoTipoVeiculo: string;
-}
-interface iBrand {
-  Label: string;
-  Value: string;
-  codigoTipoVeiculo: string;
-}
-
-export default function Filter() {
-  const [brand, setBrand] = useState<iBrand | null>(null);
-  const [model, setModel] = useState<iModel | null>(null);
-  const [apiUrl, setApiUrl] = useState("http://localhost:8080/adverts/filter");
-
-  const form = useForm<z.infer<typeof formSchemaFilter>>({
-    resolver: zodResolver(formSchemaFilter),
-    defaultValues: {
-      portas: "",
-      marca: "",
-      estado: "",
-      modelo: "",
-      tipo: "",
-      busca: "",
-      opcionais: [],
-      cidade: "",
-      ano_modelo_max: "",
-      ano_modelo_min: "",
-      quilometragem_max: "",
-      quilometragem_min: "",
-      preco_max: "",
-      preco_min: "",
-    },
-  });
-
-  async function fetchAdverts(url: string): Promise<FilterAdverts> {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Erro ao buscar os anúncios");
-    }
-
-    return res.json();
-  }
-
-  function createApiUrl(params: Record<string, any>): string {
-    const url = new URL("http://localhost:8080/adverts/filter");
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => url.searchParams.append(key, v));
-      } else if (value !== undefined && value !== null && value !== "") {
-        url.searchParams.append(key, value);
-      }
-    });
-
-    return url.toString();
-  }
-
-  function onSubmit() {
-    const filters = form.getValues();
-
-    if (filters.ano_modelo_min > filters.ano_modelo_max) {
-      toast("O ano mínimo não pode ser maior que o ano máximo");
-      return;
-    }
-    if (filters.preco_min > filters.preco_max) {
-      toast("O valor mínimo não pode ser maior que o valor máximo");
-      return;
-    }
-    if (filters.quilometragem_min > filters.quilometragem_max) {
-      toast(
-        "A quilometragem mínima não pode ser maior que a quilometragem máxima"
-      );
-      return;
-    }
-
-    if (filters.busca) {
-      filters.busca = normalizeText(filters.busca);
-    }
-    const state = fetchStates.data?.filter(
-      (state) => state.id.toString() === filters.estado
-    );
-
-    if (state && state?.length > 0) {
-      filters.estado = normalizeText(state[0].nome);
-    }
-
-    const url = createApiUrl(filters);
-    setApiUrl(url);
-  }
-
-  const getOptionals = useQuery({
-    queryKey: ["getOptionals"],
-    queryFn: async () => {
-      return await api("/optionals");
-    },
-  });
-
-  const getBoards = useMutation({
-    mutationKey: ["getBoards"],
-    mutationFn: async (type: string) => {
-      return await api(`/fipe/brands/${type}`);
-    },
-  });
-
-  const getModels = useMutation({
-    mutationKey: ["getModels"],
-    mutationFn: async ({ type, brand }: { type: string; brand: string }) => {
-      return await api(`/fipe/models/${type}/${brand}`);
-    },
-  });
-
-  useEffect(() => {
-    const value = form.watch("tipo");
-    if (value) {
-      getBoards.mutate(value);
-    }
-  }, [form.watch("tipo")]);
-
-  useEffect(() => {
-    const type = form.watch("tipo");
-    if (type && brand) {
-      getModels.mutate({ type, brand: brand.Value });
-    }
-  }, [brand]);
-
-  const fetchStates = useQuery({
-    queryKey: ["fetchStates"],
-    queryFn: async () => GetStates(),
-  });
-
-  const getCities = useMutation({
-    mutationKey: ["getCities"],
-    mutationFn: async (id: string) => {
-      return await GetCities(id);
-    },
-  });
-
-  const getAdverts = useQuery({
-    queryKey: ["getAdverts", apiUrl],
-    queryFn: async () => fetchAdverts(apiUrl),
-  });
-
-  const fetchTypes = useQuery({
-    queryKey: ["getTypes"],
-    queryFn: async () => {
-      return await api("/fipe/types", { method: "GET" });
-    },
-  });
-
-  useEffect(() => {
-    const state = form.watch("estado");
-    if (state) {
-      getCities.mutate(state);
-    }
-  }, [form.watch("estado")]);
-
-  const handleSelectChangeBrand = (event: string) => {
-    const selectedObject = getBoards.data.filter(
-      (brand: iBrand) => event === brand.Value
-    );
-    setBrand(selectedObject[0]);
-  };
-
-  const handleSelectChangeModel = (event: string) => {
-    const selectedObject = getModels.data.filter(
-      (model: iModel) => Number(event) === model.Value
-    );
-    setModel(selectedObject[0]);
-  };
-
+export default function HomePage() {
   return (
-    <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
-      <div className="flex gap-8">
-        <Card className="w-[380px] h-fit">
-          <CardHeader>
-            <CardTitle>Busca por categoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5"
-              >
-                <div className="w-full flex flex-col gap-2">
-                  <FormLabel>Buscar</FormLabel>
-                  <FormField
-                    control={form.control}
-                    name="busca"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Buscar" type="text" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="w-full flex gap-2 ">
-                  <CustomInputValue
-                    form={form}
-                    label="R$"
-                    name="preco"
-                    placeholder="R$ 99.999.999"
-                  />
-                  <CustomInputValue
-                    form={form}
-                    label="R$"
-                    name="preco"
-                    placeholder="R$ 99.999.999"
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                            }}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="default">Selecione</SelectItem>
-                              {fetchStates.data?.map((state) => (
-                                <SelectItem
-                                  value={state.id.toString()}
-                                  key={state.id}
-                                >
-                                  {state.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-                <FormField
-                  control={form.control}
-                  name="cidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          name={field.name}
-                          onValueChange={field.onChange}
-                          disabled={getCities.isSuccess !== true}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder="Selecione"
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {getCities.data?.map((city) => (
-                              <SelectItem value={city.nome} key={city.id}>
-                                {city.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de veiculo</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder="Selecione"
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {fetchTypes?.data?.map(
-                              (type: iTypes, idx: number) => (
-                                <SelectItem
-                                  value={type.value.toString()}
-                                  key={idx}
-                                >
-                                  {type.name}
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-28">
+        <div className="container px-4 mx-auto">
+          <div className="max-w-4xl mx-auto text-center mb-12">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+              Encontre o veículo perfeito para você
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8">
+              A plataforma mais completa para comprar e vender veículos no
+              Brasil. Anuncie com facilidade e encontre as melhores ofertas.
+            </p>
 
-                <FormItem>
-                  <FormLabel>Marca</FormLabel>
-                  <Select
-                    onValueChange={(e) => handleSelectChangeBrand(e)}
-                    value={brand?.Value}
-                    disabled={getBoards.isSuccess !== true}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          getBoards.isPending ? "Buscando Modelos" : "Selecione"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="default">Selecione</SelectItem>
-                      {getBoards?.data?.map((model: any, idx: number) => (
-                        <SelectItem value={model.Value.toString()} key={idx}>
-                          {model.Label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-
-                <FormItem>
-                  <FormLabel>Modelo</FormLabel>
-                  <Select
-                    onValueChange={(e) => handleSelectChangeModel(e)}
-                    value={model?.Value.toString()}
-                    disabled={getModels.isSuccess !== true}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          getModels.isPending ? "Buscando Modelos" : "Selecione"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="default">Selecione</SelectItem>
-                      {getModels?.data?.map((model: any, idx: number) => (
-                        <SelectItem value={model.Value.toString()} key={idx}>
-                          {model.Label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-
-                <div className="w-full flex gap-2">
-                  <div>
-                    <FormLabel>Ano</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_min"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="1970"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormLabel>Até</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_max"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="2025"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex gap-2 ">
-                    <CustomInputValue
-                      form={form}
-                      label="R$"
-                      name="preco"
-                      placeholder="R$ 99.999.999"
-                    />
-                    <CustomInputValue
-                      form={form}
-                      label="R$"
-                      name="preco"
-                      placeholder="R$ 99.999.999"
-                    />
-                  </div>
-                </div>
-                <FormField
-                  control={form.control}
-                  name="portas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Portas</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder="Selecione"
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            {/* Search Box */}
+            <div className="max-w-xl mx-auto">
+              <div className="flex w-full items-center space-x-2">
+                <Input
+                  type="text"
+                  name="search"
+                  placeholder="O que você está procurando? Ex: Honda Civic 2022"
+                  className="h-12"
                 />
-                <FormField
-                  control={form.control}
-                  name="opcionais"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Opcionais</FormLabel>
-                      {getOptionals.data?.map((item: iOptional) => (
-                        <FormField
-                          key={item.nome}
-                          control={form.control}
-                          name="opcionais"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={item.nome}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.nome)}
-                                    onCheckedChange={(checked) => {
-                                      const currentItems =
-                                        form.getValues("opcionais") || [];
-                                      if (checked) {
-                                        form.setValue("opcionais", [
-                                          ...currentItems,
-                                          item.nome,
-                                        ]);
-                                      } else
-                                        form.setValue(
-                                          "opcionais",
-                                          currentItems.filter(
-                                            (value) => value !== item.nome
-                                          )
-                                        );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {item.nome}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" variant={"default"}>
+                <Button className="h-12 px-6">
+                  <Search className="mr-2 h-4 w-4" />
                   Buscar
                 </Button>
-                <Button
-                  type="button"
-                  variant={"link"}
-                  onClick={() => form.reset()}
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 mt-4 text-sm text-muted-foreground">
+                <span>Buscas populares:</span>
+                <Link
+                  href="/stock/carros/?q=honda+civic"
+                  className="hover:text-primary hover:underline"
                 >
-                  Limpar
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-        <div className="w-full min-h-full">
-          <Card className="w-full min-h-screen">
-            <CardHeader>
-              <CardTitle>Resultados</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-6 gap-7">
-              {getAdverts.status === "pending" &&
-                Array.from({ length: 20 }).map((_, index) => (
-                  <Skeleton className="h-4 w-full" key={index} />
-                ))}
-              {getAdverts.data && getAdverts.data.adverts.length === 0 && (
-                <span className="m-auto text-sm text-muted-foreground">
-                  Nenhum anúncio encontrado
-                </span>
-              )}
-              {getAdverts.data &&
-                getAdverts.data.adverts.map((advert) => {
-                  return <CardAdvert data={advert} key={advert.id} />;
-                })}
-            </CardContent>
-            <CardFooter className="aqui"></CardFooter>
-          </Card>
+                  Honda Civic
+                </Link>
+                <Link
+                  href="/stock/carros/?q=toyota+corolla"
+                  className="hover:text-primary hover:underline"
+                >
+                  Toyota Corolla
+                </Link>
+                <Link
+                  href="/stock/carros/?q=jeep+compass"
+                  className="hover:text-primary hover:underline"
+                >
+                  Jeep Compass
+                </Link>
+                <Link
+                  href="/stock/carros/?q=volkswagen+t-cross"
+                  className="hover:text-primary hover:underline"
+                >
+                  Volkswagen T-Cross
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto mt-12">
+            <div className="bg-background rounded-lg p-4 text-center shadow-sm">
+              <p className="text-3xl font-bold">50mil+</p>
+              <p className="text-sm text-muted-foreground">
+                Veículos anunciados
+              </p>
+            </div>
+            <div className="bg-background rounded-lg p-4 text-center shadow-sm">
+              <p className="text-3xl font-bold">2mil+</p>
+              <p className="text-sm text-muted-foreground">Vendas por mês</p>
+            </div>
+            <div className="bg-background rounded-lg p-4 text-center shadow-sm">
+              <p className="text-3xl font-bold">500mil+</p>
+              <p className="text-sm text-muted-foreground">Usuários ativos</p>
+            </div>
+            <div className="bg-background rounded-lg p-4 text-center shadow-sm">
+              <p className="text-3xl font-bold">4.8/5</p>
+              <p className="text-sm text-muted-foreground">Avaliação média</p>
+            </div>
+          </div> */}
         </div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 md:py-24">
+        <div className="container px-4 mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              Por que escolher nossa plataforma?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Oferecemos as melhores ferramentas para você anunciar e encontrar
+              veículos com facilidade e segurança.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle>Estatísticas Avançadas</CardTitle>
+                <CardDescription>
+                  Acompanhe o desempenho dos seus anúncios em tempo real com
+                  dados detalhados.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Visualizações por dia</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Taxa de conversão e contatos</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Comparativo com o mercado</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle>Segurança Garantida</CardTitle>
+                <CardDescription>
+                  Transações seguras e verificação de anúncios para sua
+                  tranquilidade.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Verificação de contato</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Proteção contra fraudes</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Avaliação de usuários</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle>Maior Visibilidade</CardTitle>
+                <CardDescription>
+                  Alcance milhares de compradores interessados em todo o Brasil.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Destaque nos resultados de busca</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Integração com redes sociais</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
+                    <span>Recomendações personalizadas</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="container px-4 mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Como funciona</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Anunciar ou encontrar um veículo nunca foi tão fácil. Siga estes
+              simples passos:
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
+                <span className="text-2xl font-bold text-primary">1</span>
+                <div className="absolute w-8 h-0.5 bg-primary/30 right-[-2rem] top-1/2 hidden md:block"></div>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Cadastre-se</h3>
+              <p className="text-muted-foreground">
+                Crie sua conta gratuitamente em menos de 1 minuto.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
+                <span className="text-2xl font-bold text-primary">2</span>
+                <div className="absolute w-8 h-0.5 bg-primary/30 right-[-2rem] top-1/2 hidden md:block"></div>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Crie seu anúncio</h3>
+              <p className="text-muted-foreground">
+                Adicione fotos e informações detalhadas do seu veículo.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
+                <span className="text-2xl font-bold text-primary">3</span>
+                <div className="absolute w-8 h-0.5 bg-primary/30 right-[-2rem] top-1/2 hidden md:block"></div>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Receba contatos</h3>
+              <p className="text-muted-foreground">
+                Compradores interessados entrarão em contato diretamente.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-primary">4</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Feche negócio</h3>
+              <p className="text-muted-foreground">
+                Negocie e venda seu veículo com segurança e facilidade.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button asChild size="lg">
+              <Link href="/anunciar">
+                <Car className="mr-2 h-5 w-5" />
+                Anuncie seu veículo
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      {/* <section className="py-16 md:py-24 bg-muted/30">
+        <div className="container px-4 mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              O que nossos usuários dizem
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Milhares de pessoas já tiveram sucesso em vender ou encontrar
+              veículos em nossa plataforma.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className="h-5 w-5 fill-primary text-primary"
+                    />
+                  ))}
+                </div>
+                <p className="mb-6">
+                  "Vendi meu carro em apenas 3 dias! A plataforma é muito
+                  intuitiva e as estatísticas me ajudaram a precificar
+                  corretamente."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                    <span className="font-semibold text-primary">RM</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Ricardo Mendes</p>
+                    <p className="text-sm text-muted-foreground">
+                      São Paulo, SP
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className="h-5 w-5 fill-primary text-primary"
+                    />
+                  ))}
+                </div>
+                <p className="mb-6">
+                  "Como revendedor, o plano profissional me deu um retorno
+                  incrível. Aumentei minhas vendas em 40% no primeiro mês."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                    <span className="font-semibold text-primary">CS</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Carlos Silva</p>
+                    <p className="text-sm text-muted-foreground">
+                      Belo Horizonte, MG
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className="h-5 w-5 fill-primary text-primary"
+                    />
+                  ))}
+                </div>
+                <p className="mb-6">
+                  "Encontrei meu carro dos sonhos por um preço justo. A
+                  plataforma tem filtros muito úteis e os anúncios são
+                  detalhados."
+                </p>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                    <span className="font-semibold text-primary">AF</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Amanda Ferreira</p>
+                    <p className="text-sm text-muted-foreground">
+                      Curitiba, PR
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section> */}
+
+      {/* CTA Section */}
+      <section className="py-16 md:py-24">
+        <div className="container px-4 mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Pronto para anunciar ou encontrar seu próximo veículo?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Junte-se a milhares de usuários satisfeitos e experimente a
+              plataforma mais completa do mercado.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" asChild>
+                <Link href="/anunciar">
+                  <Car className="mr-2 h-5 w-5" />
+                  Anunciar Veículo
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/estoque">
+                  <Search className="mr-2 h-5 w-5" />
+                  Explorar Estoque
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

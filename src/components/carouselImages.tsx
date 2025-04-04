@@ -39,36 +39,42 @@ export function CarouselImages({ images }: ICarousel) {
   };
 
   return (
-    <div className=" w-full max-w-5xl">
+    <div className=" w-full">
       <Carousel setApi={setApi} className="w-full">
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index} className="h-[500px] basis-full">
-              <div className="relative w-full h-full rounded-xl">
+              <div className="relative w-full h-full rounded-t-xl">
                 <Image
                   src={image.url}
                   fill
-                  objectFit="contain"
-                  className="rounded-xl"
+                  objectFit="cover"
+                  className="rounded-t-xl"
                   alt={"Imagem"}
                 />
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="left-1.5" />
+        <CarouselNext className="right-1.5" />
 
         <div className="flex justify-center mt-4">
           {images.map((image, index) => (
             <div
               key={index}
-              className={`cursor-pointer mx-2 ${
-                current === index + 1 ? "border-2 b border-primary" : ""
+              className={`cursor-pointer rounded-xl  mx-2 relative w-20 h-20 ${
+                current === index + 1 ? "border border-primary" : ""
               }`}
               onClick={() => handleThumbClick(index)}
             >
-              <Image src={image.url} width={80} height={80} alt={"Thumb"} />
+              <Image
+                src={image.url}
+                fill
+                className="object-cover rounded-xl"
+                alt={"Thumb"}
+                quality={100}
+              />
             </div>
           ))}
         </div>

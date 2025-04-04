@@ -17,26 +17,23 @@ import { SignOut } from "@/app/(public)/(auth)/signout";
 export function Navbar() {
   const { user } = useAuth();
   return (
-    <div className="w-screen border-b-[1px] py-6">
+    <div className="w-screen py-6 ">
       <Wrapper>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-primary text-3xl font-semibold">
-              iGarage
-            </Link>
+          <div className="flex items-center gap-12">
             <Link href="/">
-              <Button variant={"link"}>Home</Button>
+              {/* <Image src={"/appgarage.png"} width={50} height={50} alt="" /> */}
+              appgarage
             </Link>
-            <Link href="/pricing">
-              <Button variant={"link"}>Preços</Button>
-            </Link>
+            <Link href="/">Home</Link>
+            <Link href="/pricing">Preços</Link>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-5">
-              {user && <Badge variant="secondary">{user?.plano}</Badge>}
+              {user && <Badge variant="default">{user?.plano}</Badge>}
               {user && (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-1 text-primary">
+                  <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
                     <CircleUserRound />
                     <span className="text-sm">
                       {user?.nome} {user?.sobrenome}
@@ -62,7 +59,7 @@ export function Navbar() {
                       </Link>
                     </>
 
-                    <Link href="/meus-favoritos">
+                    <Link href="/favorites">
                       <DropdownMenuItem className="cursor-pointer">
                         Meus favoritos
                       </DropdownMenuItem>

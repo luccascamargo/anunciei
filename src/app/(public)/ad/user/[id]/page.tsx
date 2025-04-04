@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { api } from "@/lib/utils";
+import { apiClient } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { CardAdClient } from "@/components/cardAdClient";
 import { Advert } from "@/types/FilterAdverts";
+import { CardSeller } from "./Card";
 
 type Params = Promise<{ id: string }>;
 
@@ -22,24 +22,23 @@ type iUser = {
   sobrenome: string;
   telefone: string | null;
   email: string;
-  image: string | null;
+  imagem: string | null;
+  data_criacao: Date;
 };
 
 export default async function Page({ params }: { params: Params }) {
   const { id } = await params;
 
-  const res = await api(`/adverts/advertsWithId/${id}`, {
-    method: "GET",
-    cache: "default",
+  const { data } = await apiClient.get(`/adverts/advertsWithId/${id}`, {
     headers: {
       "Content-Type": "application/json",
     },
   });
-  if (res.error) {
+  if (!data) {
     notFound();
   }
 
-  const user: iUser = res;
+  const user: iUser = data;
 
   return (
     <div className="container mx-auto flex justify-between pt-10 gap-10 min-h-screen">
@@ -49,18 +48,17 @@ export default async function Page({ params }: { params: Params }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           {user.anuncios.map((advert) => (
-            <CardAdClient
+            <CardSeller
               key={advert.id}
               id={advert.id}
-              image={advert.imagens[0]}
-              brand={advert.marca}
+              image={advert.imagens[0].url}
+              brand={advert.marca.nome}
               year={advert.ano_modelo}
-              model={advert.modelo}
+              model={advert.modelo.nome}
               price={advert.preco}
               city={advert.cidade}
               mileage={advert.quilometragem}
               color={advert.cor}
-              controls={false}
             />
           ))}
         </CardContent>
@@ -77,11 +75,13 @@ export default async function Page({ params }: { params: Params }) {
         <CardContent className="mt-10 flex flex-col gap-10">
           <div className="flex flex-col items-center gap-5">
             <Avatar className="w-20 h-20">
-              <AvatarImage src={user.image!} />
+              <AvatarImage src={user.imagem!} className="object-cover" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">
-              <span className="text-xl">{user.nome}</span>
+              <span className="text-xl">
+                {user.nome} {user.sobrenome}
+              </span>
               <span className="text-sm">{user.email}</span>
             </div>
           </div>
@@ -94,7 +94,14 @@ export default async function Page({ params }: { params: Params }) {
           )}
         </CardContent>
         <CardFooter className="flex justify-center">
-          <CardDescription>No iSerra desde {}</CardDescription>
+          <CardDescription>
+            No iSerra desde{" "}
+            {new Date(user.data_criacao).toLocaleDateString("pt-Br", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </CardDescription>
         </CardFooter>
       </Card>
     </div>

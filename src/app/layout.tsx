@@ -15,7 +15,7 @@ const soraSans = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "iGarage - Facilite sua venda",
+  title: "AppGarage - Facilite sua venda",
   keywords: [
     "Anúncios de veículos Rio Grande do Sul",
     "Compra e venda de carros RS",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "Anúncios automotivos RS",
   ],
   description:
-    "iGarage - Encontre os melhores anúncios de veículos no Rio Grande do Sul. Compre e venda carros, motos e caminhões na nossa plataforma especializada.",
+    "AppGarage - Encontre os melhores anúncios de veículos no Rio Grande do Sul. Compre e venda carros, motos e caminhões na nossa plataforma especializada.",
 };
 
 export default async function RootLayout({

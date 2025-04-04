@@ -1,11 +1,11 @@
 "use client";
 import { ChangeEvent, useEffect, useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload } from "lucide-react";
+import { AlertTriangle, BarChart, Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -32,230 +32,139 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Wrapper } from "@/components/wrapper";
 import { useAuth } from "@/hooks/useAuth";
+import { notFound } from "next/navigation";
+import { useMask, format } from "@react-input/mask";
+import { apiClient } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { SignOut } from "@/app/(public)/(auth)/signout";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+type FileInput = {
+  id: string;
+  file: File;
+  url: string;
+};
+
+const options = {
+  mask: "+55 (__) _____-____",
+  replacement: { _: /\d/ },
+};
 
 const formSchema = z.object({
   firstName: z.string().min(3, { message: "Nome muito curto" }),
   lastName: z.string().min(3, { message: "Sobrenome muito curto" }),
   email: z.string().email(),
-  phone: z
-    .string()
-    .min(15, { message: "O número precisa seguir o formato acima" }),
+  phone: z.string().refine(
+    (value) => {
+      const regex =
+        /^\+([1-9]{1,4})\s?(\(?\d{1,4}\)?\s?)?(\d{4,5})[-\s]?\d{4}$/;
+      return regex.test(value);
+    },
+    {
+      message:
+        "Número de WhatsApp inválido. Utilize o formato internacional, por exemplo: 54 91234-5678",
+    }
+  ),
 });
 
 export default function Page() {
   const { user } = useAuth();
-  const [uploading, setUploading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [newImage, setNewImage] = useState<null | string>(null);
-
-  const handleBillingPortal = async () => {
-    // if (data_user) {
-    //   const res = await HandleBillingPortal({
-    //     customer: data_user?.customer_id,
-    //   });
-    //   if (res.error) {
-    //     return toast("Erro ao prosseguir com sua consulta", {
-    //       description: "Tente novamente mais tarde",
-    //       important: true,
-    //       action: {
-    //         label: "Ok",
-    //         onClick: () => console.log("ok"),
-    //       },
-    //     });
-    //   }
-    //   if (res.result) {
-    //     return push(res.result);
-    //   }
-    // }
-  };
-
-  const handleTelefoneChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const inputTelefone = event.target.value;
-
-    // Remove todos os caracteres não numéricos
-    const cleanedTelefone = inputTelefone.replace(/\D/g, "");
-
-    // Aplica a máscara dependendo do comprimento do número
-    if (cleanedTelefone.length <= 2) {
-      form.setValue("phone", cleanedTelefone);
-    } else if (cleanedTelefone.length <= 6) {
-      form.setValue(
-        "phone",
-        `(${cleanedTelefone.slice(0, 2)}) ${cleanedTelefone.slice(2)}`
-      );
-    } else if (cleanedTelefone.length <= 10) {
-      form.setValue(
-        "phone",
-        `(${cleanedTelefone.slice(0, 2)}) ${cleanedTelefone.slice(
-          2,
-          6
-        )}-${cleanedTelefone.slice(6)}`
-      );
-    } else {
-      form.setValue(
-        "phone",
-        `(${cleanedTelefone.slice(0, 2)}) ${cleanedTelefone.slice(
-          2,
-          7
-        )}-${cleanedTelefone.slice(7, 11)}`
-      );
-    }
-  };
-
-  const handleUploadAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    setUploading(true);
-
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            files: [
-              {
-                filename: file.name,
-                contentType: file.type,
-              },
-            ],
-          }),
-        });
-
-        const { uploads } = await response.json();
-
-        if (response.ok) {
-          for (const upload of uploads) {
-            const formData = new FormData();
-            Object.entries(upload.fields).forEach(([key, value]) => {
-              formData.append(key, value as string);
-            });
-            formData.append("file", file);
-
-            const uploadResponse = await fetch(upload.url, {
-              method: "POST",
-              body: formData,
-              mode: "cors",
-            });
-
-            if (uploadResponse.ok) {
-              setUploading(false);
-              setNewImage(`${upload.url}${upload.fields.key}`);
-            } else {
-              console.error("Falha ao enviar arquivo:", file.name);
-              setUploading(false);
-              toast("Erro ao anexar sua imagem", {
-                description:
-                  "Algo de errado aconteceu. Entre em contato com nosso suporte",
-                action: {
-                  label: "Ok",
-                  onClick: () => console.log("ok"),
-                },
-              });
-            }
-          }
-        } else {
-          console.error("Erro ao obter URL presignada para:", file.name);
-          toast("Erro ao anexar sua imagem", {
-            description:
-              "Algo de errado aconteceu. Entre em contato com nosso suporte",
-            action: {
-              label: "Ok",
-              onClick: () => console.log("ok"),
-            },
-          });
-          setUploading(false);
-        }
-      }
-      return;
-    }
-    setUploading(false);
-    return toast("Erro ao anexar sua imagem", {
-      description:
-        "Algo de errado aconteceu. Entre em contato com nosso suporte",
-      action: {
-        label: "Ok",
-        onClick: () => console.log("ok"),
-      },
-    });
-  };
+  const [newImage, setNewImage] = useState<null | FileInput>();
+  const [profileUrl, setProfileUrl] = useState<string>("");
+  const inputRef = useMask(options);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: user?.email,
-      firstName: user?.nome,
-      lastName: user?.sobrenome,
-      phone: user?.telefone || "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await fetch(`/user`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: values.firstName,
-          lastName: values.lastName,
-          phone: values.phone,
-          avatar: newImage || "",
-        }),
-      });
-      return toast("Usuário alterado com sucesso", {
-        action: {
-          label: "Ok",
-          onClick: () => console.log("ok"),
-        },
-      });
-    } catch (error) {
-      console.log(error);
-      return toast("Erro ao editar esta usuario", {
-        description:
-          "Tente novamente mais tarde ou entre em contato com nosso suporte",
-        action: {
-          label: "Ok",
-          onClick: () => console.log("ok"),
-        },
-      });
-    }
-  }
+  const abrirPortalCliente = async () => {
+    const { data } = await apiClient.get("/stripe/portal", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    window.location.href = data;
+  };
 
-  const handleDeleteAccount = async () => {
-    try {
-      // if (user) {
-      //   setIsDeleting(true);
-      //   await fetch(`/user/id`, {
-      //     method: "DELETE",
-      //   });
-      //   setIsDeleting(false);
-      //   return toast("Conta deletada com sucesso", {
-      //     action: {
-      //       label: "Ok",
-      //       onClick: () => console.log("ok"),
-      //     },
-      //   });
-      // }
-    } catch {
-      setIsDeleting(false);
-      return toast(
-        "Não foi possivel realizar esta ação, tente novamente mais tarde.",
-        {
-          action: {
-            label: "Ok",
-            onClick: () => console.log("ok"),
-          },
-        }
-      );
+  const handleUploadAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files && files.length > 0) {
+      const file = {
+        id: `temp-${Date.now()}-${Math.random()}`, // ID temporário
+        file: files[0], // Arquivo da imagem
+        url: URL.createObjectURL(files[0]), // URL temporária para pré-visualização
+      };
+      setProfileUrl(file.url);
+      setNewImage(file);
     }
   };
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      if (!user) {
+        return notFound();
+      }
+      const formdata = new FormData();
+
+      if (newImage) {
+        formdata.append("file", newImage.file);
+      }
+
+      formdata.append("nome", values.firstName);
+      formdata.append("sobrenome", values.lastName);
+      formdata.append("telefone", values.phone.replace(/\D/g, ""));
+
+      await apiClient.patch(`/users/${user.id}`, formdata, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast("Alterações concluidas com sucesso!");
+    } catch (error) {
+      console.log(error);
+      toast("Não foi possível realizar esta ação, tente novamente mais tarde.");
+    }
+  }
+
+  const handleDeleteAccount = useMutation({
+    mutationKey: ["deleteAccount", user?.id],
+    mutationFn: async () => {
+      if (!user) {
+        return notFound();
+      }
+      await apiClient.patch(`/users/desactive/${user.email}`);
+    },
+    onSuccess: () => {
+      SignOut();
+      toast("Conta excluída com sucesso!");
+    },
+    onError: () => {
+      toast("Erro ao excluir conta, tente novamente mais tarde.");
+    },
+  });
+
+  useEffect(() => {
+    if (user) {
+      form.setValue("firstName", user.nome);
+      form.setValue("lastName", user.sobrenome);
+      form.setValue("email", user.email);
+      form.setValue("phone", format(user.telefone || "", options));
+      if (user.imagem) {
+        setProfileUrl(user.imagem);
+      }
+    }
+  }, [form, user]);
+
+  if (!user) {
+    return notFound();
+  }
+
   return (
     <Wrapper className="flex flex-col justify-center pt-10">
-      {/* <Skeleton className="h-96 w-full" /> */}
       <Card className="flex flex-col justify-center w-full p-6 m-auto">
         <CardContent className="space-y-10 flex flex-col items-center w-full">
           <Tabs
@@ -280,19 +189,15 @@ export default function Page() {
                 />
                 <label
                   htmlFor="photoInput"
-                  className="group overflow-hidden relative cursor-pointer w-32 h-32 flex items-center justify-center text-center rounded-full shadow"
+                  className="group overflow-hidden relative cursor-pointer w-32 h-32 flex items-center justify-center text-center rounded-full shadow-sm"
                 >
                   <span className="text-base font-medium transition-all absolute z-20 text-primary opacity-0 group-hover:opacity-100">
                     <Upload />
                   </span>
-                  {uploading ? (
-                    <span>carregando...</span>
-                  ) : (
-                    <Avatar className="w-32 h-32">
-                      <AvatarImage src={newImage || ""} />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  )}
+                  <Avatar className="w-32 h-32">
+                    <AvatarImage src={profileUrl} className="object-cover" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
                 </label>
               </div>
               <Form {...form}>
@@ -346,7 +251,7 @@ export default function Page() {
                           <Input
                             placeholder="Telefone"
                             {...field}
-                            onChange={handleTelefoneChange}
+                            ref={inputRef}
                           />
                         </FormControl>
                         <FormDescription>Ex: (00) 0 0000-0000</FormDescription>
@@ -356,7 +261,7 @@ export default function Page() {
                   />
                   <Button
                     variant={"outline"}
-                    disabled={form.formState.isSubmitting === true}
+                    disabled={form.formState.isSubmitting}
                     type="submit"
                   >
                     {form.formState.isSubmitting
@@ -365,7 +270,7 @@ export default function Page() {
                   </Button>
                 </form>
                 <AlertDialog>
-                  <AlertDialogTrigger className="text-sm text-destructive">
+                  <AlertDialogTrigger className="text-sm text-destructive cursor-pointer">
                     Excluir minha conta
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -382,7 +287,9 @@ export default function Page() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
 
-                      <AlertDialogAction onClick={handleDeleteAccount}>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteAccount.mutate()}
+                      >
                         Continuar
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -392,19 +299,98 @@ export default function Page() {
             </TabsContent>
             <TabsContent
               value="subscriptions"
-              className="flex items-center justify-center space-y-5 w-full max-w-[500px]"
+              className="flex items-center justify-center space-y-5 w-full max-w-[500px] text-center"
             >
-              {/* {data_user?.plan !== "GRATIS" ? ( */}
-              <CardFooter>
-                <Button variant={"default"} onClick={handleBillingPortal}>
-                  Administrar assinaturas
-                </Button>
-              </CardFooter>
-              {/* ) : ( */}
-              <span className="text-muted-foreground ">
-                Você não possui nenhuma assinatura ativa
-              </span>
-              {/* )} */}
+              {user &&
+                user.inscricoes.length > 0 &&
+                user.plano !== "GRATIS" && (
+                  <div className="max-w-3xl mx-auto mb-10">
+                    <Alert
+                      className={`mb-6 ${
+                        user.inscricoes[0].status === "paused" ||
+                        user.inscricoes[0].cancelar_ao_final_do_periodo
+                          ? "border-destructive"
+                          : "border-primary"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        {user.inscricoes[0].status === "paused" ||
+                        user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                          <AlertTriangle className="h-5 w-5 text-destructive mr-2" />
+                        ) : (
+                          <BarChart className="h-5 w-5 text-primary mr-2" />
+                        )}
+                        <AlertTitle>
+                          {user?.inscricoes[0].status === "paused"
+                            ? "Pagamento pendente"
+                            : `Você tem o plano ${
+                                user.plano === "BASICO" ? "Básico" : "PRO"
+                              } ${
+                                user.inscricoes[0].ciclo === "month"
+                                  ? "mensal"
+                                  : "anual"
+                              }`}
+                        </AlertTitle>
+                      </div>
+                      <AlertDescription className="mt-2">
+                        {user?.inscricoes[0].status === "paused" ? (
+                          <div>
+                            <p>
+                              Sua assinatura está com pagamento pendente. Por
+                              favor, atualize suas informações de pagamento.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={abrirPortalCliente}
+                            >
+                              Atualizar Pagamento
+                            </Button>
+                          </div>
+                        ) : user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                          <div className="flex flex-col items-center w-full">
+                            <p>
+                              Sua assinatura será cancelada em{" "}
+                              {new Date(
+                                user.inscricoes[0].periodo_final!
+                              ).toLocaleDateString("pt-BR")}
+                              . Você pode gerenciar sua assinatura a qualquer
+                              momento.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={abrirPortalCliente}
+                            >
+                              Gerenciar Assinatura
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center w-full">
+                            <p>
+                              Próxima renovação em{" "}
+                              {new Date(
+                                user.inscricoes[0].periodo_final!
+                              ).toLocaleDateString("pt-BR")}
+                              . Você pode gerenciar sua assinatura a qualquer
+                              momento.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2"
+                              onClick={abrirPortalCliente}
+                            >
+                              Gerenciar Assinatura
+                            </Button>
+                          </div>
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -14,7 +14,7 @@ export function CardAdvert({ className, data }: iCardAd) {
       href={`/ad/${data.id}`}
       className={cn(
         className,
-        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow"
+        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow-sm"
       )}
     >
       <div className="w-full h-[125px] relative">
@@ -22,7 +22,7 @@ export function CardAdvert({ className, data }: iCardAd) {
           src={data.imagens[0].url || "/default-car.png"}
           fill
           quality={100}
-          alt={data.modelo}
+          alt={data.modelo.nome}
           className="object-cover rounded-t"
         />
       </div>
@@ -34,9 +34,11 @@ export function CardAdvert({ className, data }: iCardAd) {
           })}
         </span>
         <div className="flex flex-col min-h-24">
-          <span className="text-primary text-lg font-bold">{data.marca}</span>
+          <span className="text-primary text-lg font-bold">
+            {data.marca.nome}
+          </span>
           <span className="text-primary font-normal text-xs uppercase">
-            {data.modelo}
+            {data.modelo.nome}
           </span>
         </div>
         <div className="w-full flex items-center justify-between">
@@ -50,7 +52,7 @@ export function CardAdvert({ className, data }: iCardAd) {
         </div>
         <div className="border w-full" />
         <span className="text-primary font-semibold text-xs w-full text-center">
-          {data.cidade}
+          {data.cidade} - {data.estado}
         </span>
       </div>
     </Link>

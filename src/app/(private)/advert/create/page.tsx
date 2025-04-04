@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -30,11 +31,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { api, apiFormData, colors, GetCities, GetStates } from "@/lib/utils";
-import { iTypes } from "@/app/page";
+import { apiClient, colors, GetCities, GetStates } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
+import { Opcionai } from "@/types/FilterAdverts";
 
 const formSchema = z.object({
   tipo: z
@@ -97,19 +98,31 @@ type FileInput = {
 };
 
 type Brand = {
-  _id: string;
-  Label: string;
-  Value: string;
-  codigoTipoVeiculo: string;
+  id: string;
+  nome: string;
+  slug: string;
 };
 
 type Model = {
-  _id: string;
-  Label: string;
-  Value: number;
-  codigoTipoVeiculo: string;
-  codigoMarcaVeiculo: string;
+  id: number;
+  nome: string;
+  slug: string;
 };
+
+const types = [
+  {
+    name: "Carros",
+    value: "carros",
+  },
+  {
+    name: "Caminhões",
+    value: "caminhoes",
+  },
+  {
+    name: "Motos",
+    value: "motos",
+  },
+];
 
 export default function Page() {
   const { user } = useAuth();
@@ -167,26 +180,6 @@ export default function Page() {
         break;
     }
 
-    const selectedBrand = getBrands.data?.find(
-      (brand: Brand) => brand.Value === values.marca
-    );
-
-    if (!selectedBrand) {
-      return toast("Marca não encontrada");
-    }
-
-    values.marca = selectedBrand.Label;
-
-    const selectedModel = getModels.data?.find(
-      (model: Model) => model.Value === Number(values.modelo)
-    );
-
-    if (!selectedModel) {
-      return toast("Modelo não encontrado");
-    }
-
-    values.modelo = selectedModel.Label;
-
     const selectedState = fetchStates.data?.find(
       ({ id }: { nome: string; id: number }) => id === Number(values.estado)
     );
@@ -219,13 +212,8 @@ export default function Page() {
     formData.append("usuario_id", user.id);
 
     if (values.opcionais) {
-      values.opcionais.forEach((opcional) =>
-        formData.append("opcionais", opcional || "")
-      );
+      formData.append("opcionais", values.opcionais.filter(Boolean).join(","));
     }
-
-    const entries = Array.from(formData.entries());
-    console.log(entries);
 
     createAdvert.mutate(formData);
   }
@@ -255,16 +243,10 @@ export default function Page() {
   };
 
   const createAdvert = useMutation({
-    mutationKey: ["create_advert"],
+    mutationKey: ["create_advert", user?.id],
     mutationFn: async (formData: FormData) => {
-      const result = await apiFormData("/adverts", formData, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer`,
-        },
-      });
-      return result;
+      const { data } = await apiClient.post("/adverts", formData);
+      return data;
     },
     onSuccess: () => {
       toast("Anúncio cadastrado com sucesso!", {
@@ -276,7 +258,7 @@ export default function Page() {
       });
       setPhotos([]);
       form.reset();
-      return push("/meus-anuncios?tipo=em aprovacao");
+      return push("/account/ads?type=requested");
     },
     onError: (err) => {
       console.log(err);
@@ -302,29 +284,37 @@ export default function Page() {
 
   const getOptionals = useQuery({
     queryKey: ["getOptionals"],
-    queryFn: async () => {
-      return await api("/optionals");
-    },
-  });
-
-  const fetchTypes = useQuery({
-    queryKey: ["getTypes"],
-    queryFn: async () => {
-      return await api("/fipe/types", { method: "GET" });
+    queryFn: async (): Promise<Opcionai[]> => {
+      const { data } = await apiClient.get("/optionals", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return data;
     },
   });
 
   const getBrands = useMutation({
-    mutationKey: ["getBrands"],
+    mutationKey: ["brands"],
     mutationFn: async (type: string) => {
-      return await api(`/fipe/brands/${type}`);
+      const { data } = await apiClient.get(`/fipe/brands/${type}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return data;
     },
   });
 
   const getModels = useMutation({
     mutationKey: ["getModels"],
-    mutationFn: async ({ type, board }: { type: string; board: string }) => {
-      return await api(`/fipe/models/${type}/${board}`);
+    mutationFn: async ({ brand }: { brand: string }) => {
+      const { data } = await apiClient.get(`/fipe/models/${brand}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return data;
     },
   });
 
@@ -340,52 +330,23 @@ export default function Page() {
     },
   });
 
-  const getYearsModel = useMutation({
-    mutationKey: ["getYearsModel"],
-    mutationFn: async ({
-      type,
-      brand,
-      model,
-    }: {
-      type: string;
-      brand: string;
-      model: string;
-    }) => {
-      return await api(`/fipe/years/${type}/${brand}/${model}`);
-    },
-  });
-
   useEffect(() => {
     const value = form.watch("tipo");
-    if (value) {
+    if (value && value !== "default") {
       getBrands.mutate(value);
     }
   }, [form.watch("tipo")]);
 
   useEffect(() => {
-    const type = form.watch("tipo");
-    const board = form.watch("marca");
-    if (type && board) {
-      getModels.mutate({ type, board });
+    const brand = form.watch("marca");
+    if (brand && brand !== "default") {
+      getModels.mutate({ brand });
     }
   }, [form.watch("marca")]);
 
   useEffect(() => {
-    const type = form.getValues("tipo");
-    const model = form.getValues("modelo");
-    const brand = form.getValues("marca");
-    if (type !== "" && model !== "" && brand !== "") {
-      getYearsModel.mutate({
-        type,
-        brand,
-        model,
-      });
-    }
-  }, [form.watch("modelo")]);
-
-  useEffect(() => {
     const state = form.watch("estado");
-    if (state) {
+    if (state && state !== "default") {
       getCities.mutate(state);
     }
   }, [form.watch("estado")]);
@@ -410,7 +371,7 @@ export default function Page() {
                 />
                 <label
                   htmlFor="photoInput"
-                  className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow"
+                  className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow-sm"
                 >
                   <span className="text-base">
                     Adicionar <br />
@@ -472,16 +433,11 @@ export default function Page() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
-                            {fetchTypes?.data?.map(
-                              (type: iTypes, idx: number) => (
-                                <SelectItem
-                                  value={type.value.toString()}
-                                  key={idx}
-                                >
-                                  {type.name}
-                                </SelectItem>
-                              )
-                            )}
+                            {types.map((type, idx: number) => (
+                              <SelectItem value={type.value} key={idx}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -501,7 +457,7 @@ export default function Page() {
                           {...field}
                           onValueChange={field.onChange}
                           name={field.name}
-                          disabled={form.getValues("tipo") === ""}
+                          disabled={getBrands.isSuccess !== true}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue
@@ -515,11 +471,16 @@ export default function Page() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
-                            {getBrands.data?.map((brand: any, idx: number) => (
-                              <SelectItem value={brand.Value} key={idx}>
-                                {brand.Label}
-                              </SelectItem>
-                            ))}
+                            {getBrands.data?.map(
+                              (brand: Brand, idx: number) => (
+                                <SelectItem
+                                  value={brand.id.toString()}
+                                  key={idx}
+                                >
+                                  {brand.nome}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -539,7 +500,7 @@ export default function Page() {
                           {...field}
                           onValueChange={field.onChange}
                           name={field.name}
-                          disabled={form.getValues("marca") === ""}
+                          disabled={getModels.isSuccess !== true}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue
@@ -553,14 +514,16 @@ export default function Page() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
-                            {getModels?.data?.map((model: any, idx: number) => (
-                              <SelectItem
-                                value={model.Value.toString()}
-                                key={idx}
-                              >
-                                {model.Label}
-                              </SelectItem>
-                            ))}
+                            {getModels?.data?.map(
+                              (model: Model, idx: number) => (
+                                <SelectItem
+                                  value={model.id.toString()}
+                                  key={idx}
+                                >
+                                  {model.nome}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -580,27 +543,25 @@ export default function Page() {
                           {...field}
                           onValueChange={field.onChange}
                           value={field.value}
-                          disabled={form.getValues("modelo") === ""}
                         >
                           <SelectTrigger>
                             <SelectValue
-                              placeholder={
-                                getYearsModel.isPending
-                                  ? "Buscando Ano Modelo"
-                                  : "Selecione"
-                              }
+                              placeholder={"Selecione"}
                               ref={field.ref}
                             />
                           </SelectTrigger>
                           <SelectContent className="bg-primary-foreground">
                             <SelectItem value="default">Selecione</SelectItem>
-                            {getYearsModel?.data?.map(
-                              (yearModel: any, idx: number) => (
-                                <SelectItem value={yearModel.Value} key={idx}>
-                                  {yearModel.Label}
+                            {Array.from(
+                              { length: new Date().getFullYear() - 1960 + 2 },
+                              (_, i) => 1960 + i
+                            )
+                              .reverse()
+                              .map((year, idx) => (
+                                <SelectItem value={year.toString()} key={idx}>
+                                  {year}
                                 </SelectItem>
-                              )
-                            )}
+                              ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -655,6 +616,7 @@ export default function Page() {
                   form={form}
                   label="R$"
                   name="preco"
+                  isPrice
                   placeholder="R$ 99.999.999"
                 />
 
