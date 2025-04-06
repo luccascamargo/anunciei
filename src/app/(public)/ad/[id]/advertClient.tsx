@@ -47,59 +47,45 @@ export function AdvertClient({ advert }: iContentAD) {
 
             <div className="w-full flex justify-between p-6 border-t mt-10">
               <div className="flex flex-col gap-3">
-                <span className="text-primary text-base font-semibold">
-                  Localização
-                </span>
-                <p className="text-primary text-base font-medium text-opacity-65">
+                <span className="text-base font-semibold">Localização</span>
+                <p className="text-muted-foreground text-base font-medium text-opacity-65">
                   {advert.cidade} - {advert.estado}
                 </p>
               </div>
               <div className="flex flex-col gap-3">
-                <span className="text-primary text-base font-semibold">
-                  Cor
-                </span>
-                <p className="text-primary text-base font-medium text-opacity-65">
+                <span className="text-base font-semibold">Cor</span>
+                <p className="text-muted-foreground text-base font-medium text-opacity-65">
                   {advert.cor}
                 </p>
               </div>
               <div className="flex flex-col gap-3">
-                <span className="text-primary text-base font-semibold">
-                  Quilometragem
-                </span>
-                <p className="text-primary text-base font-medium text-opacity-65">
+                <span className=" text-base font-semibold">Quilometragem</span>
+                <p className="text-muted-foreground text-base font-medium text-opacity-65">
                   {Number(advert.quilometragem).toLocaleString("pt-BR")} km
                 </p>
               </div>
               <div className="flex flex-col gap-3">
-                <span className="text-primary text-base font-semibold">
-                  Portas
-                </span>
-                <p className="text-primary text-base font-medium text-opacity-65">
+                <span className=" text-base font-semibold">Portas</span>
+                <p className="text-muted-foreground text-base font-medium text-opacity-65">
                   {advert.portas}
                 </p>
               </div>
               <div className="flex flex-col gap-3">
-                <span className="text-primary text-base font-semibold">
-                  Cambio
-                </span>
-                <p className="text-primary text-base font-medium text-opacity-65">
+                <span className=" text-base font-semibold">Cambio</span>
+                <p className="text-muted-foreground text-base font-medium text-opacity-65">
                   {advert.cambio}
                 </p>
               </div>
             </div>
             <div className="flex flex-col gap-5 mt-10 border-t pt-10 pl-6">
-              <span className="text-primary text-3xl font-bold">
-                Sobre este anúncio
-              </span>
-              <p className="text-primary text-base leading-7">
+              <span className=" text-3xl font-bold">Sobre este anúncio</span>
+              <p className="text-muted-foreground text-base leading-7">
                 {advert.descricao}
               </p>
             </div>
             <div className="bg-secondary mt-10 p-6 flex items-center justify-between">
               <div className="flex flex-col gap-4">
-                <span className="text-primary font-medium">
-                  Anúncio criado por:
-                </span>
+                <span className=" font-medium">Anúncio criado por:</span>
                 <div className="flex items-center gap-5">
                   <Avatar className="w-12 h-12">
                     <AvatarImage
@@ -111,10 +97,10 @@ export function AdvertClient({ advert }: iContentAD) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <span className="text-primary">{`${
+                    <span className="">{`${
                       advert.usuario.nome + " " + advert.usuario.sobrenome
                     }`}</span>
-                    <span className="text-primary">{advert.usuario.email}</span>
+                    <span className="">{advert.usuario.email}</span>
                   </div>
                 </div>
               </div>
@@ -123,12 +109,10 @@ export function AdvertClient({ advert }: iContentAD) {
               </Link>
             </div>
             <div className="mt-10 flex flex-col gap-6 pl-6">
-              <span className="font-bold text-primary text-3xl">
-                Lista de opcionais
-              </span>
+              <span className="font-bold text-3xl">Lista de opcionais</span>
               <ul className="flex flex-col gap-2 h-auto max-w-[500px] flex-wrap ">
                 {advert.opcionais.length === 0 && (
-                  <span className="text-primary">
+                  <span className="text-muted-foreground">
                     Nenhum opcional cadastrado
                   </span>
                 )}

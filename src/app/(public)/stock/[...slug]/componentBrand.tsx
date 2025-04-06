@@ -119,7 +119,7 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
   }) {
     const limit = 5;
     const { data } = await apiClient.get(
-      `/adverts/filter?${new URLSearchParams({
+      `/adverts/filterbybrand/${slug[1]}?${new URLSearchParams({
         limit: limit.toString(),
         pageParam: pageParam.toString(),
         ...filters,

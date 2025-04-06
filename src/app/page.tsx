@@ -19,10 +19,10 @@ import {
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-28">
-        <div className="container px-4 mx-auto">
+      <section className="relative py-20 md:py-28 h-screen flex items-center justify-center">
+        <div className="container px-4">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Encontre o veículo perfeito para você

@@ -47,7 +47,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Places from "@/components/Places";
 import { Opcionai } from "@/types/FilterAdverts";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export interface iTypes {
   value: number;

@@ -189,33 +189,27 @@ export default function Page() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <>
-                              <Button variant={"link"}>
-                                <Link
-                                  href={`/ad/${ad.id}`}
-                                  className="text-sm "
-                                >
-                                  Ver
-                                </Link>
-                              </Button>
-                              <Button variant={"link"}>
-                                <Link
-                                  href={`/advert/update/${ad.id}`}
-                                  className="text-sm"
-                                >
-                                  Editar
-                                </Link>
-                              </Button>
-                              <Button
-                                variant={"link"}
-                                onClick={() =>
-                                  handleInactiveAdvert.mutate(ad.id)
-                                }
+                          <div className="space-x-4">
+                            <Button variant={"ghost"}>
+                              <Link href={`/ad/${ad.id}`} className="text-sm ">
+                                Ver
+                              </Link>
+                            </Button>
+                            <Button variant={"ghost"}>
+                              <Link
+                                href={`/advert/update/${ad.id}`}
+                                className="text-sm"
                               >
-                                Desativar
-                              </Button>
-                            </>
+                                Editar
+                              </Link>
+                            </Button>
+
+                            <Button
+                              variant={"ghost"}
+                              onClick={() => handleInactiveAdvert.mutate(ad.id)}
+                            >
+                              Desativar
+                            </Button>
                           </div>
 
                           <div className="flex items-center gap-4">
@@ -283,14 +277,19 @@ export default function Page() {
                           <div className="flex items-center gap-4">
                             <>
                               <Button
-                                variant={"link"}
+                                variant={"ghost"}
                                 onClick={() => handleActiveAdvert.mutate(ad.id)}
                               >
                                 Ativar anuncio
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="link">Excluir</Button>
+                                  <Button
+                                    variant="ghost"
+                                    className="text-red-500 hover:text-red-500"
+                                  >
+                                    Excluir
+                                  </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                   <AlertDialogHeader>

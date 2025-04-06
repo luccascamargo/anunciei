@@ -14,7 +14,7 @@ export function CardAdvert({ className, data }: iCardAd) {
       href={`/ad/${data.id}`}
       className={cn(
         className,
-        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow-sm"
+        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:scale-105 hover:shadow-md"
       )}
     >
       <div className="w-full h-[125px] relative">
@@ -27,31 +27,33 @@ export function CardAdvert({ className, data }: iCardAd) {
         />
       </div>
       <div className="mt-3 px-3 w-full flex flex-col gap-5">
-        <span className="text-primary text-lg font-bold">
+        <span className="text-muted-foreground text-lg font-bold">
           {Number(data.preco).toLocaleString("pt-BR", {
             currency: "BRL",
             style: "currency",
           })}
         </span>
         <div className="flex flex-col min-h-24">
-          <span className="text-primary text-lg font-bold">
+          <span className="text-muted-foreground text-lg font-bold">
             {data.marca.nome}
           </span>
-          <span className="text-primary font-normal text-xs uppercase">
+          <span className="text-muted-foreground font-normal text-xs uppercase">
             {data.modelo.nome}
           </span>
         </div>
         <div className="w-full flex items-center justify-between">
-          <span className="text-primary font-semibold text-xs">
+          <span className="text-muted-foreground font-semibold text-xs">
             {data.ano_modelo}
           </span>
-          <span className="text-primary font-semibold text-xs">
+          <span className="text-muted-foreground font-semibold text-xs">
             {Number(data.quilometragem).toLocaleString("pt-BR")} km
           </span>
-          <span className="text-primary font-semibold text-xs">{data.cor}</span>
+          <span className="text-muted-foreground font-semibold text-xs">
+            {data.cor}
+          </span>
         </div>
         <div className="border w-full" />
-        <span className="text-primary font-semibold text-xs w-full text-center">
+        <span className="text-muted-foreground font-semibold text-xs w-full text-center">
           {data.cidade} - {data.estado}
         </span>
       </div>
