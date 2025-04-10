@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/contexts/userContext";
-import { Sora } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
 import { Navbar } from "@/components/navbar";
@@ -8,8 +8,7 @@ import { Footer } from "@/components/footer";
 import { Providers } from "@/provider/queryClientProvider";
 import { Toaster } from "sonner";
 
-const soraSans = Sora({
-  variable: "--font-sora-sans",
+const inter = Inter({
   subsets: ["latin"],
   style: "normal",
 });
@@ -41,7 +40,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${soraSans.className} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         <Providers>
           <AuthProvider user={user}>
             <Navbar />

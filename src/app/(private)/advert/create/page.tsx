@@ -44,13 +44,15 @@ import {
   Info,
   ListCollapse,
   Locate,
+  CheckCircle,
 } from "lucide-react";
+import Image from "next/image";
 
 const formSchema = z.object({
   tipo: z
     .string({ message: "Este campo é obrigatório" })
-    .refine((value) => value !== "", {
-      message: "Este campo é obrigatório",
+    .refine((value) => value !== "default", {
+      message: "Selecione um tipo de veículo válido",
     }),
   marca: z
     .string({ message: "Este campo é obrigatório" })
@@ -164,6 +166,12 @@ const steps = [
     fields: [],
     icon: <ImageIcon />,
   },
+  {
+    id: "resumo",
+    title: "Resumo",
+    fields: [],
+    icon: <CheckCircle />,
+  },
 ];
 
 export default function Page() {
@@ -179,7 +187,7 @@ export default function Page() {
     defaultValues: {
       descricao: "",
       marca: "",
-      tipo: "",
+      tipo: "default",
       ano_modelo: "",
       modelo: "",
       cor: "",
@@ -206,16 +214,12 @@ export default function Page() {
     return -1;
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     const currentStepFields = steps[currentStep].fields;
-    const errors = form.formState.errors;
 
-    // Verifica se há erros nos campos do step atual
-    const hasErrors = currentStepFields.some(
-      (field) => errors[field as keyof typeof errors]
-    );
+    const isValid = await form.trigger(currentStepFields as any);
 
-    if (hasErrors) {
+    if (!isValid) {
       return;
     }
 
@@ -272,16 +276,6 @@ export default function Page() {
         default:
           break;
       }
-
-      const selectedState = fetchStates.data?.find(
-        ({ id }: { nome: string; id: number }) => id === Number(values.estado)
-      );
-
-      if (!selectedState) {
-        return toast("Estado não encontrado");
-      }
-
-      values.estado = selectedState.nome;
 
       const formData = new FormData();
 
@@ -433,8 +427,8 @@ export default function Page() {
 
   const getCities = useMutation({
     mutationKey: ["getCities"],
-    mutationFn: async (id: string) => {
-      return await GetCities(id);
+    mutationFn: async (sigla: string) => {
+      return await GetCities(sigla);
     },
   });
 
@@ -472,12 +466,11 @@ export default function Page() {
                   <FormLabel>Tipo de veiculo</FormLabel>
                   <FormControl>
                     <Select
-                      {...field}
                       onValueChange={field.onChange}
-                      name={field.name}
+                      defaultValue={field.value}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione" ref={field.ref} />
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="default">Selecione</SelectItem>
@@ -502,9 +495,8 @@ export default function Page() {
                   <FormLabel>Marca</FormLabel>
                   <FormControl>
                     <Select
-                      {...field}
                       onValueChange={field.onChange}
-                      name={field.name}
+                      defaultValue={field.value}
                       disabled={getBrands.isSuccess !== true}
                     >
                       <SelectTrigger className="w-full">
@@ -514,7 +506,6 @@ export default function Page() {
                               ? "Buscando Marcas"
                               : "Selecione"
                           }
-                          ref={field.ref}
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -540,9 +531,8 @@ export default function Page() {
                   <FormLabel>Modelo</FormLabel>
                   <FormControl>
                     <Select
-                      {...field}
                       onValueChange={field.onChange}
-                      name={field.name}
+                      defaultValue={field.value}
                       disabled={getModels.isSuccess !== true}
                     >
                       <SelectTrigger className="w-full">
@@ -552,7 +542,6 @@ export default function Page() {
                               ? "Buscando Modelos"
                               : "Selecione"
                           }
-                          ref={field.ref}
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -578,15 +567,11 @@ export default function Page() {
                   <FormLabel>Ano modelo</FormLabel>
                   <FormControl>
                     <Select
-                      {...field}
                       onValueChange={field.onChange}
-                      value={field.value}
+                      defaultValue={field.value}
                     >
                       <SelectTrigger>
-                        <SelectValue
-                          placeholder={"Selecione"}
-                          ref={field.ref}
-                        />
+                        <SelectValue placeholder={"Selecione"} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="default">Selecione</SelectItem>
@@ -710,10 +695,7 @@ export default function Page() {
                         <SelectContent>
                           <SelectItem value="default">Selecione</SelectItem>
                           {fetchStates.data?.map((state) => (
-                            <SelectItem
-                              value={state.id.toString()}
-                              key={state.id}
-                            >
+                            <SelectItem value={state.sigla} key={state.sigla}>
                               {state.nome}
                             </SelectItem>
                           ))}
@@ -918,6 +900,119 @@ export default function Page() {
             </div>
           </div>
         )}
+
+        {currentStep === 5 && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Informações Básicas</h3>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-medium">Tipo:</span>{" "}
+                    {types.find((t) => t.value === form.watch("tipo"))?.name}
+                  </p>
+                  <p>
+                    <span className="font-medium">Marca:</span>{" "}
+                    {
+                      getBrands.data?.find(
+                        (b: Brand) => b.id.toString() === form.watch("marca")
+                      )?.nome
+                    }
+                  </p>
+                  <p>
+                    <span className="font-medium">Modelo:</span>{" "}
+                    {
+                      getModels.data?.find(
+                        (m: Model) => m.id.toString() === form.watch("modelo")
+                      )?.nome
+                    }
+                  </p>
+                  <p>
+                    <span className="font-medium">Ano Modelo:</span>{" "}
+                    {form.watch("ano_modelo")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Detalhes do Veículo</h3>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-medium">Cor:</span>{" "}
+                    {colors.find((c) => c.code === form.watch("cor"))?.name}
+                  </p>
+                  <p>
+                    <span className="font-medium">Preço:</span> R${" "}
+                    {form.watch("preco")}
+                  </p>
+                  <p>
+                    <span className="font-medium">Quilometragem:</span>{" "}
+                    {form.watch("quilometragem")} km
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Localização</h3>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-medium">Estado:</span>{" "}
+                    {form.watch("estado")}
+                  </p>
+                  <p>
+                    <span className="font-medium">Cidade:</span>{" "}
+                    {form.watch("cidade")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Especificações</h3>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-medium">Portas:</span>{" "}
+                    {form.watch("portas")}
+                  </p>
+                  <p>
+                    <span className="font-medium">Câmbio:</span>{" "}
+                    {form.watch("cambio")}
+                  </p>
+                  <div>
+                    <span className="font-medium">Opcionais:</span>
+                    <ul className="list-disc list-inside">
+                      {form
+                        .watch("opcionais")
+                        ?.filter(Boolean)
+                        .map((opcionalId) => {
+                          const opcional = getOptionals.data?.find(
+                            (o) => o.id === opcionalId
+                          );
+                          return <li key={opcionalId}>{opcional?.nome}</li>;
+                        })}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Fotos Selecionadas</h3>
+              <div className="grid grid-cols-4 gap-4">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="relative">
+                    <Image
+                      src={file.url}
+                      width={80}
+                      height={80}
+                      alt={`Foto ${index + 1}`}
+                      className="w-full h-28 object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -929,7 +1024,7 @@ export default function Page() {
           <CardTitle>Crie seu anúncio</CardTitle>
           <div className="mt-4">
             <Progress value={progress} className="h-2" />
-            <div className="grid grid-cols-5 place-items-end mt-2">
+            <div className="grid grid-cols-6 place-items-end mt-2">
               {steps.map((step, index) => (
                 <div
                   key={step.id}
@@ -965,7 +1060,11 @@ export default function Page() {
                     Voltar
                   </Button>
                   {currentStep === steps.length - 1 ? (
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button
+                      type="button"
+                      onClick={() => form.handleSubmit(onSubmit)()}
+                      disabled={isSubmitting}
+                    >
                       {isSubmitting ? "Criando anúncio..." : "Criar anúncio"}
                     </Button>
                   ) : (

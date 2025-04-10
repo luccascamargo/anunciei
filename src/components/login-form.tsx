@@ -25,8 +25,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
+  email: z.string().email({ message: "Email inválido." }),
+  password: z.string().min(8, {
+    message: "Senha deve ter pelo menos 8 caracteres.",
+  }),
 });
 
 export function SiginForm({
@@ -43,25 +45,29 @@ export function SiginForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await apiClient.post("/auth/signin", {
+    await apiClient
+      .post("/auth/signin", {
         data: { email: values.email, senha: values.password },
         headers: {
           "Content-Type": "application/json",
         },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          toast("Login bem sucedido!");
+          router.refresh();
+        }
+      })
+      .catch((error) => {
+        if (error.response.status === 403) {
+          toast(error.response.data.message, {
+            description:
+              error.response.data.code === "user_inactive"
+                ? "Entre em contato com o suporte para ativar sua conta."
+                : "Verifique seu email e senha e tente novamente.",
+          });
+        }
       });
-      toast("Login bem sucedido!");
-      router.refresh();
-      return;
-    } catch (error) {
-      console.log(error);
-      toast("Algo de errado aconteceu!", {
-        description:
-          "Entre em contato com nosso suporte ou tente novamente mais tarde!",
-      });
-      console.error("Erro na requisição:");
-      return;
-    }
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

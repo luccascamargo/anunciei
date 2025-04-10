@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UseFormReturn } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormLabel } from "./ui/form";
+import { normalizeText } from "@/lib/utils";
 
 const libraries: "places"[] = ["places"];
 
@@ -76,7 +77,9 @@ export default function Places({ form }: PlacesProps) {
 
     // Filtrar estados pelo termo digitado
     const estadosFiltrados = estadosBrasil.filter((estado) =>
-      estado.toLowerCase().includes(valor.toLowerCase())
+      normalizeText(estado)
+        .toLowerCase()
+        .includes(normalizeText(valor).toLowerCase())
     );
     setSugestoesEstados(estadosFiltrados);
 
@@ -108,7 +111,14 @@ export default function Places({ form }: PlacesProps) {
     setSugestoesEstados([]);
     setSugestoesCidades([]);
     setOpen(false);
-    form.setValue("localizacao", localidade);
+    const localidadeStates = localidade.split(",");
+    if (localidadeStates.length === 3) {
+      form.setValue("cidade", localidadeStates[0].trim());
+      form.setValue("estado", "");
+    } else {
+      form.setValue("estado", localidadeStates[0].trim());
+      form.setValue("cidade", "");
+    }
   };
 
   // Fecha as sugestões quando clicar fora do input ou lista
@@ -130,6 +140,30 @@ export default function Places({ form }: PlacesProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      if (values.localizacao === "") {
+        setTermo(""); // Limpa o estado interno
+        setSugestoesEstados([]);
+        setSugestoesCidades([]);
+        setOpen(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  useEffect(() => {
+    // Sincroniza o estado interno com o valor do formulário
+    const subscription = form.watch((values) => {
+      if (values.localizacao !== termo) {
+        setTermo(values.localizacao || ""); // Atualiza o estado interno
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, termo]);
+
   if (!isLoaded) return <p className="text-sm">Localizando...</p>;
 
   return (
@@ -145,10 +179,12 @@ export default function Places({ form }: PlacesProps) {
                 placeholder="Digite cidade ou estado..."
                 type="text"
                 onChange={(e) => {
-                  handleInputChange(e.target.value);
-                  field.onChange(termo);
+                  const valor = e.target.value;
+                  setTermo(valor); // Atualiza o estado interno
+                  handleInputChange(valor); // Atualiza sugestões
+                  field.onChange(valor); // Atualiza o valor no formulário
                 }}
-                value={termo}
+                value={termo} // Sincroniza o valor do input com o estado interno
                 ref={inputRef}
               />
             </FormControl>

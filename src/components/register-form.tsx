@@ -24,10 +24,16 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  name: z.string().min(3),
-  lastName: z.string(),
-  email: z.string().email(),
-  password: z.string().min(8),
+  name: z
+    .string()
+    .min(3, { message: "Nome deve ter pelo menos 3 caracteres." }),
+  lastName: z.string({ message: "Sobrenome é obrigatório." }).min(3, {
+    message: "Sobrenome deve ter pelo menos 3 caracteres.",
+  }),
+  email: z.string().email({ message: "Email inválido." }),
+  password: z
+    .string()
+    .min(8, { message: "Senha deve ter pelo menos 8 caracteres." }),
 });
 
 export function RegisterForm({
@@ -46,25 +52,30 @@ export function RegisterForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await apiClient.post("/auth/register", {
+    await apiClient
+      .post("/auth/register", {
         data: {
           nome: values.name,
           sobrenome: values.lastName,
           email: values.email,
           senha: values.password,
         },
+      })
+      .then(() => {
+        toast("Conta criada com sucesso!");
+        router.refresh();
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.response.data.code === "user_inactive") {
+          toast(err.response.data.message, {
+            description:
+              err.response.data.code === "user_inactive"
+                ? "Entre em contato com o suporte para ativar sua conta."
+                : "Verifique seu email e senha e tente novamente.",
+          });
+        }
       });
-      toast("Conta criada com sucesso!");
-      router.refresh();
-      return;
-    } catch (error) {
-      console.log(error);
-      toast("Algo de errado aconteceu!", {
-        description:
-          "Entre em contato com nosso suporte ou tente novamente mais tarde!",
-      });
-    }
   }
 
   return (

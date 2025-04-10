@@ -27,7 +27,13 @@ const numberFormatter = new Intl.NumberFormat("pt-BR", {
 
 const formatValue = (value: string) => {
   const digits = value.replace(/\D/g, "");
-  return numberFormatter.format(Number(digits));
+  const numberValue = Number(digits);
+
+  if (numberValue === 0) {
+    return "";
+  }
+
+  return numberFormatter.format(numberValue);
 };
 
 export function CustomInputValue({
@@ -80,6 +86,10 @@ export function CustomInputValue({
                   const inputValue = ev.target.value;
                   const digits = inputValue.replace(/\D/g, "");
                   const caracteres = isPrice ? 8 : 6;
+
+                  if (digits === "0") {
+                    return;
+                  }
 
                   if (digits.length <= caracteres) {
                     setValue(inputValue);

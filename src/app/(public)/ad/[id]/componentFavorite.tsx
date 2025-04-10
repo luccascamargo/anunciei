@@ -64,7 +64,7 @@ export function ComponentFavorite({
   return (
     <HeartIcon
       className={`cursor-pointer ${
-        isFavorite ? "fill-red-500 text-red-500" : "text-primary"
+        isFavorite ? "fill-primary text-primary" : "text-primary"
       }`}
       onClick={toggleFavorite}
     />

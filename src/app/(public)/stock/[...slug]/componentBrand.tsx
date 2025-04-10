@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,16 +28,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardAdvert } from "@/components/cardAdvert";
-import { apiClient, normalizeText } from "@/lib/utils";
+import { apiClient, GetCities, GetStates, normalizeText } from "@/lib/utils";
 import { CustomInputValue } from "@/components/customInputValue";
 import { X } from "lucide-react";
 import Link from "next/link";
-import Places from "@/components/Places";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export interface iTypes {
   value: number;
@@ -46,13 +46,8 @@ export interface iTypes {
 const formSchemaFilter = z.object({
   modelo: z.string(),
   busca: z.string(),
-  localizacao: z.string().transform((value) => {
-    if (value) {
-      const [locale] = value.split(",");
-      return locale.trim();
-    }
-    return "";
-  }),
+  cidade: z.string(),
+  estado: z.string(),
   ano_modelo_min: z.coerce
     .string()
 
@@ -62,7 +57,6 @@ const formSchemaFilter = z.object({
 
     .transform((value) => value?.toString()),
   quilometragem_min: z.string().transform((value) => value.replace(/\D/g, "")),
-  tipo: z.string(),
   quilometragem_max: z.string().transform((value) => value.replace(/\D/g, "")),
   portas: z.string(),
   preco_min: z.string().transform((value) => value.replace(/\D/g, "")),
@@ -86,22 +80,23 @@ type IFilterBrand = {
 };
 
 export function ComponentBrand({ slug, models }: IFilterBrand) {
-  const [filters, setFilters] = useState({});
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const defaultValues = {
-    portas: "",
-    estado: "",
-    modelo: "",
-    tipo: slug[0],
-    busca: "",
-    opcionais: [],
-    cidade: "",
-    ano_modelo_max: "",
-    ano_modelo_min: "",
-    quilometragem_max: "",
-    quilometragem_min: "",
-    preco_max: "",
-    preco_min: "",
+    portas: searchParams.get("portas") || "",
+    marca: searchParams.get("marca") || "",
+    cidade: searchParams.get("cidade") || "",
+    estado: searchParams.get("estado") || "",
+    busca: searchParams.get("busca") || "",
+    modelo: searchParams.get("modelo") || "",
+    opcionais: searchParams.getAll("opcionais") || [],
+    ano_modelo_max: searchParams.get("ano_modelo_max") || "",
+    ano_modelo_min: searchParams.get("ano_modelo_min") || "",
+    quilometragem_max: searchParams.get("quilometragem_max") || "",
+    quilometragem_min: searchParams.get("quilometragem_min") || "",
+    preco_max: searchParams.get("preco_max") || "",
+    preco_min: searchParams.get("preco_min") || "",
   };
 
   const form = useForm<z.infer<typeof formSchemaFilter>>({
@@ -109,21 +104,14 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
     defaultValues,
   });
 
-  async function fetchAdverts({
-    pageParam = 1,
-    filters,
-  }: {
-    pageParam: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filters: any;
-  }) {
+  async function fetchAdverts({ pageParam = 1 }: { pageParam: number }) {
     const limit = 5;
+    const params = new URLSearchParams(searchParams);
+    params.set("limit", limit.toString());
+    params.set("pageParam", pageParam.toString());
+
     const { data } = await apiClient.get(
-      `/adverts/filterbybrand/${slug[1]}?${new URLSearchParams({
-        limit: limit.toString(),
-        pageParam: pageParam.toString(),
-        ...filters,
-      })}`,
+      `/adverts/filterbybrand/${slug[1]}?${params}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -135,38 +123,19 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
   }
 
   function onSubmit(values: z.infer<typeof formSchemaFilter>) {
-    if (values.ano_modelo_min > values.ano_modelo_max) {
-      toast("O ano mínimo não pode ser maior que o ano máximo");
-      return;
-    }
-    if (values.preco_min > values.preco_max) {
-      toast("O valor mínimo não pode ser maior que o valor máximo");
-      return;
-    }
-    if (values.quilometragem_min > values.quilometragem_max) {
-      toast(
-        "A quilometragem mínima não pode ser maior que a quilometragem máxima"
-      );
-      return;
-    }
-
-    if (values.busca) {
-      values.busca = normalizeText(values.busca);
-    }
-
-    const newFilters: { [key: string]: string } = {};
+    const params = new URLSearchParams();
 
     Object.entries(values).forEach(([key, value]) => {
       if (key === "opcionais" && Array.isArray(value)) {
         value = value.filter((item) => item !== "");
         if (value.length === 0) return;
-      }
-      if (value && value !== "" && value !== "default") {
-        newFilters[key] = value.toString();
+        value.forEach((item) => params.append("opcionais", item as string));
+      } else if (value && value !== "" && value !== "default") {
+        params.set(key, normalizeText(value.toString()));
       }
     });
 
-    setFilters(newFilters);
+    router.push(`/stock/${slug[0]}/${slug[1]}?${params.toString()}`);
   }
 
   const getOptionals = useQuery({
@@ -189,11 +158,30 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["ads", filters, slug[1]],
-    queryFn: ({ pageParam }) => fetchAdverts({ pageParam, filters }),
+    queryKey: ["adsbybrand", searchParams.toString(), slug[1]],
+    queryFn: ({ pageParam }) => fetchAdverts({ pageParam }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.nextPage;
+      return nextPage ? Number(nextPage) : undefined;
+    },
   });
+
+  const QueryStates = useQuery({
+    queryKey: ["getStates"],
+    queryFn: async () => await GetStates(),
+  });
+
+  const QueryCities = useMutation({
+    mutationKey: ["getCities"],
+    mutationFn: async (sigla: string) => await GetCities(sigla),
+  });
+
+  useEffect(() => {
+    if (form.watch("estado") !== "") {
+      QueryCities.mutate(form.watch("estado"));
+    }
+  }, [form.watch("estado")]);
 
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
@@ -224,7 +212,68 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-5"
               >
-                <Places form={form} />
+                <FormField
+                  control={form.control}
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          onValueChange={field.onChange}
+                          name={field.name}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Selecione</SelectItem>
+                            {QueryStates.data?.map((state) => (
+                              <SelectItem
+                                key={state.sigla}
+                                value={state.sigla.toString()}
+                              >
+                                {state.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          onValueChange={field.onChange}
+                          name={field.name}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Selecione</SelectItem>
+                            {QueryCities.data?.map((city: any) => (
+                              <SelectItem key={city.id} value={city.nome}>
+                                {city.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="w-full flex flex-col gap-2">
                   <FormLabel>Buscar</FormLabel>

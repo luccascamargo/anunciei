@@ -301,96 +301,98 @@ export default function Page() {
               value="subscriptions"
               className="flex items-center justify-center space-y-5 w-full max-w-[500px] text-center"
             >
-              {user &&
-                user.inscricoes.length > 0 &&
-                user.plano !== "GRATIS" && (
-                  <div className="max-w-3xl mx-auto mb-10">
-                    <Alert
-                      className={`mb-6 ${
-                        user.inscricoes[0].status === "paused" ||
-                        user.inscricoes[0].cancelar_ao_final_do_periodo
-                          ? "border-destructive"
-                          : "border-primary"
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        {user.inscricoes[0].status === "paused" ||
-                        user.inscricoes[0].cancelar_ao_final_do_periodo ? (
-                          <AlertTriangle className="h-5 w-5 text-destructive mr-2" />
-                        ) : (
-                          <BarChart className="h-5 w-5 text-primary mr-2" />
-                        )}
-                        <AlertTitle>
-                          {user?.inscricoes[0].status === "paused"
-                            ? "Pagamento pendente"
-                            : `Você tem o plano ${
-                                user.plano === "BASICO" ? "Básico" : "PRO"
-                              } ${
-                                user.inscricoes[0].ciclo === "month"
-                                  ? "mensal"
-                                  : "anual"
-                              }`}
-                        </AlertTitle>
-                      </div>
-                      <AlertDescription className="mt-2">
-                        {user?.inscricoes[0].status === "paused" ? (
-                          <div>
-                            <p>
-                              Sua assinatura está com pagamento pendente. Por
-                              favor, atualize suas informações de pagamento.
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-2"
-                              onClick={abrirPortalCliente}
-                            >
-                              Atualizar Pagamento
-                            </Button>
-                          </div>
-                        ) : user.inscricoes[0].cancelar_ao_final_do_periodo ? (
-                          <div className="flex flex-col items-center w-full">
-                            <p>
-                              Sua assinatura será cancelada em{" "}
-                              {new Date(
-                                user.inscricoes[0].periodo_final!
-                              ).toLocaleDateString("pt-BR")}
-                              . Você pode gerenciar sua assinatura a qualquer
-                              momento.
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-2"
-                              onClick={abrirPortalCliente}
-                            >
-                              Gerenciar Assinatura
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center w-full">
-                            <p>
-                              Próxima renovação em{" "}
-                              {new Date(
-                                user.inscricoes[0].periodo_final!
-                              ).toLocaleDateString("pt-BR")}
-                              . Você pode gerenciar sua assinatura a qualquer
-                              momento.
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-2"
-                              onClick={abrirPortalCliente}
-                            >
-                              Gerenciar Assinatura
-                            </Button>
-                          </div>
-                        )}
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                )}
+              {user && user.inscricoes.length > 0 && user.plano !== "GRATIS" ? (
+                <div className="max-w-3xl mx-auto mb-10">
+                  <Alert
+                    className={`mb-6 ${
+                      user.inscricoes[0].status === "paused" ||
+                      user.inscricoes[0].cancelar_ao_final_do_periodo
+                        ? "border-destructive"
+                        : "border-primary"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      {user.inscricoes[0].status === "paused" ||
+                      user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                        <AlertTriangle className="h-5 w-5 text-destructive mr-2" />
+                      ) : (
+                        <BarChart className="h-5 w-5 text-primary mr-2" />
+                      )}
+                      <AlertTitle>
+                        {user?.inscricoes[0].status === "paused"
+                          ? "Pagamento pendente"
+                          : `Você tem o plano ${
+                              user.plano === "BASICO" ? "Básico" : "PRO"
+                            } ${
+                              user.inscricoes[0].ciclo === "month"
+                                ? "mensal"
+                                : "anual"
+                            }`}
+                      </AlertTitle>
+                    </div>
+                    <AlertDescription className="mt-2">
+                      {user?.inscricoes[0].status === "paused" ? (
+                        <div>
+                          <p>
+                            Sua assinatura está com pagamento pendente. Por
+                            favor, atualize suas informações de pagamento.
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={abrirPortalCliente}
+                          >
+                            Atualizar Pagamento
+                          </Button>
+                        </div>
+                      ) : user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                        <div className="flex flex-col items-center w-full">
+                          <p>
+                            Sua assinatura será cancelada em{" "}
+                            {new Date(
+                              user.inscricoes[0].periodo_final!
+                            ).toLocaleDateString("pt-BR")}
+                            . Você pode gerenciar sua assinatura a qualquer
+                            momento.
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={abrirPortalCliente}
+                          >
+                            Gerenciar Assinatura
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center w-full">
+                          <p>
+                            Próxima renovação em{" "}
+                            {new Date(
+                              user.inscricoes[0].periodo_final!
+                            ).toLocaleDateString("pt-BR")}
+                            . Você pode gerenciar sua assinatura a qualquer
+                            momento.
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={abrirPortalCliente}
+                          >
+                            Gerenciar Assinatura
+                          </Button>
+                        </div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">
+                  Você não possui nenhuma assinatura ativa no momento.
+                </span>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

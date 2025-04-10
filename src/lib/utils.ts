@@ -4,7 +4,7 @@ import axios from "axios";
 
 interface StatesProps {
   nome: string;
-  id: number;
+  sigla: string;
 }
 
 interface CityProps {
@@ -102,16 +102,16 @@ export async function GetStates() {
   const res = await response.json();
 
   res.map((state: StatesProps) =>
-    states.push({ id: state.id, nome: state.nome })
+    states.push({ sigla: state.sigla, nome: state.nome })
   );
 
   return states;
 }
 
-export async function GetCities(id: string) {
+export async function GetCities(uf: string) {
   const cities: CityProps[] = [];
   const response = await fetch(
-    `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${id}/municipios`,
+    `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
     {
       headers: {
         "Content-Type": "application/json",

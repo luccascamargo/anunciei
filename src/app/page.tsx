@@ -8,7 +8,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -16,13 +15,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SearchBox } from "@/components/searchBox";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-28 h-screen flex items-center justify-center">
-        <div className="container px-4">
+      <section className="relative py-20 md:py-28 h-screen md:h-[1000px] flex items-center justify-center">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-primary/10 blur-3xl" />
+        </div>
+        <div className="container px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Encontre o veículo perfeito para você
@@ -33,47 +36,7 @@ export default function HomePage() {
             </p>
 
             {/* Search Box */}
-            <div className="max-w-xl mx-auto">
-              <div className="flex w-full items-center space-x-2">
-                <Input
-                  type="text"
-                  name="search"
-                  placeholder="O que você está procurando? Ex: Honda Civic 2022"
-                  className="h-12"
-                />
-                <Button className="h-12 px-6">
-                  <Search className="mr-2 h-4 w-4" />
-                  Buscar
-                </Button>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2 mt-4 text-sm text-muted-foreground">
-                <span>Buscas populares:</span>
-                <Link
-                  href="/stock/carros/?q=honda+civic"
-                  className="hover:text-primary hover:underline"
-                >
-                  Honda Civic
-                </Link>
-                <Link
-                  href="/stock/carros/?q=toyota+corolla"
-                  className="hover:text-primary hover:underline"
-                >
-                  Toyota Corolla
-                </Link>
-                <Link
-                  href="/stock/carros/?q=jeep+compass"
-                  className="hover:text-primary hover:underline"
-                >
-                  Jeep Compass
-                </Link>
-                <Link
-                  href="/stock/carros/?q=volkswagen+t-cross"
-                  className="hover:text-primary hover:underline"
-                >
-                  Volkswagen T-Cross
-                </Link>
-              </div>
-            </div>
+            <SearchBox />
           </div>
 
           {/* Stats */}
@@ -101,7 +64,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 md:py-24">
+      <section className="pb-16 md:py-24">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">
@@ -190,7 +153,7 @@ export default function HomePage() {
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
-                    <span>Integração com redes sociais</span>
+                    <span>Integração com whatsapp</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0 mt-0.5" />
@@ -261,7 +224,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Button asChild size="lg">
-              <Link href="/anunciar">
+              <Link href="/advert/create">
                 <Car className="mr-2 h-5 w-5" />
                 Anuncie seu veículo
               </Link>
@@ -386,13 +349,13 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
-                <Link href="/anunciar">
+                <Link href="/advert/create">
                   <Car className="mr-2 h-5 w-5" />
                   Anunciar Veículo
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/estoque">
+                <Link href="/stock/carros">
                   <Search className="mr-2 h-5 w-5" />
                   Explorar Estoque
                 </Link>

@@ -14,7 +14,7 @@ export function CardAdvert({ className, data }: iCardAd) {
       href={`/ad/${data.id}`}
       className={cn(
         className,
-        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:scale-105 hover:shadow-md"
+        "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow-md"
       )}
     >
       <div className="w-full h-[125px] relative">
@@ -33,7 +33,7 @@ export function CardAdvert({ className, data }: iCardAd) {
             style: "currency",
           })}
         </span>
-        <div className="flex flex-col min-h-24">
+        <div className="flex flex-col min-h-20">
           <span className="text-muted-foreground text-lg font-bold">
             {data.marca.nome}
           </span>

@@ -30,7 +30,7 @@ export function AdvertClient({ advert }: iContentAD) {
   }
   return (
     <>
-      <div className="container mx-auto pt-10 pb-20">
+      <div className="container mx-auto pt-10 pb-20 relative">
         <div className="flex items-end justify-between pt-10">
           <div className="flex flex-col gap-4">
             <span className="text-primary text-opacity-65 text-5xl font-bold uppercase">
@@ -49,7 +49,9 @@ export function AdvertClient({ advert }: iContentAD) {
               <div className="flex flex-col gap-3">
                 <span className="text-base font-semibold">Localização</span>
                 <p className="text-muted-foreground text-base font-medium text-opacity-65">
-                  {advert.cidade} - {advert.estado}
+                  {advert.cidade}
+                  <br />
+                  {advert.estado}
                 </p>
               </div>
               <div className="flex flex-col gap-3">
@@ -145,9 +147,7 @@ export function AdvertClient({ advert }: iContentAD) {
             <CardContent className="p-4">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <span className="text-primary text-xl font-semibold">
-                    Valor:
-                  </span>
+                  <span className="text-xl font-semibold">Valor:</span>
                   <span className="text-primary text-4xl font-bold">
                     {Number(advert.preco).toLocaleString("pt-BR", {
                       currency: "BRL",

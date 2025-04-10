@@ -109,6 +109,7 @@ export function UpdateAdvert({ advert }: Props) {
     advert.imagens
   );
   const [oldImages, setOldImages] = useState<FileInput[]>([]);
+  console.log(advert);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -140,19 +141,9 @@ export function UpdateAdvert({ advert }: Props) {
       return toast("Seu plano não permite mais que 3 fotos");
     }
 
-    if (user?.plano === "BASICO" && imagesUploaded > 5) {
-      return toast("Seu plano não permite mais que 5 fotos");
+    if (user?.plano === "BASICO" && imagesUploaded > 6) {
+      return toast("Seu plano não permite mais que 6 fotos");
     }
-
-    const selectedState = fetchStates.data?.find(
-      ({ nome }: { nome: string; id: number }) => nome === values.estado
-    );
-
-    if (!selectedState) {
-      return toast("Estado não encontrado");
-    }
-
-    values.estado = selectedState.nome;
 
     const formData = new FormData();
 
@@ -163,9 +154,8 @@ export function UpdateAdvert({ advert }: Props) {
     }
 
     if (oldImages.length > 0) {
-      for (const image of oldImages) {
-        formData.append("imagens_remover", image.id);
-      }
+      const idsToRemove = oldImages.map((image) => image.id).join(",");
+      formData.append("imagens_remover", idsToRemove);
     }
 
     formData.append("ano_modelo", values.ano_modelo);
@@ -179,13 +169,11 @@ export function UpdateAdvert({ advert }: Props) {
     formData.append("cambio", values.cambio);
     formData.append("usuario_id", user.id);
 
-    if (values.opcionais) {
+    if (values.opcionais && values.opcionais.length > 0) {
       formData.append("opcionais", values.opcionais.filter(Boolean).join(","));
     }
 
-    console.log(values);
-
-    updateAdvert.mutate(formData);
+    updateAdvert.mutateAsync(formData);
   }
 
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
@@ -219,26 +207,26 @@ export function UpdateAdvert({ advert }: Props) {
   };
 
   const updateAdvert = useMutation({
-    mutationKey: ["updateAdvert", user?.id],
+    mutationKey: ["updateAdvert", advert.id],
     mutationFn: async (formData: FormData) => {
       const { data } = await apiClient.patch(`/adverts/${advert.id}`, formData);
       return data;
     },
     onSuccess: () => {
       toast("Anúncio alterado com sucesso!", {
-        description: "Seu anúncio sera revisado e logo será listado.",
+        description: "Seu anúncio será revisado e logo será listado.",
         action: {
           label: "Ok",
           onClick: () => console.log("ok"),
         },
       });
       form.reset();
-      return push("/account/ads?type=requested");
+      push("/account/ads?type=requested");
     },
-    onError: (err) => {
-      console.log(err);
+    onError: (error: any) => {
+      console.error("Update Advert Error:", error);
       toast("Erro ao editar seu anúncio", {
-        description: err.message,
+        description: error?.response?.data?.message || "Erro desconhecido.",
         action: {
           label: "Ok",
           onClick: () => console.log("ok"),
@@ -275,13 +263,8 @@ export function UpdateAdvert({ advert }: Props) {
   });
 
   const getCities = useMutation({
-    mutationKey: ["getCities"],
-    mutationFn: async (id: string) => {
-      return await GetCities(id);
-    },
-    onSuccess: (data) => {
-      form.setValue("cidade", data[0].nome);
-    },
+    mutationKey: ["fetchCities"],
+    mutationFn: async (sigla: string) => await GetCities(sigla),
   });
 
   useEffect(() => {
@@ -426,7 +409,7 @@ export function UpdateAdvert({ advert }: Props) {
                               ref={field.ref}
                             />
                           </SelectTrigger>
-                          <SelectContent className="bg-primary-foreground">
+                          <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
                             {Array.from(
                               { length: new Date().getFullYear() - 1960 + 2 },
@@ -473,7 +456,7 @@ export function UpdateAdvert({ advert }: Props) {
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
-                          <SelectContent className="bg-primary-foreground">
+                          <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
                             {colors.map((color, index: number) => (
                               <SelectItem value={color.code} key={index}>
@@ -492,6 +475,7 @@ export function UpdateAdvert({ advert }: Props) {
                   form={form}
                   label="R$"
                   name="preco"
+                  isPrice
                   placeholder="R$ 99.999.999"
                 />
 
@@ -535,14 +519,8 @@ export function UpdateAdvert({ advert }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="default">Selecione</SelectItem>
-                              <SelectItem value={advert.estado}>
-                                {advert.estado}
-                              </SelectItem>
-                              {fetchStates.data?.map((state) => (
-                                <SelectItem
-                                  value={state.id.toString()}
-                                  key={state.id}
-                                >
+                              {fetchStates.data?.map((state, idx) => (
+                                <SelectItem value={state.sigla} key={idx}>
                                   {state.nome}
                                 </SelectItem>
                               ))}
@@ -575,11 +553,8 @@ export function UpdateAdvert({ advert }: Props) {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
-                            <SelectItem value={advert.cidade}>
-                              {advert.cidade}
-                            </SelectItem>
-                            {getCities.data?.map((city) => (
-                              <SelectItem value={city.nome} key={city.id}>
+                            {getCities.data?.map((city, idx) => (
+                              <SelectItem value={city.nome} key={idx}>
                                 {city.nome}
                               </SelectItem>
                             ))}
@@ -606,7 +581,7 @@ export function UpdateAdvert({ advert }: Props) {
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
-                          <SelectContent className="bg-primary-foreground">
+                          <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
                             <SelectItem value="1">1</SelectItem>
                             <SelectItem value="2">2</SelectItem>
@@ -635,7 +610,7 @@ export function UpdateAdvert({ advert }: Props) {
                           <SelectTrigger>
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
-                          <SelectContent className="bg-primary-foreground">
+                          <SelectContent>
                             <SelectItem value="default">Selecione</SelectItem>
                             <SelectItem value="manual">Manual</SelectItem>
                             <SelectItem value="automatico">

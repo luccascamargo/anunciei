@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,11 +29,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardAdvert } from "@/components/cardAdvert";
-import { apiClient, normalizeText } from "@/lib/utils";
+import { apiClient, GetCities, GetStates, normalizeText } from "@/lib/utils";
 import { CustomInputValue } from "@/components/customInputValue";
 import {
   Sheet,
@@ -45,9 +45,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Places from "@/components/Places";
 import { Opcionai } from "@/types/FilterAdverts";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export interface iTypes {
   value: number;
@@ -55,23 +54,12 @@ export interface iTypes {
 }
 
 const formSchemaFilter = z.object({
-  marca: z.string(),
-  modelo: z.string(),
+  estado: z.string(),
+  cidade: z.string(),
   busca: z.string(),
-  localizacao: z.string().transform((value) => {
-    if (value) {
-      const [locale] = value.split(",");
-      return locale.trim();
-    }
-    return "";
-  }),
-  ano_modelo_min: z.coerce
-    .string()
-
-    .transform((value) => value?.toString()),
+  ano_modelo_min: z.coerce.string().transform((value) => value?.toString()),
   ano_modelo_max: z.coerce.string().transform((value) => value?.toString()),
   quilometragem_min: z.string().transform((value) => value.replace(/\D/g, "")),
-  tipo: z.string(),
   quilometragem_max: z.string().transform((value) => value.replace(/\D/g, "")),
   portas: z.string(),
   preco_min: z.string().transform((value) => value.replace(/\D/g, "")),
@@ -139,23 +127,21 @@ const handleBrands = {
 type ComponentTypeProps = "carros" | "motos" | "caminhoes";
 
 export function ComponentType({ slug }: { slug: string }) {
-  const [filters, setFilters] = useState({});
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const defaultValues = {
-    portas: "",
-    marca: "",
-    modelo: "",
-    tipo: slug,
-    busca: "",
-    opcionais: [],
-    localizacao: "",
-    ano_modelo_max: "",
-    ano_modelo_min: "",
-    quilometragem_max: "",
-    quilometragem_min: "",
-    preco_max: "",
-    preco_min: "",
+    portas: searchParams.get("portas") || "",
+    opcionais: searchParams.getAll("opcionais") || [],
+    estado: searchParams.get("estado") || "",
+    cidade: searchParams.get("cidade") || "",
+    busca: searchParams.get("busca") || "",
+    ano_modelo_max: searchParams.get("ano_modelo_max") || "",
+    ano_modelo_min: searchParams.get("ano_modelo_min") || "",
+    quilometragem_max: searchParams.get("quilometragem_max") || "",
+    quilometragem_min: searchParams.get("quilometragem_min") || "",
+    preco_max: searchParams.get("preco_max") || "",
+    preco_min: searchParams.get("preco_min") || "",
   };
 
   const form = useForm<z.infer<typeof formSchemaFilter>>({
@@ -163,21 +149,14 @@ export function ComponentType({ slug }: { slug: string }) {
     defaultValues,
   });
 
-  async function fetchAdverts({
-    pageParam = 1,
-    filters,
-  }: {
-    pageParam: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filters: any;
-  }) {
+  async function fetchAdverts({ pageParam = 1 }: { pageParam: number }) {
     const limit = 5;
+    const params = new URLSearchParams(searchParams);
+    params.set("limit", limit.toString());
+    params.set("pageParam", pageParam.toString());
+
     const { data } = await apiClient.get(
-      `/adverts/filter?${new URLSearchParams({
-        limit: limit.toString(),
-        pageParam: pageParam.toString(),
-        ...filters,
-      })}`,
+      `/adverts/filterbyType/${slug}?${params}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -189,42 +168,23 @@ export function ComponentType({ slug }: { slug: string }) {
   }
 
   function onSubmit(values: z.infer<typeof formSchemaFilter>) {
-    if (values.ano_modelo_min > values.ano_modelo_max) {
-      toast("O ano mínimo não pode ser maior que o ano máximo");
-      return;
-    }
-    if (values.preco_min > values.preco_max) {
-      toast("O valor mínimo não pode ser maior que o valor máximo");
-      return;
-    }
-    if (values.quilometragem_min > values.quilometragem_max) {
-      toast(
-        "A quilometragem mínima não pode ser maior que a quilometragem máxima"
-      );
-      return;
-    }
-
-    if (values.busca) {
-      values.busca = normalizeText(values.busca);
-    }
-
-    const newFilters: { [key: string]: string } = {};
+    const params = new URLSearchParams();
 
     Object.entries(values).forEach(([key, value]) => {
       if (key === "opcionais" && Array.isArray(value)) {
         value = value.filter((item) => item !== "");
         if (value.length === 0) return;
-      }
-      if (value && value !== "" && value !== "default") {
-        newFilters[key] = value.toString();
+        value.forEach((item) => params.append("opcionais", item as string));
+      } else if (value && value !== "" && value !== "default") {
+        params.set(key, normalizeText(value.toString()));
       }
     });
 
-    setFilters(newFilters);
+    router.push(`/stock/${slug}?${params.toString()}`);
   }
 
   const { data: brands } = useQuery<IBrand[]>({
-    queryKey: ["type"],
+    queryKey: ["type", slug],
     queryFn: async () => {
       const { data } = await apiClient.get(`/fipe/brands/${slug}`, {
         headers: {
@@ -245,7 +205,7 @@ export function ComponentType({ slug }: { slug: string }) {
 
   const handleOtherBrands = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase().trim();
-    if (!brands) return; // Evita erro caso os dados ainda não tenham carregado
+    if (!brands) return;
 
     setBrandsFiltered(
       value === ""
@@ -266,6 +226,16 @@ export function ComponentType({ slug }: { slug: string }) {
     },
   });
 
+  const QueryStates = useQuery({
+    queryKey: ["getStates"],
+    queryFn: async () => await GetStates(),
+  });
+
+  const QueryCities = useMutation({
+    mutationKey: ["getCities"],
+    mutationFn: async (sigla: string) => await GetCities(sigla),
+  });
+
   const {
     data,
     error,
@@ -274,11 +244,20 @@ export function ComponentType({ slug }: { slug: string }) {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["ads", filters],
-    queryFn: ({ pageParam }) => fetchAdverts({ pageParam, filters }),
+    queryKey: ["adsbytype", searchParams.toString()],
+    queryFn: ({ pageParam }) => fetchAdverts({ pageParam }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getNextPageParam: (lastPage) => {
+      const nextPage = lastPage.nextPage;
+      return nextPage ? Number(nextPage) : undefined;
+    },
   });
+
+  useEffect(() => {
+    if (form.watch("estado") !== "") {
+      QueryCities.mutate(form.watch("estado"));
+    }
+  }, [form.watch("estado")]);
 
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
@@ -315,7 +294,65 @@ export function ComponentType({ slug }: { slug: string }) {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-5"
               >
-                <Places form={form} />
+                <FormField
+                  control={form.control}
+                  name="estado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estado</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          onValueChange={field.onChange}
+                          name={field.name}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Selecione</SelectItem>
+                            {QueryStates.data?.map((state) => (
+                              <SelectItem key={state.sigla} value={state.sigla}>
+                                {state.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Select
+                          {...field}
+                          onValueChange={field.onChange}
+                          name={field.name}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">Selecione</SelectItem>
+                            {QueryCities.data?.map((city: any) => (
+                              <SelectItem key={city.id} value={city.nome}>
+                                {city.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="w-full flex flex-col gap-2">
                   <FormField
@@ -337,14 +374,14 @@ export function ComponentType({ slug }: { slug: string }) {
                     isPrice
                     label="R$"
                     name="preco_min"
-                    placeholder="R$ 99.999.999"
+                    placeholder="R$ 0"
                   />
                   <CustomInputValue
                     form={form}
                     isPrice
                     label="Até"
                     name="preco_max"
-                    placeholder="R$ 99.999.999"
+                    placeholder="R$ 0"
                   />
                 </div>
 
@@ -376,8 +413,8 @@ export function ComponentType({ slug }: { slug: string }) {
                     </div>
                   </div>
                   <Sheet>
-                    <SheetTrigger className="flex items-center gap-2 cursor-pointer transition-all hover:underline">
-                      outras marcas <ArrowUpRight size={20} />
+                    <SheetTrigger className="flex items-center gap-2 cursor-pointer transition-all hover:underline text-sm">
+                      outras marcas <ArrowUpRight size={15} />
                     </SheetTrigger>
                     <SheetContent
                       side="left"
@@ -396,7 +433,7 @@ export function ComponentType({ slug }: { slug: string }) {
                           <div className="flex flex-col">
                             {brandsFiltered.map((brand, idx) => (
                               <Link
-                                href={`/stock/${brand.slug}`}
+                                href={`/stock/${slug}/${brand.slug}`}
                                 key={idx}
                                 className="text-sm hover:bg-accent py-2 pl-2"
                               >
@@ -455,13 +492,13 @@ export function ComponentType({ slug }: { slug: string }) {
                       form={form}
                       label="Km"
                       name="quilometragem_min"
-                      placeholder=""
+                      placeholder="0"
                     />
                     <CustomInputValue
                       form={form}
                       label="Até"
                       name="quilometragem_max"
-                      placeholder=""
+                      placeholder="0"
                     />
                   </div>
                 </div>

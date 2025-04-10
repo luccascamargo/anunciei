@@ -1,4 +1,9 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
 interface LoadingModalProps {
@@ -14,8 +19,10 @@ export function LoadingModal({
 }: LoadingModalProps) {
   return (
     <Dialog open={isOpen}>
-      {/* <DialogTitle>Cadastrando anúncio</DialogTitle> */}
       <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Cadastrando anúncio</DialogTitle>
+        </DialogHeader>
         <div className="flex flex-col items-center justify-center gap-4 py-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <h3 className="text-lg font-semibold">{title}</h3>
