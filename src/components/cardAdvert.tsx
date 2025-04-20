@@ -2,6 +2,7 @@ import { AdvertFull } from "@/@types/FilterAdverts";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "./ui/badge";
 
 interface iCardAd {
   className?: string;
@@ -18,6 +19,9 @@ export function CardAdvert({ className, data }: iCardAd) {
       )}
     >
       <div className="w-full h-[125px] relative">
+        {data.emphasis && (
+          <Badge className="absolute z-10 top-2 right-2">Destaque</Badge>
+        )}
         <Image
           src={data.images[0].url || "/default-car.png"}
           fill

@@ -27,6 +27,7 @@ export async function GET(
       min_price: searchParams.get("preco_min"),
       max_mileage: searchParams.get("quilometragem_max"),
       min_mileage: searchParams.get("quilometragem_min"),
+      sort: searchParams.get("sort") || "data-asc",
       limit: searchParams.get("limit") || "10",
     };
 
@@ -49,10 +50,21 @@ export async function GET(
         : [filterAdvertsDto.optionals];
     }
 
+    const orderMap: Record<string, { [key: string]: "asc" | "desc" }> = {
+      "preco-asc": { price: "asc" },
+      "preco-desc": { price: "desc" },
+      "data-asc": { created_at: "asc" },
+      "data-desc": { created_at: "desc" },
+    };
+
+    const orderBy = orderMap[filterAdvertsDto.sort as string] || {
+      created_at: "desc",
+    };
+
     const adverts = await prisma.adverts.findMany({
       skip,
       take: Number(filterAdvertsDto.limit),
-      orderBy: { created_at: "asc" },
+      orderBy: [orderBy, { emphasis: "desc" }],
       where: {
         AND: [
           { status: "ACTIVE" },

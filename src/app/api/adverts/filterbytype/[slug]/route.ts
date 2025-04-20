@@ -62,12 +62,10 @@ export async function GET(
       created_at: "desc",
     };
 
-    console.log(orderBy);
-
     const adverts = await prisma.adverts.findMany({
       skip,
       take: Number(filterAdvertsDto.limit),
-      orderBy,
+      orderBy: [orderBy, { emphasis: "desc" }],
       where: {
         AND: [
           { status: "ACTIVE" },
