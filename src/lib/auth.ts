@@ -1,16 +1,16 @@
 import { JwtPayload, verify } from "jsonwebtoken";
 
 import { cookies } from "next/headers";
-import { apiClient } from "./utils";
-import { iUser } from "@/contexts/userContext";
+import { prisma } from "./prisma";
+import { Prisma } from "@/generated/prisma";
 
 async function getAccessToken() {
   const accessToken = await cookies();
   return accessToken.get("accessToken")?.value;
 }
 
-async function verifyJwt(): Promise<null | string> {
-  const accessToken = await getAccessToken();
+export async function verifyJwt(token?: string): Promise<null | string> {
+  const accessToken = token || (await getAccessToken());
 
   if (!accessToken) {
     return null;
@@ -35,7 +35,9 @@ export function isAuthenticated() {
   return !!verifyJwt();
 }
 
-export async function auth(): Promise<null | iUser> {
+export async function auth(): Promise<null | Prisma.UserGetPayload<{
+  include: { subscriptions: true };
+}>> {
   const userId = await verifyJwt();
 
   if (!userId) {
@@ -43,9 +45,14 @@ export async function auth(): Promise<null | iUser> {
   }
 
   try {
-    const { data } = await apiClient.get(`/auth/me/${userId}`);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        subscriptions: true,
+      },
+    });
 
-    return data;
+    return user;
   } catch {
     return null;
   }

@@ -10,26 +10,28 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Advert } from "@/types/FilterAdverts";
 import { CardSeller } from "./Card";
+import { Prisma } from "@/generated/prisma";
 
 type Params = Promise<{ id: string }>;
 
 type iUser = {
   id: string;
-  anuncios: Advert[];
-  nome: string;
-  sobrenome: string;
-  telefone: string | null;
+  adverts: Prisma.AdvertsGetPayload<{
+    include: { images: true; brand: true; model: true };
+  }>[];
+  name: string;
+  lastname: string;
+  phone: string | null;
   email: string;
-  imagem: string | null;
-  data_criacao: Date;
+  image: string | null;
+  created_at: Date;
 };
 
 export default async function Page({ params }: { params: Params }) {
   const { id } = await params;
 
-  const { data } = await apiClient.get(`/adverts/advertsWithId/${id}`, {
+  const { data } = await apiClient.get(`/adverts/filterbyuserid/${id}`, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -47,24 +49,24 @@ export default async function Page({ params }: { params: Params }) {
           <CardTitle>Anúncios deste vendedor</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          {user.anuncios.map((advert) => (
+          {user.adverts.map((advert) => (
             <CardSeller
               key={advert.id}
               id={advert.id}
-              image={advert.imagens[0].url}
-              brand={advert.marca.nome}
-              year={advert.ano_modelo}
-              model={advert.modelo.nome}
-              price={advert.preco}
-              city={advert.cidade}
-              mileage={advert.quilometragem}
-              color={advert.cor}
+              image={advert.images[0].url}
+              brand={advert.brand?.name}
+              year={advert.year_model}
+              model={advert.model.name}
+              price={advert.price}
+              city={advert.city}
+              mileage={advert.mileage}
+              color={advert.color}
             />
           ))}
         </CardContent>
         <CardFooter className="flex justify-center">
           <CardDescription>
-            {user.anuncios.length} Anúncio(s) publicado(s)
+            {user.adverts.length} Anúncio(s) publicado(s)
           </CardDescription>
         </CardFooter>
       </Card>
@@ -75,18 +77,18 @@ export default async function Page({ params }: { params: Params }) {
         <CardContent className="mt-10 flex flex-col gap-10">
           <div className="flex flex-col items-center gap-5">
             <Avatar className="w-20 h-20">
-              <AvatarImage src={user.imagem!} className="object-cover" />
+              <AvatarImage src={user.image!} className="object-cover" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">
               <span className="text-xl">
-                {user.nome} {user.sobrenome}
+                {user.name} {user.lastname}
               </span>
               <span className="text-sm">{user.email}</span>
             </div>
           </div>
-          {user.telefone && (
-            <a href={`https://wa.me/${user.telefone.replace(/\D/g, "")}`}>
+          {user.phone && (
+            <a href={`https://wa.me/${user.phone.replace(/\D/g, "")}`}>
               <Button variant={"default"} className="w-full">
                 Chamar no WhatsApp
               </Button>
@@ -96,7 +98,7 @@ export default async function Page({ params }: { params: Params }) {
         <CardFooter className="flex justify-center">
           <CardDescription>
             No iSerra desde{" "}
-            {new Date(user.data_criacao).toLocaleDateString("pt-Br", {
+            {new Date(user.created_at).toLocaleDateString("pt-Br", {
               year: "numeric",
               month: "long",
               day: "numeric",

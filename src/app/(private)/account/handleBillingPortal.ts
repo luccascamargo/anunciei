@@ -7,17 +7,17 @@ interface iHandleBillingPortal {
   error: boolean;
 }
 
-export const HandleBillingPortal = async ({
-  id,
-}: {
-  id: string;
-}): Promise<iHandleBillingPortal> => {
+export const HandleBillingPortal = async (
+  returnUrl: string
+): Promise<iHandleBillingPortal> => {
   try {
     const { data } = await apiClient.post("/stripe/portal", {
+      params: {
+        returnUrl,
+      },
       headers: {
         "Content-Type": "application/json",
       },
-      data: { id },
     });
 
     return { result: data.url, error: false };

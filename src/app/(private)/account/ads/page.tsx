@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { Advert, Usuario } from "@/types/FilterAdverts";
+import { AdvertByStatus } from "@/@types/FilterAdverts";
 import { apiClient, cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -21,38 +21,34 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingModal } from "@/components/loadingModal";
 
 export default function Page() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 
-  const getActiveAds = useQuery<Usuario>({
+  const getActiveAds = useQuery<AdvertByStatus[]>({
     queryKey: ["active", user?.id],
     queryFn: async () => {
-      const { data } = await apiClient.get(
-        `/adverts/advertsWithId/${user?.id}/?status=ativo`
-      );
+      const { data } = await apiClient.get(`/adverts/filterbyactives`);
       return data;
     },
   });
 
-  const getInactiveAds = useQuery<Usuario>({
+  const getInactiveAds = useQuery<AdvertByStatus[]>({
     queryKey: ["inactive", user?.id],
     queryFn: async () => {
-      const { data } = await apiClient.get(
-        `/adverts/advertsWithId/${user?.id}/?status=inativo`
-      );
+      const { data } = await apiClient.get(`/adverts/filterbyinactives`);
       return data;
     },
   });
 
-  const getRequestedAds = useQuery<Usuario>({
+  const getRequestedAds = useQuery<AdvertByStatus[]>({
     queryKey: ["requested", user?.id],
     queryFn: async () => {
-      const { data } = await apiClient(
-        `/adverts/advertsWithId/${user?.id}/?status=pendente`
-      );
+      const { data } = await apiClient(`/adverts/filterbypending`);
       return data;
     },
   });
@@ -60,7 +56,7 @@ export default function Page() {
   const deleteAd = useMutation({
     mutationKey: ["deleteAd", user?.id],
     mutationFn: async (id: string) => {
-      const res = await apiClient.delete(`/adverts/${id}`, {
+      const res = await apiClient.delete(`/adverts/remove/${id}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -82,7 +78,7 @@ export default function Page() {
   const handleInactiveAdvert = useMutation({
     mutationKey: ["inactiveAdvert", user?.id],
     mutationFn: async (id: string) => {
-      const res = await apiClient.patch(`/adverts/inactive/${id}`, {
+      const res = await apiClient.patch(`/adverts/desactive/${id}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -125,7 +121,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="container m-auto flex items-center justify-center">
+      <div className="container m-auto px-5 flex items-center justify-center">
         <Card className="mt-10 w-full min-h-screen">
           <CardHeader>
             <CardTitle>Meus anúncios</CardTitle>
@@ -140,265 +136,299 @@ export default function Page() {
                   <Link href={"?type=active"}>Ativos</Link>
                 </TabsTrigger>
                 <TabsTrigger value="inactive">
-                  <Link href={"?type=inactivo"}>Inativos</Link>
+                  <Link href={"?type=inactive"}>Inativos</Link>
                 </TabsTrigger>
                 <TabsTrigger value="requested">
                   <Link href={"?type=requested"}>Em aprovação</Link>
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="active" className="flex flex-col space-y-5">
+              <TabsContent
+                value="active"
+                className="w-full max-w-4xl flex flex-col space-y-5"
+              >
+                {getActiveAds.status === "pending" && (
+                  <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
+                )}
                 {getActiveAds.data &&
-                getActiveAds.data.anuncios &&
-                getActiveAds.data.anuncios.length > 0 ? (
-                  getActiveAds.data.anuncios.map((ad: Advert) => (
+                  getActiveAds.data.length > 0 &&
+                  getActiveAds.data.map((ad) => (
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-[900px] h-[200px] flex items-center p-5 gap-6"
+                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6"
                       )}
                     >
                       <div className="relative w-[150px] h-[150px]">
                         <Image
-                          src={ad.imagens[0].url || "/default-car.png"}
+                          src={ad.images[0].url || "/default-car.png"}
                           fill
                           alt="1"
                           className="object-cover rounded-md"
                         />
                       </div>
                       <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-center h-full">
+                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
                           <div>
                             <div className="flex items-center gap-3">
                               <span className="text-2xl font-bold text-primary">
-                                {ad.marca.nome}
+                                {ad.brand?.name}
                               </span>
                               <span className="text-2xl font-bold text-primary">
-                                {ad.ano_modelo}
+                                {ad.year_model}
                               </span>
                             </div>
                             <p className="text-base max-w-[350px]">
-                              {ad.modelo.nome}
+                              {ad.model.name}
                             </p>
                           </div>
                           <span className="text-xl text-primary font-medium">
-                            {Number(ad.preco).toLocaleString("pt-BR", {
+                            {Number(ad.price).toLocaleString("pt-BR", {
                               currency: "BRL",
                               style: "currency",
                             })}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="space-x-4">
-                            <Button variant={"ghost"}>
-                              <Link href={`/ad/${ad.id}`} className="text-sm ">
-                                Ver
-                              </Link>
-                            </Button>
-                            <Button variant={"ghost"}>
-                              <Link
-                                href={`/advert/update/${ad.id}`}
-                                className="text-sm"
-                              >
-                                Editar
-                              </Link>
-                            </Button>
+                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
+                          <div className="space-x-8 flex items-center">
+                            <Link href={`/ad/${ad.slug}`} className="text-sm ">
+                              Ver
+                            </Link>
+                            <Link
+                              href={`/advert/update/${ad.id}`}
+                              className="text-sm"
+                            >
+                              Editar
+                            </Link>
 
-                            <Button
-                              variant={"ghost"}
+                            <div
+                              className="text-sm cursor-pointer"
                               onClick={() => handleInactiveAdvert.mutate(ad.id)}
                             >
                               Desativar
-                            </Button>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-4">
                             <span className="text-sm">
-                              {Number(ad.quilometragem).toLocaleString("pt-BR")}{" "}
-                              km
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
                             </span>
-                            <span className="text-sm">{ad.cor}</span>
-                            <span className="text-sm">{ad.cidade}</span>
+                            <span className="text-sm">{ad.color}</span>
+                            <span className="text-sm">{ad.city}</span>
                           </div>
                         </div>
                       </div>
                     </Card>
-                  ))
-                ) : (
-                  <span className="text-sm">Nenhum anúncio encontrado</span>
+                  ))}
+                {getActiveAds.data && getActiveAds.data.length === 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Nenhum anúncio encontrado
+                  </span>
                 )}
               </TabsContent>
               <TabsContent
                 value="inactive"
-                className="flex flex-col gap-8 mt-0"
+                className="w-full max-w-4xl flex flex-col space-y-5"
               >
+                {getInactiveAds.status === "pending" && (
+                  <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
+                )}
                 {getInactiveAds.data &&
-                getInactiveAds.data.anuncios &&
-                getInactiveAds.data.anuncios.length > 0 ? (
-                  getInactiveAds.data.anuncios.map((ad: Advert) => (
+                  getInactiveAds.data.length > 0 &&
+                  getInactiveAds.data.map((ad) => (
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-[900px] h-[200px] flex items-center p-5 gap-6 opacity-50 hover:opacity-100 transition-opacity duration-300"
+                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6 opacity-100 md:opacity-50 transition-all hover:opacity-100"
                       )}
                     >
                       <div className="relative w-[150px] h-[150px]">
                         <Image
-                          src={ad.imagens[0].url || "/default-car.png"}
+                          src={ad.images[0].url || "/default-car.png"}
                           fill
                           alt="1"
                           className="object-cover rounded-md"
                         />
                       </div>
                       <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-center h-full">
+                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
                           <div>
                             <div className="flex items-center gap-3">
                               <span className="text-2xl font-bold text-primary">
-                                {ad.marca.nome}
+                                {ad.brand?.name}
                               </span>
                               <span className="text-2xl font-bold text-primary">
-                                {ad.ano_modelo}
+                                {ad.year_model}
                               </span>
                             </div>
                             <p className="text-base max-w-[350px]">
-                              {ad.modelo.nome}
+                              {ad.model.name}
                             </p>
                           </div>
                           <span className="text-xl text-primary font-medium">
-                            {Number(ad.preco).toLocaleString("pt-BR", {
+                            {Number(ad.price).toLocaleString("pt-BR", {
                               currency: "BRL",
                               style: "currency",
                             })}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <>
-                              <Button
-                                variant={"ghost"}
-                                onClick={() => handleActiveAdvert.mutate(ad.id)}
-                              >
-                                Ativar anuncio
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="text-red-500 hover:text-red-500"
+                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
+                          <div className="space-x-8 flex items-center">
+                            <Link
+                              href={`/advert/update/${ad.id}`}
+                              className="text-sm"
+                            >
+                              Editar
+                            </Link>
+
+                            <div
+                              className="text-sm cursor-pointer"
+                              onClick={() => handleActiveAdvert.mutate(ad.id)}
+                            >
+                              Ativar
+                            </div>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className="text-red-500 hover:text-red-500"
+                                >
+                                  Excluir
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Você tem certeza que deseja deletar este
+                                    anúncio?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Esta ação não pode ser desfeita. Você tem
+                                    certeza que deseja continuar?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>
+                                    Cancelar
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteAd.mutate(ad.id)}
                                   >
                                     Excluir
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                      Você tem certeza que deseja deletar este
-                                      anúncio?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Esta ação não pode ser desfeita. Você tem
-                                      certeza que deseja continuar?
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                      Cancelar
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => deleteAd.mutate(ad.id)}
-                                    >
-                                      Excluir
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </>
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
 
                           <div className="flex items-center gap-4">
                             <span className="text-sm">
-                              {Number(ad.quilometragem).toLocaleString("pt-BR")}{" "}
-                              km
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
                             </span>
-                            <span className="text-sm">{ad.cor}</span>
-                            <span className="text-sm">{ad.cidade}</span>
+                            <span className="text-sm">{ad.color}</span>
+                            <span className="text-sm">{ad.city}</span>
                           </div>
                         </div>
                       </div>
                     </Card>
-                  ))
-                ) : (
-                  <span className="text-sm">Nenhum anúncio encontrado</span>
+                  ))}
+                {getInactiveAds.data && getInactiveAds.data.length === 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Nenhum anúncio encontrado
+                  </span>
                 )}
               </TabsContent>
               <TabsContent
                 value="requested"
-                className="flex flex-col gap-8 mt-0"
+                className="w-full max-w-4xl flex flex-col space-y-5"
               >
+                {getRequestedAds.status === "pending" && (
+                  <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
+                )}
                 {getRequestedAds.data &&
-                getRequestedAds.data.anuncios &&
-                getRequestedAds.data.anuncios.length > 0 ? (
-                  getRequestedAds.data.anuncios.map((ad: Advert) => (
+                  getRequestedAds.data.length > 0 &&
+                  getRequestedAds.data.map((ad) => (
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-[900px] h-[200px] flex items-center p-5 gap-6 opacity-50"
+                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6 opacity-50 "
                       )}
                     >
                       <div className="relative w-[150px] h-[150px]">
                         <Image
-                          src={ad.imagens[0].url || "/default-car.png"}
+                          src={ad.images[0].url || "/default-car.png"}
                           fill
                           alt="1"
                           className="object-cover rounded-md"
                         />
                       </div>
                       <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-center h-full">
+                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
                           <div>
                             <div className="flex items-center gap-3">
                               <span className="text-2xl font-bold text-primary">
-                                {ad.marca.nome}
+                                {ad.brand?.name}
                               </span>
                               <span className="text-2xl font-bold text-primary">
-                                {ad.ano_modelo}
+                                {ad.year_model}
                               </span>
                             </div>
                             <p className="text-base max-w-[350px]">
-                              {ad.modelo.nome}
+                              {ad.model.name}
                             </p>
                           </div>
                           <span className="text-xl text-primary font-medium">
-                            {Number(ad.preco).toLocaleString("pt-BR", {
+                            {Number(ad.price).toLocaleString("pt-BR", {
                               currency: "BRL",
                               style: "currency",
                             })}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
                           <div className="flex items-center gap-4">
                             <span className="text-sm">
-                              {Number(ad.quilometragem).toLocaleString("pt-BR")}{" "}
-                              km
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
                             </span>
-                            <span className="text-sm">{ad.cor}</span>
-                            <span className="text-sm">{ad.cidade}</span>
+                            <span className="text-sm">{ad.color}</span>
+                            <span className="text-sm">{ad.city}</span>
                           </div>
                         </div>
                       </div>
                     </Card>
-                  ))
-                ) : (
-                  <span className="text-sm">Nenhum anúncio encontrado</span>
+                  ))}
+                {getRequestedAds.data && getRequestedAds.data.length === 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Nenhum anúncio encontrado
+                  </span>
                 )}
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
+
+      <LoadingModal
+        isOpen={handleActiveAdvert.isPending}
+        description="Aguarde um momento enquanto ativamos seu anúncio."
+        title="Aguarde, isso pode levar alguns segundos..."
+        subTitle="Ativando anúncio..."
+      />
+
+      <LoadingModal
+        isOpen={handleInactiveAdvert.isPending}
+        description="Aguarde um momento enquanto desativamos seu anúncio."
+        title="Aguarde, isso pode levar alguns segundos..."
+        subTitle="Aguarde um momento enquanto desativamos seu anúncio."
+      />
+
+      <LoadingModal
+        isOpen={deleteAd.isPending}
+        description="Aguarde um momento enquanto deletamos seu anúncio."
+        title="Aguarde, isso pode levar alguns segundos..."
+        subTitle="Aguarde um momento enquanto deletamos seu anúncio."
+      />
     </>
   );
 }

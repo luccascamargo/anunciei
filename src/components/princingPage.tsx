@@ -17,12 +17,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiClient } from "@/lib/utils";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
-type PlanoTipo = "GRATIS" | "BASICO" | "PRO";
+type PlanoTipo = "FREE" | "BASIC" | "PRO";
 type FaturamentoTipo = "month" | "year";
 
 export function PaginaPrecos() {
   const { user: userData } = useAuth();
+  const router = useRouter();
   const [cicloFaturamento, setCicloFaturamento] =
     useState<FaturamentoTipo>("month");
 
@@ -47,23 +49,26 @@ export function PaginaPrecos() {
   // Função para lidar com a assinatura ou upgrade
   const handleAssinatura = async (plano: PlanoTipo) => {
     const { data } = await apiClient.get(
-      `/stripe/create?plano=${plano}&ciclo=${cicloFaturamento}`,
+      `/stripe/create?plan=${plano.toLowerCase()}&cycle=${cicloFaturamento}`,
       {
         headers: {
           "Content-Type": "application/json",
         },
       }
     );
-    window.location.href = data;
+    window.location.href = data.url;
   };
 
   const abrirPortalCliente = async () => {
     const { data } = await apiClient.get("/stripe/portal", {
+      params: {
+        returnUrl: `${window.location.origin}/pricing`,
+      },
       headers: {
         "Content-Type": "application/json",
       },
     });
-    window.location.href = data;
+    window.location.href = data.url;
   };
 
   // Renderizar o botão apropriado com base no plano e assinatura atual
@@ -76,17 +81,21 @@ export function PaginaPrecos() {
       );
     }
     // Se não tiver assinatura, mostrar botão para assinar
-    if (!userData.plano) {
-      if (plano === "GRATIS") {
+    if (userData.subscriptions.length === 0) {
+      if (plano === "FREE") {
         return (
-          <Button variant="outline" className="w-full">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => router.push("/advert/create")}
+          >
             Começar Agora
           </Button>
         );
       }
       return (
         <Button
-          variant={plano === "BASICO" ? "default" : "outline"}
+          variant={plano === "BASIC" ? "default" : "outline"}
           className="w-full"
           onClick={() => handleAssinatura(plano)}
         >
@@ -97,8 +106,8 @@ export function PaginaPrecos() {
 
     // Se já tiver esse plano com o mesmo ciclo
     if (
-      userData.plano === plano &&
-      userData.inscricoes[0].ciclo === cicloFaturamento
+      userData.plan === plano &&
+      userData.subscriptions[0].cycle === cicloFaturamento
     ) {
       return (
         <Button
@@ -114,8 +123,8 @@ export function PaginaPrecos() {
 
     // Se for um downgrade
     if (
-      (userData.plano === "PRO" && plano === "BASICO") ||
-      (userData.plano !== "GRATIS" && plano === "GRATIS")
+      (userData.plan === "PRO" && plano === "BASIC") ||
+      (userData.plan !== "FREE" && plano === "FREE")
     ) {
       return (
         <Button
@@ -131,8 +140,8 @@ export function PaginaPrecos() {
 
     // Se for um upgrade
     if (
-      (userData.plano === "GRATIS" && plano !== "GRATIS") ||
-      (userData.plano === "BASICO" && plano === "PRO")
+      (userData.plan === "FREE" && plano !== "FREE") ||
+      (userData.plan === "BASIC" && plano === "PRO")
     ) {
       return (
         <Button className="w-full" onClick={abrirPortalCliente}>
@@ -144,8 +153,8 @@ export function PaginaPrecos() {
 
     // Se for apenas uma mudança de ciclo
     if (
-      userData.plano === plano &&
-      userData.inscricoes[0].ciclo !== cicloFaturamento
+      userData.plan === plano &&
+      userData.subscriptions[0].cycle !== cicloFaturamento
     ) {
       return (
         <Button
@@ -160,14 +169,14 @@ export function PaginaPrecos() {
 
     // Fallback
     return (
-      <Button className="w-full" onClick={abrirPortalCliente}>
-        Alterar Plano
+      <Button className="w-full" onClick={abrirPortalCliente} disabled>
+        Plano atual
       </Button>
     );
   };
 
   return (
-    <div className="container px-4 py-16 mx-auto md:py-24">
+    <div className="container px-6 py-16 mx-auto md:py-24">
       <div className="max-w-3xl mx-auto mb-10 text-center">
         <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
           Planos simples e transparentes
@@ -206,11 +215,11 @@ export function PaginaPrecos() {
         {/* Plano Gratuito */}
         <Card
           className={`flex flex-col ${
-            userData?.plano === "GRATIS" ? "border-primary" : "border-border"
+            userData?.plan === "FREE" ? "border-primary" : "border-border"
           }`}
         >
           <CardHeader>
-            {userData?.plano === "GRATIS" && (
+            {userData?.plan === "FREE" && (
               <Badge className="w-fit mb-2">Seu plano atual</Badge>
             )}
             <CardTitle className="text-2xl">Gratuito</CardTitle>
@@ -240,25 +249,25 @@ export function PaginaPrecos() {
               </li>
             </ul>
           </CardContent>
-          <CardFooter>{renderizarBotao("GRATIS")}</CardFooter>
+          <CardFooter>{renderizarBotao("FREE")}</CardFooter>
         </Card>
 
         {/* Plano Básico */}
         <Card
           className={`flex flex-col relative ${
-            userData?.plano === "BASICO"
+            userData?.plan === "BASIC"
               ? "border-primary"
               : userData
-              ? "border-border"
-              : "border-primary"
+                ? "border-border"
+                : "border-primary"
           }`}
         >
-          {userData?.plano !== "BASICO" && (
-            <Badge className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/2 px-3 py-1">
+          {userData?.plan !== "BASIC" && (
+            <Badge className="absolute top-0 right-4 translate-x-1/4 -translate-y-1/2 px-3 py-1">
               Mais Popular
             </Badge>
           )}
-          {userData?.plano === "BASICO" && (
+          {userData?.plan === "BASIC" && (
             <Badge className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/2 px-3 py-1">
               Seu plano atual
             </Badge>
@@ -320,16 +329,16 @@ export function PaginaPrecos() {
               </li>
             </ul>
           </CardContent>
-          <CardFooter>{renderizarBotao("BASICO")}</CardFooter>
+          <CardFooter>{renderizarBotao("BASIC")}</CardFooter>
         </Card>
 
         {/* Plano Pro */}
         <Card
           className={`flex flex-col ${
-            userData?.plano === "PRO" ? "border-primary" : "border-border"
+            userData?.plan === "PRO" ? "border-primary" : "border-border"
           }`}
         >
-          {userData?.plano === "PRO" && (
+          {userData?.plan === "PRO" && (
             <Badge className="w-fit mx-auto mt-4">Seu plano atual</Badge>
           )}
           <CardHeader>

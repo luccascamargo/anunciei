@@ -55,10 +55,10 @@ export function RegisterForm({
     await apiClient
       .post("/auth/register", {
         data: {
-          nome: values.name,
-          sobrenome: values.lastName,
+          name: values.name,
+          lastname: values.lastName,
           email: values.email,
-          senha: values.password,
+          password: values.password,
         },
       })
       .then(() => {
@@ -67,13 +67,12 @@ export function RegisterForm({
       })
       .catch((err) => {
         console.log(err);
-        if (err.response.data.code === "user_inactive") {
-          toast(err.response.data.message, {
-            description:
-              err.response.data.code === "user_inactive"
-                ? "Entre em contato com o suporte para ativar sua conta."
-                : "Verifique seu email e senha e tente novamente.",
-          });
+        if (err.response.status === 409) {
+          toast.error("Usuário já existe.");
+        } else if (err.response.status === 422) {
+          toast.error("Dados inválidos.");
+        } else {
+          toast.error("Erro ao criar conta.");
         }
       });
   }

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { CircleUserRound } from "lucide-react";
+import { CircleUserRound, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,30 +13,44 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Wrapper } from "./wrapper";
 import { SignOut } from "@/app/(public)/(auth)/signout";
+import Image from "next/image";
+import {
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
 export function Navbar() {
   const { user } = useAuth();
+
   return (
-    <div className="w-screen py-6 ">
+    <div className="w-screen py-4 border-b bg-white">
       <Wrapper>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-12">
+          {/* Logo */}
+          <div className="flex items-center gap-4">
             <Link href="/">
-              {/* <Image src={"/appgarage.png"} width={50} height={50} alt="" /> */}
-              appgarage
+              <Image src={"/appgarage.svg"} width={52} height={52} alt="Logo" />
             </Link>
-            <Link href="/">Home</Link>
-            <Link href="/pricing">Preços</Link>
+            <div className="hidden md:flex items-center justify-center gap-12">
+              <Link href="/">Home</Link>
+              <Link href="/stock/carros">Buscar</Link>
+              <Link href="/pricing">Preços</Link>
+            </div>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-5">
-              {user && <Badge variant="default">{user?.plano}</Badge>}
-              {user && (
+
+          {/* Ações do Usuário */}
+          <div className="hidden md:flex items-center gap-6">
+            {user && (
+              <div className="flex items-center gap-5">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
                     <CircleUserRound />
                     <span className="text-sm">
-                      {user?.nome} {user?.sobrenome}
+                      {user?.name} {user?.lastname}
                     </span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -46,19 +60,16 @@ export function Navbar() {
                         Meu perfil
                       </DropdownMenuItem>
                     </Link>
-                    <>
-                      <Link href="/advert/create">
-                        <DropdownMenuItem className="cursor-pointer">
-                          Criar anúncio
-                        </DropdownMenuItem>
-                      </Link>
-                      <Link href="/account/ads">
-                        <DropdownMenuItem className="cursor-pointer">
-                          Meus anúncios
-                        </DropdownMenuItem>
-                      </Link>
-                    </>
-
+                    <Link href="/advert/create">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Criar anúncio
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/account/ads">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Meus anúncios
+                      </DropdownMenuItem>
+                    </Link>
                     <Link href="/favorites">
                       <DropdownMenuItem className="cursor-pointer">
                         Meus favoritos
@@ -72,8 +83,8 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
-            </div>
+              </div>
+            )}
             {!user && (
               <div className="flex items-center gap-6">
                 <Link href="/signin">
@@ -84,6 +95,59 @@ export function Navbar() {
                 </Link>
               </div>
             )}
+          </div>
+
+          {/* Menu Mobile */}
+          <div className="flex md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Menu size={28} />
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 px-5">
+                <SheetHeader>
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={"/appgarage.svg"}
+                      width={40}
+                      height={40}
+                      alt="Logo"
+                    />
+                    <SheetTitle>Menu</SheetTitle>
+                  </div>
+                </SheetHeader>
+                <div className="mt-4 flex flex-col items-start gap-4">
+                  <Link href="/">Home</Link>
+                  <Link href="/pricing">Preços</Link>
+                  {user && (
+                    <>
+                      <Link href="/account">Meu perfil</Link>
+                      <Link href="/advert/create">Criar anúncio</Link>
+                      <Link href="/account/ads">Meus anúncios</Link>
+                      <Link href="/favorites">Meus favoritos</Link>
+                      <button
+                        onClick={SignOut}
+                        className="text-red-700 hover:text-red-800"
+                      >
+                        Sair
+                      </button>
+                    </>
+                  )}
+                  {!user && (
+                    <>
+                      <Link href="/signin">
+                        <Button variant={"link"}>Entrar</Button>
+                      </Link>
+                      <Link href="/register">
+                        <Button variant={"default"}>Crie sua conta</Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
+                <SheetFooter className="w-full flex items-end">
+                  {user && <Badge variant="default">{user?.plan}</Badge>}
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </Wrapper>

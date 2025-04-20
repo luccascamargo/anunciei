@@ -21,12 +21,9 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative py-20 md:py-28 h-screen md:h-[1000px] flex items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-primary/10 blur-3xl" />
-        </div>
+      <section className="relative pt-24 md:h-[800px] flex items-center justify-center">
         <div className="container px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center mb-12">
+          <div className="max-w-3xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
               Encontre o veículo perfeito para você
             </h1>
@@ -64,7 +61,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="pb-16 md:py-24">
+      <section className="py-16 md:py-24">
         <div className="container px-4 mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">

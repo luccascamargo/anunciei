@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { iComponentFavorite } from "../ad/[id]/componentFavorite";
+import { iComponentFavorite } from "../ad/[slug]/componentFavorite";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CardFavorites } from "@/components/cardfavorites";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ export default function Page() {
   };
 
   return (
-    <div className="container mx-auto flex items-center justify-center pt-10">
+    <div className="container mx-auto px-6 flex items-center justify-center pt-10">
       <Card className="min-h-[600px] w-full">
         <CardHeader>
           <CardTitle>Meus favoritos</CardTitle>
@@ -37,6 +37,7 @@ export default function Page() {
           ) : (
             favorites.map((ad) => (
               <CardFavorites
+                slug={ad.slug}
                 key={ad.id}
                 brand={ad.marca}
                 city={ad.cidade}

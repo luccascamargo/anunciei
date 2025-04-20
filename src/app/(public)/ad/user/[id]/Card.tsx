@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 type CardAdClient = {
   id: string;
   image: string;
+  slug: string;
   brand: string;
   year: number;
   model: string;
@@ -51,7 +52,7 @@ export function CardSeller({ ...props }: CardAdClient) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant={"link"}>
-              <Link href={`/ad/${props.id}`} className="text-sm ">
+              <Link href={`/ad/${props.slug}`} className="text-sm ">
                 Ver anúncio
               </Link>
             </Button>

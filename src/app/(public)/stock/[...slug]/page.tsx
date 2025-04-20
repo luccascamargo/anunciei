@@ -19,7 +19,7 @@ export default async function TypePage({
   }
 
   if (slug.length === 2) {
-    const { data } = await apiClient(`/fipe/models/${slug[1]}`);
+    const { data } = await apiClient(`/models/${slug[1]}`);
 
     if (!data) {
       return notFound();

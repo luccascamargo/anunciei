@@ -1,11 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 
 type CardAdClient = {
   id: string;
+  slug: string;
   image: string;
   brand: string;
   year: number;
@@ -19,7 +19,7 @@ type CardAdClient = {
 
 export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
   return (
-    <Card className="w-[900px] h-[200px] flex items-center p-5 gap-6">
+    <Card className=" w-full max-w-4xl h-fit md:h-[200px] flex items-center p-5 gap-6">
       <div className="relative w-[150px] h-[150px]">
         <Image
           src={props.image || "/default-car.png"}
@@ -29,7 +29,7 @@ export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
         />
       </div>
       <div className="w-full flex flex-col justify-between gap-6 h-full">
-        <div className="flex justify-between items-center h-full">
+        <div className="flex flex-col gap-5 md:gap-0 justify-between items-start md:flex-row md:items-center h-full">
           <div>
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold text-primary">
@@ -49,22 +49,17 @@ export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
           </span>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <>
-              <Button variant={"link"}>
-                <Link href={`/ad/${props.id}`} className="text-sm ">
-                  Ver
-                </Link>
-              </Button>
-            </>
-            <Button
-              variant={"link"}
-              className="text-red-800"
+        <div className="flex flex-col items-start gap-5 md:gap-0 md:flex-row md:items-center justify-between">
+          <div className="flex items-center gap-7">
+            <Link href={`/ad/${props.slug}`} className="text-sm ">
+              Ver
+            </Link>
+            <div
+              className="text-red-800 text-sm cursor-pointer"
               onClick={() => toggleFavorite(props.id)}
             >
               Excluir
-            </Button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">

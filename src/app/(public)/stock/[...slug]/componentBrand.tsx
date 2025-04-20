@@ -37,6 +37,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface iTypes {
   value: number;
@@ -66,12 +67,12 @@ const formSchemaFilter = z.object({
 
 interface iOptional {
   id: string;
-  nome: string;
+  name: string;
 }
 
 interface iModel {
   id: number;
-  nome: string;
+  name: string;
 }
 
 type IFilterBrand = {
@@ -324,11 +325,11 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
                           <SelectItem value="default">Selecione</SelectItem>
                           {models.map((model: iModel, idx: number) => (
                             <SelectItem
-                              value={model.nome}
+                              value={model.name}
                               key={idx}
                               className="max-w-full text-sm"
                             >
-                              {model.nome}
+                              {model.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -423,56 +424,58 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="opcionais"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Opcionais</FormLabel>
-                      {getOptionals.data?.map((item: iOptional) => (
-                        <FormField
-                          key={item.nome}
-                          control={form.control}
-                          name="opcionais"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={item.nome}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.nome)}
-                                    onCheckedChange={(checked) => {
-                                      const currentItems =
-                                        form.getValues("opcionais") || [];
-                                      if (checked) {
-                                        form.setValue("opcionais", [
-                                          ...currentItems,
-                                          item.nome,
-                                        ]);
-                                      } else
-                                        form.setValue(
-                                          "opcionais",
-                                          currentItems.filter(
-                                            (value) => value !== item.nome
-                                          )
-                                        );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {item.nome}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <ScrollArea className="h-72 w-full rounded-md border p-2">
+                  <FormField
+                    control={form.control}
+                    name="opcionais"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Opcionais</FormLabel>
+                        {getOptionals.data?.map((item: iOptional) => (
+                          <FormField
+                            key={item.name}
+                            control={form.control}
+                            name="opcionais"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={item.name}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item.name)}
+                                      onCheckedChange={(checked) => {
+                                        const currentItems =
+                                          form.getValues("opcionais") || [];
+                                        if (checked) {
+                                          form.setValue("opcionais", [
+                                            ...currentItems,
+                                            item.name,
+                                          ]);
+                                        } else
+                                          form.setValue(
+                                            "opcionais",
+                                            currentItems.filter(
+                                              (value) => value !== item.name
+                                            )
+                                          );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    {item.name}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </ScrollArea>
                 <Button type="submit" variant={"outline"}>
                   Buscar
                 </Button>
@@ -527,8 +530,8 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
                   {isFetchingNextPage
                     ? "Buscando..."
                     : hasNextPage
-                    ? "Buscar mais..."
-                    : "Não há mais nada para buscar"}
+                      ? "Buscar mais..."
+                      : "Não há mais nada para buscar"}
                 </Button>
               </div>
             </CardFooter>

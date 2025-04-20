@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @unique @default(uuid())
+  stripe_id     String?        @unique
+  name          String
+  lastname      String
+  email         String         @unique
+  phone         String?
+  active        Boolean
+  plan          Plan           @default(FREE)
+  updated_at    DateTime       @default(now()) @db.Timestamp(6)
+  created_at    DateTime       @default(now()) @db.Timestamp(6)
+  image         String?
+  password      String
+  adverts       Adverts[]
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id                   String   @unique @default(uuid())
+  status               String
+  subscripton_id       String?  @unique
+  cycle                String
+  user_id              String
+  stripe_product_id    String?
+  updated_at           DateTime @default(now()) @db.Timestamp(6)
+  created_ad           DateTime @default(now()) @db.Timestamp(6)
+  cancel_at_period_end Boolean
+  current_period_start DateTime
+  current_period_end   DateTime
+  user                 User     @relation(fields: [user_id], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Adverts {
+  id                    String     @id @default(uuid())
+  type                  String
+  year_model            Int
+  color                 String
+  city                  String
+  formatted_city        String
+  state                 String
+  formatted_state       String
+  price                 Int
+  doors                 String
+  mileage               Int
+  description           String?
+  formatted_description String?
+  plate                 String
+  transmission          String
+  created_at            DateTime   @default(now()) @db.Timestamp(6)
+  updated_at            DateTime   @default(now()) @db.Timestamp(6)
+  status                Status     @default(REQUESTED)
+  slug                  String     @unique
+  emphasis              Boolean?
+  user_id               String
+  user                  User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  images                Photos[]
+  optionals             Optional[] @relation("AdvertsToOptional")
+  model                 Models     @relation(fields: [model_id], references: [id], onDelete: Cascade)
+  model_id              String
+  brand                 Brands     @relation(fields: [brand_id], references: [id], onDelete: Cascade)
+  brand_id              String
+
+  @@map("adverts")
+}
+
+model Brands {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  category Category
+  slug     String    @unique
+  models   Models[]
+  adverts  Adverts[]
+
+  @@map("brands")
+}
+
+model Models {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  category Category
+  adverts  Adverts[]
+  brands   Brands?   @relation(fields: [brand_id], references: [id])
+  brand_id String?
+
+  @@map("models")
+}
+
+model Optional {
+  id      String    @id @unique @default(uuid())
+  name    String    @unique
+  adverts Adverts[] @relation("AdvertsToOptional")
+
+  @@map("optional")
+}
+
+model Photos {
+  id        String  @id @default(uuid())
+  url       String
+  key       String
+  advert_id String
+  advert    Adverts @relation(fields: [advert_id], references: [id], onDelete: Cascade)
+
+  @@map("photos")
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  REQUESTED
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PRO
+}
+
+enum Category {
+  CARS
+  TRUCKS
+  MOTORCYCLES
+}

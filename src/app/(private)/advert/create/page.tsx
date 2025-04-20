@@ -35,7 +35,7 @@ import { apiClient, colors, GetCities, GetStates } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
-import { Opcionai } from "@/types/FilterAdverts";
+import { Opcionai } from "@/@types/FilterAdverts";
 import { LoadingModal } from "@/components/loadingModal";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -99,7 +99,7 @@ const formSchema = z.object({
 
 interface iOptional {
   id: string;
-  nome: string;
+  name: string;
 }
 
 type FileInput = {
@@ -110,13 +110,13 @@ type FileInput = {
 
 type Brand = {
   id: string;
-  nome: string;
+  name: string;
   slug: string;
 };
 
 type Model = {
   id: number;
-  nome: string;
+  name: string;
   slug: string;
 };
 
@@ -180,7 +180,6 @@ export default function Page() {
   const [selectedFiles, setSelectedFiles] = useState<FileInput[]>([]);
   const [photos, setPhotos] = useState<{ key: string; uri: string }[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -246,80 +245,61 @@ export default function Page() {
       }
     }
 
-    setIsSubmitting(true);
+    const imagesUploaded = photos.length + selectedFiles.length;
 
-    try {
-      const imagesUploaded = photos.length + selectedFiles.length;
-
-      if (selectedFiles.length === 0) {
-        return toast("Nenhuma imagem selecionada.");
-      }
-
-      if (user?.plano === "GRATIS" && imagesUploaded > 3) {
-        return toast("Seu plano não permite mais que 3 fotos");
-      }
-
-      if (user?.plano === "BASICO" && imagesUploaded > 5) {
-        return toast("Seu plano não permite mais que 5 fotos");
-      }
-
-      switch (values.tipo) {
-        case "1":
-          values.tipo = "carros";
-          break;
-        case "2":
-          values.tipo = "motos";
-          break;
-        case "3":
-          values.tipo = "caminhoes";
-          break;
-        default:
-          break;
-      }
-
-      const formData = new FormData();
-
-      for (const image of selectedFiles) {
-        formData.append("file", image.file);
-      }
-
-      formData.append("tipo", values.tipo);
-      formData.append("marca", values.marca);
-      formData.append("modelo", values.modelo);
-      formData.append("ano_modelo", values.ano_modelo);
-      formData.append("descricao", values.descricao || "");
-      formData.append("cor", values.cor);
-      formData.append("preco", values.preco);
-      formData.append("placa", values.placa);
-      formData.append("quilometragem", values.quilometragem);
-      formData.append("estado", values.estado);
-      formData.append("cidade", values.cidade);
-      formData.append("portas", values.portas);
-      formData.append("cambio", values.cambio);
-      formData.append("usuario_id", user.id);
-
-      if (values.opcionais) {
-        formData.append(
-          "opcionais",
-          values.opcionais.filter(Boolean).join(",")
-        );
-      }
-
-      await createAdvert.mutateAsync(formData);
-      setPhotos([]);
-      form.reset();
-      return push("/account/ads?type=requested");
-    } catch (error: any) {
-      toast("Erro ao criar seu anúncio", {
-        description:
-          error.message ||
-          "Ocorreu um erro ao criar seu anúncio. Tente novamente.",
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (selectedFiles.length === 0) {
+      return toast("Nenhuma imagem selecionada.");
     }
-  }
 
+    if (user.plan === "FREE" && imagesUploaded > 3) {
+      return toast("Seu plano não permite mais que 3 fotos");
+    }
+
+    if (user.plan === "BASIC" && imagesUploaded > 5) {
+      return toast("Seu plano não permite mais que 5 fotos");
+    }
+
+    switch (values.tipo) {
+      case "1":
+        values.tipo = "carros";
+        break;
+      case "2":
+        values.tipo = "motos";
+        break;
+      case "3":
+        values.tipo = "caminhoes";
+        break;
+      default:
+        break;
+    }
+
+    const formData = new FormData();
+
+    for (const image of selectedFiles) {
+      formData.append("file", image.file);
+    }
+
+    formData.append("tipo", values.tipo);
+    formData.append("marca", values.marca);
+    formData.append("modelo", values.modelo);
+    formData.append("ano_modelo", values.ano_modelo);
+    formData.append("descricao", values.descricao || "");
+    formData.append("cor", values.cor);
+    formData.append("preco", values.preco);
+    formData.append("placa", values.placa);
+    formData.append("quilometragem", values.quilometragem);
+    formData.append("estado", values.estado);
+    formData.append("cidade", values.cidade);
+    formData.append("portas", values.portas);
+    formData.append("cambio", values.cambio);
+    formData.append("usuario_id", user.id);
+
+    if (values.opcionais) {
+      formData.append("opcionais", values.opcionais.filter(Boolean).join(","));
+    }
+
+    await createAdvert.mutateAsync(formData);
+  }
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files && files.length > 0) {
@@ -347,7 +327,7 @@ export default function Page() {
   const createAdvert = useMutation({
     mutationKey: ["create_advert", user?.id],
     mutationFn: async (formData: FormData) => {
-      const { data } = await apiClient.post("/adverts", formData);
+      const { data } = await apiClient.post("/adverts/create", formData);
       return data;
     },
     onSuccess: () => {
@@ -399,7 +379,7 @@ export default function Page() {
   const getBrands = useMutation({
     mutationKey: ["brands"],
     mutationFn: async (type: string) => {
-      const { data } = await apiClient.get(`/fipe/brands/${type}`, {
+      const { data } = await apiClient.get(`/brands/${type}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -411,7 +391,7 @@ export default function Page() {
   const getModels = useMutation({
     mutationKey: ["getModels"],
     mutationFn: async ({ brand }: { brand: string }) => {
-      const { data } = await apiClient.get(`/fipe/models/${brand}`, {
+      const { data } = await apiClient.get(`/models/${brand}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -511,8 +491,8 @@ export default function Page() {
                       <SelectContent>
                         <SelectItem value="default">Selecione</SelectItem>
                         {getBrands.data?.map((brand: Brand, idx: number) => (
-                          <SelectItem value={brand.id.toString()} key={idx}>
-                            {brand.nome}
+                          <SelectItem value={brand.slug} key={idx}>
+                            {brand.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -547,8 +527,8 @@ export default function Page() {
                       <SelectContent>
                         <SelectItem value="default">Selecione</SelectItem>
                         {getModels?.data?.map((model: Model, idx: number) => (
-                          <SelectItem value={model.id.toString()} key={idx}>
-                            {model.nome}
+                          <SelectItem value={model.slug} key={idx}>
+                            {model.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -835,7 +815,7 @@ export default function Page() {
                               />
                             </FormControl>
                             <FormLabel className="text-sm font-normal">
-                              {item.nome}
+                              {item.name}
                             </FormLabel>
                           </FormItem>
                         );
@@ -850,7 +830,7 @@ export default function Page() {
         )}
 
         {currentStep === 4 && (
-          <div className="flex gap-8 w-full">
+          <div className="flex gap-8 w-full flex-wrap md:flex-nowrap">
             <div>
               <input
                 type="file"
@@ -879,7 +859,7 @@ export default function Page() {
                 >
                   {(provided: any) => (
                     <article
-                      className="w-full max-w-[1000px] flex items-center gap-9 px-8"
+                      className="w-full max-w-[1000px] flex-wrap md:flex-nowrap flex items-center gap-9"
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                     >
@@ -902,8 +882,8 @@ export default function Page() {
         )}
 
         {currentStep === 5 && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-6 max-w-[800px] flex flex-col items-center">
+            <div className="flex w-full flex-wrap justify-between">
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Informações Básicas</h3>
                 <div className="space-y-2">
@@ -987,7 +967,7 @@ export default function Page() {
                           const opcional = getOptionals.data?.find(
                             (o) => o.id === opcionalId
                           );
-                          return <li key={opcionalId}>{opcional?.nome}</li>;
+                          return <li key={opcionalId}>{opcional?.name}</li>;
                         })}
                     </ul>
                   </div>
@@ -1018,11 +998,11 @@ export default function Page() {
   };
 
   return (
-    <div className="container m-auto flex items-center justify-center">
+    <div className="container m-auto flex items-center justify-center px-2">
       <Card className="mt-10 w-full min-h-screen">
         <CardHeader>
           <CardTitle>Crie seu anúncio</CardTitle>
-          <div className="mt-4">
+          <div className="mt-4 hidden md:block">
             <Progress value={progress} className="h-2" />
             <div className="grid grid-cols-6 place-items-end mt-2">
               {steps.map((step, index) => (
@@ -1042,11 +1022,11 @@ export default function Page() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="w-full px-6 flex flex-col gap-16 max-w-[1920px] pt-10">
+          <div className="w-full flex flex-col gap-16 max-w-[1920px] pt-10">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5 w-[500px] mx-auto"
+                className="space-y-5 min-w-[450px] mx-auto"
               >
                 {renderStepContent()}
 
@@ -1063,9 +1043,11 @@ export default function Page() {
                     <Button
                       type="button"
                       onClick={() => form.handleSubmit(onSubmit)()}
-                      disabled={isSubmitting}
+                      disabled={createAdvert.isPending}
                     >
-                      {isSubmitting ? "Criando anúncio..." : "Criar anúncio"}
+                      {createAdvert.isPending
+                        ? "Criando anúncio..."
+                        : "Criar anúncio"}
                     </Button>
                   ) : (
                     <Button type="button" onClick={nextStep}>
@@ -1080,8 +1062,9 @@ export default function Page() {
       </Card>
 
       <LoadingModal
-        isOpen={isSubmitting}
-        title="Criando anúncio"
+        isOpen={createAdvert.isPending}
+        title="Aguarde, isso pode levar alguns segundos..."
+        subTitle="Processando anúncio"
         description="Estamos processando seu anúncio. Por favor, aguarde..."
       />
     </div>

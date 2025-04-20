@@ -51,7 +51,7 @@ const options = {
 };
 
 const formSchema = z.object({
-  firstName: z.string().min(3, { message: "Nome muito curto" }),
+  name: z.string().min(3, { message: "Nome muito curto" }),
   lastName: z.string().min(3, { message: "Sobrenome muito curto" }),
   email: z.string().email(),
   phone: z.string().refine(
@@ -62,7 +62,7 @@ const formSchema = z.object({
     },
     {
       message:
-        "Número de WhatsApp inválido. Utilize o formato internacional, por exemplo: 54 91234-5678",
+        "Número de telefone inválido. Utilize o formato internacional, por exemplo: 54 91234-5678",
     }
   ),
 });
@@ -77,7 +77,7 @@ export default function Page() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      firstName: "",
+      name: "",
       lastName: "",
       phone: "",
     },
@@ -85,11 +85,14 @@ export default function Page() {
 
   const abrirPortalCliente = async () => {
     const { data } = await apiClient.get("/stripe/portal", {
+      params: {
+        returnUrl: `${window.location.origin}/account`,
+      },
       headers: {
         "Content-Type": "application/json",
       },
     });
-    window.location.href = data;
+    window.location.href = data.url;
   };
 
   const handleUploadAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -116,11 +119,11 @@ export default function Page() {
         formdata.append("file", newImage.file);
       }
 
-      formdata.append("nome", values.firstName);
-      formdata.append("sobrenome", values.lastName);
-      formdata.append("telefone", values.phone.replace(/\D/g, ""));
+      formdata.append("name", values.name);
+      formdata.append("lastname", values.lastName);
+      formdata.append("phone", values.phone.replace(/\D/g, ""));
 
-      await apiClient.patch(`/users/${user.id}`, formdata, {
+      await apiClient.patch("/users/update", formdata, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast("Alterações concluidas com sucesso!");
@@ -136,7 +139,7 @@ export default function Page() {
       if (!user) {
         return notFound();
       }
-      await apiClient.patch(`/users/desactive/${user.email}`);
+      await apiClient.patch("/users/delete");
     },
     onSuccess: () => {
       SignOut();
@@ -149,12 +152,12 @@ export default function Page() {
 
   useEffect(() => {
     if (user) {
-      form.setValue("firstName", user.nome);
-      form.setValue("lastName", user.sobrenome);
+      form.setValue("name", user.name);
+      form.setValue("lastName", user.lastname);
       form.setValue("email", user.email);
-      form.setValue("phone", format(user.telefone || "", options));
-      if (user.imagem) {
-        setProfileUrl(user.imagem);
+      form.setValue("phone", format(user.phone || "", options));
+      if (user.image) {
+        setProfileUrl(user.image);
       }
     }
   }, [form, user]);
@@ -207,7 +210,7 @@ export default function Page() {
                 >
                   <FormField
                     control={form.control}
-                    name="firstName"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nome:</FormLabel>
@@ -301,37 +304,37 @@ export default function Page() {
               value="subscriptions"
               className="flex items-center justify-center space-y-5 w-full max-w-[500px] text-center"
             >
-              {user && user.inscricoes.length > 0 && user.plano !== "GRATIS" ? (
+              {user && user.subscriptions.length > 0 && user.plan !== "FREE" ? (
                 <div className="max-w-3xl mx-auto mb-10">
                   <Alert
                     className={`mb-6 ${
-                      user.inscricoes[0].status === "paused" ||
-                      user.inscricoes[0].cancelar_ao_final_do_periodo
+                      user.subscriptions[0].status === "paused" ||
+                      user.subscriptions[0].cancel_at_period_end
                         ? "border-destructive"
                         : "border-primary"
                     }`}
                   >
                     <div className="flex items-center">
-                      {user.inscricoes[0].status === "paused" ||
-                      user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                      {user.subscriptions[0].status === "paused" ||
+                      user.subscriptions[0].cancel_at_period_end ? (
                         <AlertTriangle className="h-5 w-5 text-destructive mr-2" />
                       ) : (
                         <BarChart className="h-5 w-5 text-primary mr-2" />
                       )}
                       <AlertTitle>
-                        {user?.inscricoes[0].status === "paused"
+                        {user?.subscriptions[0].status === "paused"
                           ? "Pagamento pendente"
                           : `Você tem o plano ${
-                              user.plano === "BASICO" ? "Básico" : "PRO"
+                              user.plan === "BASIC" ? "Básico" : "PRO"
                             } ${
-                              user.inscricoes[0].ciclo === "month"
+                              user.subscriptions[0].cycle === "month"
                                 ? "mensal"
                                 : "anual"
                             }`}
                       </AlertTitle>
                     </div>
                     <AlertDescription className="mt-2">
-                      {user?.inscricoes[0].status === "paused" ? (
+                      {user?.subscriptions[0].status === "paused" ? (
                         <div>
                           <p>
                             Sua assinatura está com pagamento pendente. Por
@@ -346,12 +349,12 @@ export default function Page() {
                             Atualizar Pagamento
                           </Button>
                         </div>
-                      ) : user.inscricoes[0].cancelar_ao_final_do_periodo ? (
+                      ) : user.subscriptions[0].cancel_at_period_end ? (
                         <div className="flex flex-col items-center w-full">
                           <p>
                             Sua assinatura será cancelada em{" "}
                             {new Date(
-                              user.inscricoes[0].periodo_final!
+                              user.subscriptions[0].current_period_end!
                             ).toLocaleDateString("pt-BR")}
                             . Você pode gerenciar sua assinatura a qualquer
                             momento.
@@ -370,7 +373,7 @@ export default function Page() {
                           <p>
                             Próxima renovação em{" "}
                             {new Date(
-                              user.inscricoes[0].periodo_final!
+                              user.subscriptions[0].current_period_end!
                             ).toLocaleDateString("pt-BR")}
                             . Você pode gerenciar sua assinatura a qualquer
                             momento.

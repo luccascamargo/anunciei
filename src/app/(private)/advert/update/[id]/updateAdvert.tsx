@@ -35,7 +35,9 @@ import { apiClient, colors, GetCities, GetStates } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
-import { Advert, Opcionai } from "@/types/FilterAdverts";
+import { AdvertFull, Opcionai } from "@/@types/FilterAdverts";
+import { LoadingModal } from "@/components/loadingModal";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   ano_modelo: z
@@ -74,7 +76,7 @@ const formSchema = z.object({
 
 interface iOptional {
   id: string;
-  nome: string;
+  name: string;
 }
 
 type FileInput = {
@@ -99,31 +101,30 @@ const types = [
 ];
 
 type Props = {
-  advert: Advert;
+  advert: AdvertFull;
 };
 
 export function UpdateAdvert({ advert }: Props) {
   const { user } = useAuth();
   const { push } = useRouter();
   const [selectedFiles, setSelectedFiles] = useState<FileInput[]>(
-    advert.imagens
+    advert.images
   );
   const [oldImages, setOldImages] = useState<FileInput[]>([]);
-  console.log(advert);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      descricao: advert.descricao || "",
-      opcionais: advert.opcionais?.map((opcional) => opcional.id) || [],
-      ano_modelo: advert.ano_modelo.toString() || "",
-      cor: advert.cor || "",
-      cambio: advert.cambio || "",
-      estado: advert.estado || "",
-      cidade: advert.cidade || "",
-      portas: advert.portas || "",
-      preco: advert.preco.toString() || "",
-      quilometragem: advert.quilometragem.toString() || "",
+      descricao: advert.description || "",
+      opcionais: advert.optionals?.map((opcional) => opcional.id) || [],
+      ano_modelo: advert.year_model.toString() || "",
+      cor: advert.color || "",
+      cambio: advert.transmission || "",
+      estado: advert.state || "",
+      cidade: advert.city || "",
+      portas: advert.doors || "",
+      preco: advert.price.toString() || "",
+      quilometragem: advert.mileage.toString() || "",
     },
   });
 
@@ -131,17 +132,17 @@ export function UpdateAdvert({ advert }: Props) {
     if (!user) {
       return;
     }
-    const imagesUploaded = selectedFiles.length;
+    const imagesUploaded = selectedFiles.length + oldImages.length;
 
-    if (selectedFiles.length === 0) {
+    if (imagesUploaded === 0) {
       return toast("Nenhuma imagem selecionada.");
     }
 
-    if (user?.plano === "GRATIS" && imagesUploaded > 3) {
+    if (user.plan === "FREE" && imagesUploaded > 6) {
       return toast("Seu plano não permite mais que 3 fotos");
     }
 
-    if (user?.plano === "BASICO" && imagesUploaded > 6) {
+    if (user.plan === "BASIC" && imagesUploaded > 12) {
       return toast("Seu plano não permite mais que 6 fotos");
     }
 
@@ -167,7 +168,6 @@ export function UpdateAdvert({ advert }: Props) {
     formData.append("cidade", values.cidade);
     formData.append("portas", values.portas);
     formData.append("cambio", values.cambio);
-    formData.append("usuario_id", user.id);
 
     if (values.opcionais && values.opcionais.length > 0) {
       formData.append("opcionais", values.opcionais.filter(Boolean).join(","));
@@ -209,7 +209,10 @@ export function UpdateAdvert({ advert }: Props) {
   const updateAdvert = useMutation({
     mutationKey: ["updateAdvert", advert.id],
     mutationFn: async (formData: FormData) => {
-      const { data } = await apiClient.patch(`/adverts/${advert.id}`, formData);
+      const { data } = await apiClient.patch(
+        `/adverts/update/${advert.id}`,
+        formData
+      );
       return data;
     },
     onSuccess: () => {
@@ -276,14 +279,14 @@ export function UpdateAdvert({ advert }: Props) {
   }, [form.watch("estado")]);
 
   return (
-    <div className="container m-auto flex items-center justify-center">
+    <div className="container px-6 m-auto flex items-center justify-center">
       <Card className="mt-10 w-full">
         <CardHeader>
           <CardTitle>Crie seu anúncio</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-screen px-6 flex flex-col gap-16 max-w-[1920px] pt-10">
-            <div className="flex gap-8 w-full">
+          <div className="w-full flex flex-col gap-16 pt-10">
+            <div className="flex flex-col lg:flex-row gap-8 w-full">
               <div>
                 <input
                   type="file"
@@ -312,7 +315,7 @@ export function UpdateAdvert({ advert }: Props) {
                   >
                     {(provided: any) => (
                       <article
-                        className="max-w-[1000px] flex flex-wrap items-center gap-9 px-8"
+                        className="max-w-[1000px] flex flex-wrap items-center gap-9"
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                       >
@@ -335,12 +338,12 @@ export function UpdateAdvert({ advert }: Props) {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5 w-[400px]"
+                className="space-y-5 w-full lg:w-[400px]"
               >
                 <FormItem>
                   <FormLabel>Tipo de veiculo</FormLabel>
                   <FormControl>
-                    <Select disabled value={advert.tipo}>
+                    <Select disabled value={advert.type}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -360,13 +363,13 @@ export function UpdateAdvert({ advert }: Props) {
                 <FormItem>
                   <FormLabel>Marca</FormLabel>
                   <FormControl>
-                    <Select disabled value={advert.marca.nome}>
+                    <Select disabled value={advert.brand.name}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={advert.marca.nome}>
-                          {advert.marca.nome}
+                        <SelectItem value={advert.brand.name}>
+                          {advert.brand.name}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -377,13 +380,13 @@ export function UpdateAdvert({ advert }: Props) {
                 <FormItem>
                   <FormLabel>Modelo</FormLabel>
                   <FormControl>
-                    <Select disabled value={advert.modelo.nome}>
+                    <Select disabled value={advert.model.name}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={advert.modelo.nome}>
-                          {advert.modelo.nome}
+                        <SelectItem value={advert.model.name}>
+                          {advert.model.name}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -484,7 +487,7 @@ export function UpdateAdvert({ advert }: Props) {
                   <FormControl>
                     <Input
                       placeholder="Sua placa aqui"
-                      value={advert.placa}
+                      value={advert.plate}
                       disabled
                     />
                   </FormControl>
@@ -627,53 +630,55 @@ export function UpdateAdvert({ advert }: Props) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="opcionais"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Opcionais</FormLabel>
-                      {getOptionals.data?.map((item: iOptional) => (
-                        <FormField
-                          key={item.id}
-                          control={form.control}
-                          name="opcionais"
-                          render={({ field }) => {
-                            return (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.id)}
-                                    onCheckedChange={(checked) => {
-                                      const currentItems =
-                                        form.getValues("opcionais") || [];
-                                      if (checked) {
-                                        form.setValue("opcionais", [
-                                          ...currentItems,
-                                          item.id,
-                                        ]);
-                                      } else
-                                        form.setValue(
-                                          "opcionais",
-                                          currentItems.filter(
-                                            (value) => value !== item.id
-                                          )
-                                        );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {item.nome}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <ScrollArea className="h-72 w-96 rounded-md border p-2">
+                  <FormField
+                    control={form.control}
+                    name="opcionais"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Opcionais</FormLabel>
+                        {getOptionals.data?.map((item: iOptional) => (
+                          <FormField
+                            key={item.id}
+                            control={form.control}
+                            name="opcionais"
+                            render={({ field }) => {
+                              return (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item.id)}
+                                      onCheckedChange={(checked) => {
+                                        const currentItems =
+                                          form.getValues("opcionais") || [];
+                                        if (checked) {
+                                          form.setValue("opcionais", [
+                                            ...currentItems,
+                                            item.id,
+                                          ]);
+                                        } else
+                                          form.setValue(
+                                            "opcionais",
+                                            currentItems.filter(
+                                              (value) => value !== item.id
+                                            )
+                                          );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    {item.name}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </ScrollArea>
 
                 <Button type="submit" className="transition-all">
                   {updateAdvert.isPending ? (
@@ -689,6 +694,12 @@ export function UpdateAdvert({ advert }: Props) {
           </div>
         </CardContent>
       </Card>
+      <LoadingModal
+        isOpen={updateAdvert.isPending}
+        title="Aguarde, isso pode levar alguns segundos..."
+        subTitle="Processando anúncio"
+        description="Estamos processando seu anúncio. Por favor, aguarde..."
+      />
     </div>
   );
 }

@@ -46,26 +46,29 @@ export function SiginForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await apiClient
-      .post("/auth/signin", {
-        data: { email: values.email, senha: values.password },
+      .post("/auth/login", {
+        data: { email: values.email, password: values.password },
         headers: {
           "Content-Type": "application/json",
         },
       })
       .then((response) => {
+        console.log(response);
         if (response.status === 200) {
           toast("Login bem sucedido!");
           router.refresh();
         }
       })
       .catch((error) => {
-        if (error.response.status === 403) {
-          toast(error.response.data.message, {
-            description:
-              error.response.data.code === "user_inactive"
-                ? "Entre em contato com o suporte para ativar sua conta."
-                : "Verifique seu email e senha e tente novamente.",
-          });
+        console.log(error);
+        if (error.response.status === 401) {
+          toast.error("E-mail ou senha incorretos.");
+        } else if (error.response.status === 409) {
+          toast.error("Usuário inativo.");
+        } else if (error.response.status === 404) {
+          toast.error("Usuário não encontrado.");
+        } else {
+          toast.error("Erro ao fazer login.");
         }
       });
   }

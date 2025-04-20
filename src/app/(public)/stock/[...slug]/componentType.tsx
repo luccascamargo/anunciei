@@ -45,7 +45,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Opcionai } from "@/types/FilterAdverts";
+import { Opcionai } from "@/@types/FilterAdverts";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export interface iTypes {
@@ -69,12 +69,12 @@ const formSchemaFilter = z.object({
 
 interface iOptional {
   id: string;
-  nome: string;
+  name: string;
 }
 
 interface IBrand {
   id: string;
-  nome: string;
+  name: string;
   slug: string;
 }
 
@@ -103,7 +103,7 @@ const MotorcycleBrands = [
 ];
 
 const TruckBrands = [
-  { name: "Agrale", slug: "fiat", image: "/agrale.jpg" },
+  { name: "Agrale", slug: "agrale", image: "/agrale.jpg" },
   { name: "GMC", slug: "gmc", image: "/gmc.webp" },
   { name: "Chevrolet", slug: "chevrolet", image: "/gm.webp" },
   {
@@ -156,7 +156,7 @@ export function ComponentType({ slug }: { slug: string }) {
     params.set("pageParam", pageParam.toString());
 
     const { data } = await apiClient.get(
-      `/adverts/filterbyType/${slug}?${params}`,
+      `/adverts/filterbytype/${slug}?${params}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -186,7 +186,7 @@ export function ComponentType({ slug }: { slug: string }) {
   const { data: brands } = useQuery<IBrand[]>({
     queryKey: ["type", slug],
     queryFn: async () => {
-      const { data } = await apiClient.get(`/fipe/brands/${slug}`, {
+      const { data } = await apiClient.get(`/brands/${slug}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -210,7 +210,7 @@ export function ComponentType({ slug }: { slug: string }) {
     setBrandsFiltered(
       value === ""
         ? brands
-        : brands.filter((brand) => brand.nome.toLowerCase().includes(value))
+        : brands.filter((brand) => brand.name.toLowerCase().includes(value))
     );
   };
 
@@ -258,6 +258,8 @@ export function ComponentType({ slug }: { slug: string }) {
       QueryCities.mutate(form.watch("estado"));
     }
   }, [form.watch("estado")]);
+
+  console.log(data);
 
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
@@ -437,7 +439,7 @@ export function ComponentType({ slug }: { slug: string }) {
                                 key={idx}
                                 className="text-sm hover:bg-accent py-2 pl-2"
                               >
-                                {brand.nome}
+                                {brand.name}
                               </Link>
                             ))}
                           </div>
@@ -533,56 +535,59 @@ export function ComponentType({ slug }: { slug: string }) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="opcionais"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Opcionais</FormLabel>
-                      {getOptionals.data?.map((item: iOptional) => (
-                        <FormField
-                          key={item.nome}
-                          control={form.control}
-                          name="opcionais"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={item.nome}
-                                className="flex flex-row items-start space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(item.nome)}
-                                    onCheckedChange={(checked) => {
-                                      const currentItems =
-                                        form.getValues("opcionais") || [];
-                                      if (checked) {
-                                        form.setValue("opcionais", [
-                                          ...currentItems,
-                                          item.nome,
-                                        ]);
-                                      } else
-                                        form.setValue(
-                                          "opcionais",
-                                          currentItems.filter(
-                                            (value) => value !== item.nome
-                                          )
-                                        );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {item.nome}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <ScrollArea className="h-72 w-full rounded-md border p-2">
+                  <FormField
+                    control={form.control}
+                    name="opcionais"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Opcionais</FormLabel>
+                        {getOptionals.data?.map((item: iOptional) => (
+                          <FormField
+                            key={item.name}
+                            control={form.control}
+                            name="opcionais"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={item.name}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(item.name)}
+                                      onCheckedChange={(checked) => {
+                                        const currentItems =
+                                          form.getValues("opcionais") || [];
+                                        if (checked) {
+                                          form.setValue("opcionais", [
+                                            ...currentItems,
+                                            item.name,
+                                          ]);
+                                        } else
+                                          form.setValue(
+                                            "opcionais",
+                                            currentItems.filter(
+                                              (value) => value !== item.name
+                                            )
+                                          );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    {item.name}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </ScrollArea>
+
                 <Button type="submit" variant={"outline"}>
                   Buscar
                 </Button>
@@ -637,8 +642,8 @@ export function ComponentType({ slug }: { slug: string }) {
                   {isFetchingNextPage
                     ? "Buscando..."
                     : hasNextPage
-                    ? "Buscar mais..."
-                    : "Não há mais nada para buscar"}
+                      ? "Buscar mais..."
+                      : "Não há mais nada para buscar"}
                 </Button>
               </div>
             </CardFooter>
