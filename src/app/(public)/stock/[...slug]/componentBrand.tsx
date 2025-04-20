@@ -80,6 +80,13 @@ type IFilterBrand = {
   models: iModel[];
 };
 
+const sortingOptions = [
+  { key: "preco-asc", label: "Preço Mínimo" },
+  { key: "preco-desc", label: "Preço Máximo" },
+  { key: "data-asc", label: "Mais Recentes" },
+  { key: "data-desc", label: "Mais Antigos" },
+];
+
 export function ComponentBrand({ slug, models }: IFilterBrand) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -99,6 +106,8 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
     preco_max: searchParams.get("preco_max") || "",
     preco_min: searchParams.get("preco_min") || "",
   };
+
+  const sort = searchParams.get("sort");
 
   const form = useForm<z.infer<typeof formSchemaFilter>>({
     resolver: zodResolver(formSchemaFilter),
@@ -183,6 +192,13 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
       QueryCities.mutate(form.watch("estado"));
     }
   }, [form.watch("estado")]);
+
+  function handleSorting(e: string) {
+    if (e === "default") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", e);
+    router.push(`/stock/${slug}?${params.toString()}`);
+  }
 
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
@@ -493,8 +509,26 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
         </Card>
         <div className="w-full min-h-full">
           <Card className="w-full min-h-screen">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Resultados</CardTitle>
+              <div>
+                <Select
+                  onValueChange={(e) => handleSorting(e)}
+                  value={sort || "default"}
+                >
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Ordenar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={"default"}>Ordenar</SelectItem>
+                    {sortingOptions.map((item, idx) => (
+                      <SelectItem key={idx} value={item.key}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent className="grid grid-cols-5 gap-7">
               {status === "pending" ? (

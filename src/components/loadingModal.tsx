@@ -21,16 +21,14 @@ export function LoadingModal({
 }: LoadingModalProps) {
   return (
     <Dialog open={isOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-full max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col items-center justify-center gap-4 py-4">
+        <div className="flex flex-col items-center text-center justify-center gap-4 py-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <h3 className="text-lg font-semibold">{subTitle}</h3>
-          <p className="text-sm text-muted-foreground text-center">
-            {description}
-          </p>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       </DialogContent>
     </Dialog>

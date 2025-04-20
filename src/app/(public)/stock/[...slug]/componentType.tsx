@@ -118,6 +118,13 @@ const TruckBrands = [
   { name: "Volkswagen", slug: "vw-volkswagen", image: "/volks.webp" },
 ];
 
+const sortingOptions = [
+  { key: "preco-asc", label: "Preço Mínimo" },
+  { key: "preco-desc", label: "Preço Máximo" },
+  { key: "data-asc", label: "Mais Recentes" },
+  { key: "data-desc", label: "Mais Antigos" },
+];
+
 const handleBrands = {
   carros: CarBrands,
   motos: MotorcycleBrands,
@@ -143,6 +150,8 @@ export function ComponentType({ slug }: { slug: string }) {
     preco_max: searchParams.get("preco_max") || "",
     preco_min: searchParams.get("preco_min") || "",
   };
+
+  const sort = searchParams.get("sort");
 
   const form = useForm<z.infer<typeof formSchemaFilter>>({
     resolver: zodResolver(formSchemaFilter),
@@ -259,12 +268,17 @@ export function ComponentType({ slug }: { slug: string }) {
     }
   }, [form.watch("estado")]);
 
-  console.log(data);
+  function handleSorting(e: string) {
+    if (e === "default") return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", e);
+    router.push(`/stock/${slug}?${params.toString()}`);
+  }
 
   return (
-    <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
-      <div className="flex gap-8">
-        <Card className="w-[400px] h-fit">
+    <div className="w-screen px-6 max-w-[1920px] pt-10">
+      <div className="w-full flex gap-8 justify-center">
+        <Card className="w-[350px] h-fit">
           <CardHeader>
             <div className="mt-5 w-full flex items-center gap-3">
               <Button
@@ -603,12 +617,30 @@ export function ComponentType({ slug }: { slug: string }) {
             </Form>
           </CardContent>
         </Card>
-        <div className="w-full min-h-full">
+        <div className="w-full max-w-7xl min-h-full">
           <Card className="w-full min-h-screen">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Resultados</CardTitle>
+              <div>
+                <Select
+                  onValueChange={(e) => handleSorting(e)}
+                  value={sort || "default"}
+                >
+                  <SelectTrigger className="w-36">
+                    <SelectValue placeholder="Ordenar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={"default"}>Ordenar</SelectItem>
+                    {sortingOptions.map((item, idx) => (
+                      <SelectItem key={idx} value={item.key}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-5 gap-7">
+            <CardContent className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
               {status === "pending" ? (
                 Array.from({ length: 24 }).map((_, index) => (
                   <Skeleton className="h-4 w-full" key={index} />

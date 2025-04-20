@@ -144,7 +144,7 @@ export default function Page() {
               </TabsList>
               <TabsContent
                 value="active"
-                className="w-full max-w-4xl flex flex-col space-y-5"
+                className="w-full max-w-4xl flex flex-col items-center space-y-5"
               >
                 {getActiveAds.status === "pending" && (
                   <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
@@ -228,7 +228,7 @@ export default function Page() {
               </TabsContent>
               <TabsContent
                 value="inactive"
-                className="w-full max-w-4xl flex flex-col space-y-5"
+                className="w-full max-w-4xl flex flex-col items-center space-y-5"
               >
                 {getInactiveAds.status === "pending" && (
                   <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
@@ -341,7 +341,7 @@ export default function Page() {
               </TabsContent>
               <TabsContent
                 value="requested"
-                className="w-full max-w-4xl flex flex-col space-y-5"
+                className="w-full max-w-4xl flex flex-col items-center space-y-5"
               >
                 {getRequestedAds.status === "pending" && (
                   <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
