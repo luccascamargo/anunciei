@@ -2,7 +2,7 @@ import { JwtPayload, verify } from "jsonwebtoken";
 
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 
 async function getAccessToken() {
   const accessToken = await cookies();

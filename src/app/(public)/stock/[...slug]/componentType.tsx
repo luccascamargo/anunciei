@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -278,350 +278,400 @@ export function ComponentType({ slug }: { slug: string }) {
   return (
     <div className="w-screen px-6 max-w-[1920px] pt-10">
       <div className="w-full flex gap-8 justify-center">
-        <Card className="w-[350px] h-fit">
-          <CardHeader>
-            <div className="mt-5 w-full flex items-center gap-3">
-              <Button
-                variant={slug === "carros" ? "default" : "outline"}
-                disabled={slug === "carros"}
-                onClick={() => router.push("/stock/carros")}
-              >
-                Carros
-              </Button>
-              <Button
-                variant={slug === "motos" ? "default" : "outline"}
-                disabled={slug === "motos"}
-                onClick={() => router.push("/stock/motos")}
-              >
-                Motos
-              </Button>
-              <Button
-                variant={slug === "caminhoes" ? "default" : "outline"}
-                disabled={slug === "caminhoes"}
-                onClick={() => router.push("/stock/caminhoes")}
-              >
-                Caminhões
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5"
-              >
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {QueryStates.data?.map((state) => (
-                              <SelectItem key={state.sigla} value={state.sigla}>
-                                {state.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {QueryCities.data?.map((city: any) => (
-                              <SelectItem key={city.id} value={city.nome}>
-                                {city.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="w-full flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name="busca"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Buscar</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Buscar" type="text" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="w-full flex gap-2 ">
-                  <CustomInputValue
-                    form={form}
-                    isPrice
-                    label="R$"
-                    name="preco_min"
-                    placeholder="R$ 0"
-                  />
-                  <CustomInputValue
-                    form={form}
-                    isPrice
-                    label="Até"
-                    name="preco_max"
-                    placeholder="R$ 0"
-                  />
-                </div>
-
-                <div className="w-full flex flex-col gap-3 items-end">
-                  <div className="w-full">
-                    <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Marcas
-                    </span>
-                    <div className="w-full grid grid-cols-3 gap-2">
-                      {handleBrands[slug as ComponentTypeProps].map(
-                        (brand, idx) => (
-                          <Link
-                            key={idx}
-                            href={`/stock/${slug}/${brand.slug}`}
-                            className="w-full rounded-md border border-input py-3 shadow-xs flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
-                          >
-                            <Image
-                              src={brand.image}
-                              width={48}
-                              height={48}
-                              alt=""
-                            />
-                            <span className="text-xs font-medium leading-none text-center">
-                              {brand.name}
-                            </span>
-                          </Link>
-                        )
-                      )}
-                    </div>
-                  </div>
-                  <Sheet>
-                    <SheetTrigger className="flex items-center gap-2 cursor-pointer transition-all hover:underline text-sm">
-                      outras marcas <ArrowUpRight size={15} />
-                    </SheetTrigger>
-                    <SheetContent
-                      side="left"
-                      className="flex flex-col items-center"
-                    >
-                      <SheetHeader className="w-full">
-                        <SheetTitle>Selecione uma marca</SheetTitle>
-                        <Input
-                          placeholder="Busque por uma marca"
-                          onChange={handleOtherBrands}
-                        />
-                      </SheetHeader>
-                      <ScrollArea className="w-[98%] h-[90%] rounded-md border pb-10">
-                        <div className="p-4 flex flex-col gap-4">
-                          <span>Todas as marcas</span>
-                          <div className="flex flex-col">
-                            {brandsFiltered.map((brand, idx) => (
-                              <Link
-                                href={`/stock/${slug}/${brand.slug}`}
-                                key={idx}
-                                className="text-sm hover:bg-accent py-2 pl-2"
-                              >
-                                {brand.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </ScrollArea>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-
-                <div className="w-full flex gap-2">
-                  <div>
-                    <FormLabel>Ano</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_min"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="1970"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormLabel>Até</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_max"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="2025"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex gap-2 ">
-                    <CustomInputValue
-                      form={form}
-                      label="Km"
-                      name="quilometragem_min"
-                      placeholder="0"
-                    />
-                    <CustomInputValue
-                      form={form}
-                      label="Até"
-                      name="quilometragem_max"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-                <FormField
-                  control={form.control}
-                  name="portas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Portas</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder="Selecione"
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <ScrollArea className="h-72 w-full rounded-md border p-2">
-                  <FormField
-                    control={form.control}
-                    name="opcionais"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Opcionais</FormLabel>
-                        {getOptionals.data?.map((item: iOptional) => (
-                          <FormField
-                            key={item.name}
-                            control={form.control}
-                            name="opcionais"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  key={item.name}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.name)}
-                                      onCheckedChange={(checked) => {
-                                        const currentItems =
-                                          form.getValues("opcionais") || [];
-                                        if (checked) {
-                                          form.setValue("opcionais", [
-                                            ...currentItems,
-                                            item.name,
-                                          ]);
-                                        } else
-                                          form.setValue(
-                                            "opcionais",
-                                            currentItems.filter(
-                                              (value) => value !== item.name
-                                            )
-                                          );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="text-sm font-normal">
-                                    {item.name}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        ))}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </ScrollArea>
-
-                <Button type="submit" variant={"outline"}>
-                  Buscar
-                </Button>
-                <Button
-                  type="button"
-                  variant={"link"}
-                  className="text-black"
-                  onClick={() => form.reset()}
-                >
-                  Limpar
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-        <div className="w-full max-w-7xl min-h-full">
-          <Card className="w-full min-h-screen">
+        <div className="w-full min-h-full">
+          <Card className="container mx-auto w-full min-h-screen">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Resultados</CardTitle>
-              <div>
+              <div className="flex items-center gap-4">
+                <Sheet>
+                  <SheetTrigger className="text-sm transition-all cursor-pointer hover:underline">
+                    Filtrar
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="flex flex-col items-center"
+                  >
+                    <SheetHeader className="w-full">
+                      <SheetTitle>Escolha seus filtros</SheetTitle>
+                    </SheetHeader>
+                    <ScrollArea className="w-full">
+                      <div className="w-full h-fit">
+                        <CardHeader>
+                          <div className="mt-5 w-full flex items-center gap-3">
+                            <Button
+                              variant={
+                                slug === "carros" ? "default" : "outline"
+                              }
+                              disabled={slug === "carros"}
+                              onClick={() => router.push("/stock/carros")}
+                            >
+                              Carros
+                            </Button>
+                            <Button
+                              variant={slug === "motos" ? "default" : "outline"}
+                              disabled={slug === "motos"}
+                              onClick={() => router.push("/stock/motos")}
+                            >
+                              Motos
+                            </Button>
+                            <Button
+                              variant={
+                                slug === "caminhoes" ? "default" : "outline"
+                              }
+                              disabled={slug === "caminhoes"}
+                              onClick={() => router.push("/stock/caminhoes")}
+                            >
+                              Caminhões
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <Form {...form}>
+                            <form
+                              onSubmit={form.handleSubmit(onSubmit)}
+                              className="space-y-5"
+                            >
+                              <FormField
+                                control={form.control}
+                                name="estado"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Estado</FormLabel>
+                                    <FormControl>
+                                      <Select
+                                        {...field}
+                                        onValueChange={field.onChange}
+                                        name={field.name}
+                                      >
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="default">
+                                            Selecione
+                                          </SelectItem>
+                                          {QueryStates.data?.map((state) => (
+                                            <SelectItem
+                                              key={state.sigla}
+                                              value={state.sigla}
+                                            >
+                                              {state.nome}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="cidade"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Cidade</FormLabel>
+                                    <FormControl>
+                                      <Select
+                                        {...field}
+                                        onValueChange={field.onChange}
+                                        name={field.name}
+                                      >
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="default">
+                                            Selecione
+                                          </SelectItem>
+                                          {QueryCities.data?.map((city) => (
+                                            <SelectItem
+                                              key={city.id}
+                                              value={city.nome}
+                                            >
+                                              {city.nome}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="w-full flex flex-col gap-2">
+                                <FormField
+                                  control={form.control}
+                                  name="busca"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Buscar</FormLabel>
+                                      <FormControl>
+                                        <Input
+                                          placeholder="Buscar"
+                                          type="text"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <div className="w-full flex gap-2 ">
+                                <CustomInputValue
+                                  form={form}
+                                  isPrice
+                                  label="R$"
+                                  name="preco_min"
+                                  placeholder="R$ 0"
+                                />
+                                <CustomInputValue
+                                  form={form}
+                                  isPrice
+                                  label="Até"
+                                  name="preco_max"
+                                  placeholder="R$ 0"
+                                />
+                              </div>
+
+                              <div className="w-full flex flex-col gap-3 items-end">
+                                <div className="w-full">
+                                  <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    Marcas
+                                  </span>
+                                  <div className="w-full grid grid-cols-3 gap-2">
+                                    {handleBrands[
+                                      slug as ComponentTypeProps
+                                    ].map((brand, idx) => (
+                                      <Link
+                                        key={idx}
+                                        href={`/stock/${slug}/${brand.slug}`}
+                                        className="w-full rounded-md border border-input py-3 shadow-xs flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
+                                      >
+                                        <Image
+                                          src={brand.image}
+                                          width={48}
+                                          height={48}
+                                          alt=""
+                                        />
+                                        <span className="text-xs font-medium leading-none text-center">
+                                          {brand.name}
+                                        </span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                                <Sheet>
+                                  <SheetTrigger className="flex items-center gap-2 cursor-pointer transition-all hover:underline text-sm">
+                                    outras marcas <ArrowUpRight size={15} />
+                                  </SheetTrigger>
+                                  <SheetContent
+                                    side="right"
+                                    className="flex flex-col items-center"
+                                  >
+                                    <SheetHeader className="w-full">
+                                      <SheetTitle>
+                                        Selecione uma marca
+                                      </SheetTitle>
+                                      <Input
+                                        placeholder="Busque por uma marca"
+                                        onChange={handleOtherBrands}
+                                      />
+                                    </SheetHeader>
+                                    <ScrollArea className="w-[98%] h-[90%] rounded-md border pb-10">
+                                      <div className="p-4 flex flex-col gap-4">
+                                        <span>Todas as marcas</span>
+                                        <div className="flex flex-col">
+                                          {brandsFiltered.map((brand, idx) => (
+                                            <Link
+                                              href={`/stock/${slug}/${brand.slug}`}
+                                              key={idx}
+                                              className="text-sm hover:bg-accent py-2 pl-2"
+                                            >
+                                              {brand.name}
+                                            </Link>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </ScrollArea>
+                                  </SheetContent>
+                                </Sheet>
+                              </div>
+
+                              <div className="w-full flex gap-2">
+                                <div>
+                                  <FormLabel>Ano</FormLabel>
+                                  <FormField
+                                    control={form.control}
+                                    name="ano_modelo_min"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            placeholder="1970"
+                                            type="number"
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                <div>
+                                  <FormLabel>Até</FormLabel>
+                                  <FormField
+                                    control={form.control}
+                                    name="ano_modelo_max"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            placeholder="2025"
+                                            type="number"
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="w-full flex flex-col gap-2">
+                                <div className="w-full flex gap-2 ">
+                                  <CustomInputValue
+                                    form={form}
+                                    label="Km"
+                                    name="quilometragem_min"
+                                    placeholder="0"
+                                  />
+                                  <CustomInputValue
+                                    form={form}
+                                    label="Até"
+                                    name="quilometragem_max"
+                                    placeholder="0"
+                                  />
+                                </div>
+                              </div>
+                              <FormField
+                                control={form.control}
+                                name="portas"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Portas</FormLabel>
+                                    <FormControl>
+                                      <Select
+                                        {...field}
+                                        onValueChange={field.onChange}
+                                        name={field.name}
+                                      >
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue
+                                            placeholder="Selecione"
+                                            ref={field.ref}
+                                          />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="default">
+                                            Selecione
+                                          </SelectItem>
+                                          <SelectItem value="1">1</SelectItem>
+                                          <SelectItem value="2">2</SelectItem>
+                                          <SelectItem value="3">3</SelectItem>
+                                          <SelectItem value="4">4</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <ScrollArea className="h-72 w-full rounded-md border p-2">
+                                <FormField
+                                  control={form.control}
+                                  name="opcionais"
+                                  render={() => (
+                                    <FormItem>
+                                      <FormLabel>Opcionais</FormLabel>
+                                      {getOptionals.data?.map(
+                                        (item: iOptional) => (
+                                          <FormField
+                                            key={item.name}
+                                            control={form.control}
+                                            name="opcionais"
+                                            render={({ field }) => {
+                                              return (
+                                                <FormItem
+                                                  key={item.name}
+                                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                                >
+                                                  <FormControl>
+                                                    <Checkbox
+                                                      checked={field.value?.includes(
+                                                        item.name
+                                                      )}
+                                                      onCheckedChange={(
+                                                        checked
+                                                      ) => {
+                                                        const currentItems =
+                                                          form.getValues(
+                                                            "opcionais"
+                                                          ) || [];
+                                                        if (checked) {
+                                                          form.setValue(
+                                                            "opcionais",
+                                                            [
+                                                              ...currentItems,
+                                                              item.name,
+                                                            ]
+                                                          );
+                                                        } else
+                                                          form.setValue(
+                                                            "opcionais",
+                                                            currentItems.filter(
+                                                              (value) =>
+                                                                value !==
+                                                                item.name
+                                                            )
+                                                          );
+                                                      }}
+                                                    />
+                                                  </FormControl>
+                                                  <FormLabel className="text-sm font-normal">
+                                                    {item.name}
+                                                  </FormLabel>
+                                                </FormItem>
+                                              );
+                                            }}
+                                          />
+                                        )
+                                      )}
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </ScrollArea>
+
+                              <Button type="submit" variant={"outline"}>
+                                Buscar
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={"link"}
+                                className="text-black"
+                                onClick={() => form.reset()}
+                              >
+                                Limpar
+                              </Button>
+                            </form>
+                          </Form>
+                        </CardContent>
+                      </div>
+                    </ScrollArea>
+                  </SheetContent>
+                </Sheet>
                 <Select
                   onValueChange={(e) => handleSorting(e)}
                   value={sort || "default"}

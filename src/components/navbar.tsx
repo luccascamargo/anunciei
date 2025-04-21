@@ -22,9 +22,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
+import { useState } from "react";
 
 export function Navbar() {
   const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="w-screen py-4 border-b bg-white">
@@ -99,7 +101,7 @@ export function Navbar() {
 
           {/* Menu Mobile */}
           <div className="flex md:hidden">
-            <Sheet>
+            <Sheet open={isOpen} onOpenChange={() => setIsOpen((old) => !old)}>
               <SheetTrigger asChild>
                 <Menu size={28} />
               </SheetTrigger>
@@ -117,13 +119,28 @@ export function Navbar() {
                 </SheetHeader>
                 <div className="mt-4 flex flex-col items-start gap-4">
                   <Link href="/">Home</Link>
+                  <Link href="/stock/carros">Buscar</Link>
                   <Link href="/pricing">Preços</Link>
                   {user && (
                     <>
-                      <Link href="/account">Meu perfil</Link>
-                      <Link href="/advert/create">Criar anúncio</Link>
-                      <Link href="/account/ads">Meus anúncios</Link>
-                      <Link href="/favorites">Meus favoritos</Link>
+                      <Link href="/account" onClick={() => setIsOpen(false)}>
+                        Meu perfil
+                      </Link>
+                      <Link
+                        href="/advert/create"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Criar anúncio
+                      </Link>
+                      <Link
+                        href="/account/ads"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Meus anúncios
+                      </Link>
+                      <Link href="/favorites" onClick={() => setIsOpen(false)}>
+                        Meus favoritos
+                      </Link>
                       <button
                         onClick={SignOut}
                         className="text-red-700 hover:text-red-800"

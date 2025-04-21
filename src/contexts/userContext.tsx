@@ -1,5 +1,5 @@
 "use client";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { createContext, ReactNode } from "react";
 
 interface iAuthContext {

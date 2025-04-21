@@ -5,10 +5,10 @@ import { verifyJwt } from "@/lib/auth";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug: id } = params;
+    const { slug: id } = await params;
 
     const token = request.cookies.get("accessToken")?.value;
     if (!token) {

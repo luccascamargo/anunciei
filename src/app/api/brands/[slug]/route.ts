@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Category } from "@/generated/prisma";
 import { AsyncParams } from "@/@types/FilterAdverts";
+import { Category } from "@prisma/client";
 
 const categoryMap: Record<string, Category> = {
   carros: "CARS",

@@ -19,8 +19,8 @@ type CardAdClient = {
 
 export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
   return (
-    <Card className=" w-full max-w-4xl h-fit md:h-[200px] flex items-center p-5 gap-6">
-      <div className="relative w-[150px] h-[150px]">
+    <Card className="w-full max-w-4xl h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6">
+      <div className="relative w-full md:w-[150px] h-[150px]">
         <Image
           src={props.image || "/default-car.png"}
           fill

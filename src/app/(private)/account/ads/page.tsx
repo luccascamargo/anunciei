@@ -155,10 +155,10 @@ export default function Page() {
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6"
+                        "w-full h-fit md:h-[200px] flex flex-col items-center p-5 gap-6 md:flex-row"
                       )}
                     >
-                      <div className="relative w-[150px] h-[150px]">
+                      <div className="relative w-full h-[150px] md:w-[150px]">
                         <Image
                           src={ad.images[0].url || "/default-car.png"}
                           fill
@@ -239,10 +239,10 @@ export default function Page() {
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6 opacity-100 md:opacity-50 transition-all hover:opacity-100"
+                        "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-100 md:opacity-50 transition-all hover:opacity-100"
                       )}
                     >
-                      <div className="relative w-[150px] h-[150px]">
+                      <div className="relative w-full md:w-[150px] h-[150px]">
                         <Image
                           src={ad.images[0].url || "/default-car.png"}
                           fill
@@ -352,10 +352,10 @@ export default function Page() {
                     <Card
                       key={ad.id}
                       className={cn(
-                        "w-full h-fit md:h-[200px] flex items-center p-5 gap-6 opacity-50 "
+                        "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-50 "
                       )}
                     >
-                      <div className="relative w-[150px] h-[150px]">
+                      <div className="relative w-full md:w-[150px] h-[150px]">
                         <Image
                           src={ad.images[0].url || "/default-car.png"}
                           fill

@@ -11,27 +11,23 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardSeller } from "./Card";
-import { Prisma } from "@/generated/prisma";
+import { AdvertFull } from "@/@types/FilterAdverts";
 
 type Params = Promise<{ id: string }>;
 
-type iUser = {
-  id: string;
-  adverts: Prisma.AdvertsGetPayload<{
-    include: { images: true; brand: true; model: true };
-  }>[];
+type UserReturn = {
+  adverts: AdvertFull[];
+  email: string;
+  created_at: Date;
   name: string;
   lastname: string;
-  phone: string | null;
-  email: string;
-  image: string | null;
-  created_at: Date;
+  image: string;
+  phone: string;
 };
-
 export default async function Page({ params }: { params: Params }) {
   const { id } = await params;
 
-  const { data } = await apiClient.get(`/adverts/filterbyuserid/${id}`, {
+  const { data } = await apiClient.get<UserReturn>(`/users/adverts/${id}`, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -40,55 +36,42 @@ export default async function Page({ params }: { params: Params }) {
     notFound();
   }
 
-  const user: iUser = data;
-
   return (
-    <div className="container mx-auto flex justify-between pt-10 gap-10 min-h-screen">
-      <Card className="h-fit px-9">
+    <div className="container mx-auto px-6 flex flex-col items-center justify-between pt-10 gap-10 min-h-screen md:flex-row md:items-start">
+      <Card className="w-full h-fit order-2">
         <CardHeader>
           <CardTitle>Anúncios deste vendedor</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          {user.adverts.map((advert) => (
-            <CardSeller
-              key={advert.id}
-              id={advert.id}
-              image={advert.images[0].url}
-              brand={advert.brand?.name}
-              year={advert.year_model}
-              model={advert.model.name}
-              price={advert.price}
-              city={advert.city}
-              mileage={advert.mileage}
-              color={advert.color}
-            />
+          {data.adverts.map((advert) => (
+            <CardSeller advert={advert} key={advert.id} />
           ))}
         </CardContent>
         <CardFooter className="flex justify-center">
           <CardDescription>
-            {user.adverts.length} Anúncio(s) publicado(s)
+            {data.adverts.length} Anúncio(s) publicado(s)
           </CardDescription>
         </CardFooter>
       </Card>
-      <Card className="min-w-[350px] h-fit">
+      <Card className="w-full md:w-[500px] h-fit">
         <CardHeader>
           <CardTitle>Detalhes do vendedor</CardTitle>
         </CardHeader>
         <CardContent className="mt-10 flex flex-col gap-10">
           <div className="flex flex-col items-center gap-5">
             <Avatar className="w-20 h-20">
-              <AvatarImage src={user.image!} className="object-cover" />
+              <AvatarImage src={data.image!} className="object-cover" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">
               <span className="text-xl">
-                {user.name} {user.lastname}
+                {data.name} {data.lastname}
               </span>
-              <span className="text-sm">{user.email}</span>
+              <span className="text-sm">{data.email}</span>
             </div>
           </div>
-          {user.phone && (
-            <a href={`https://wa.me/${user.phone.replace(/\D/g, "")}`}>
+          {data.phone && (
+            <a href={`https://wa.me/${data.phone.replace(/\D/g, "")}`}>
               <Button variant={"default"} className="w-full">
                 Chamar no WhatsApp
               </Button>
@@ -98,7 +81,7 @@ export default async function Page({ params }: { params: Params }) {
         <CardFooter className="flex justify-center">
           <CardDescription>
             No iSerra desde{" "}
-            {new Date(user.created_at).toLocaleDateString("pt-Br", {
+            {new Date(data.created_at).toLocaleDateString("pt-Br", {
               year: "numeric",
               month: "long",
               day: "numeric",

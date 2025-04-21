@@ -31,7 +31,7 @@ export function SearchBox() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex w-full items-center space-x-2"
+          className="flex w-full items-center space-x-2 flex-col gap-4 md:gap-0 md:flex-row"
         >
           <FormField
             control={form.control}

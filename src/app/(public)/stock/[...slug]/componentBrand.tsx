@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,6 +38,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export interface iTypes {
   value: number;
@@ -203,315 +210,360 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
   return (
     <div className="w-screen px-6 flex flex-col gap-8 max-w-[1920px] pt-10">
       <div className="flex gap-8">
-        <Card className=" h-fit">
-          <CardHeader>
-            <div className="mt-5">
-              <span className="font-medium">Filtros:</span>
-              <div className="w-full flex items-center gap-2">
-                <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
-                  {slug[0]}
-                  <Link href={`/stock/carros`}>
-                    <X className="h-4 w-4" />
-                  </Link>
-                </span>
-                <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
-                  {slug[1]}
-                  <Link href={`/stock/${slug[0]}`}>
-                    <X className="h-4 w-4" />
-                  </Link>
-                </span>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5"
-              >
-                <FormField
-                  control={form.control}
-                  name="estado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {QueryStates.data?.map((state) => (
-                              <SelectItem
-                                key={state.sigla}
-                                value={state.sigla.toString()}
-                              >
-                                {state.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            {QueryCities.data?.map((city: any) => (
-                              <SelectItem key={city.id} value={city.nome}>
-                                {city.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="w-full flex flex-col gap-2">
-                  <FormLabel>Buscar</FormLabel>
-                  <FormField
-                    control={form.control}
-                    name="busca"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Buscar" type="text" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="w-full flex gap-2 ">
-                  <CustomInputValue
-                    form={form}
-                    label="R$"
-                    isPrice
-                    name="preco_min"
-                    placeholder="R$ 99.999.999"
-                  />
-                  <CustomInputValue
-                    form={form}
-                    isPrice
-                    label="Até"
-                    name="preco_max"
-                    placeholder="R$ 99.999.999"
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="modelo"
-                  render={({ field }) => (
-                    <FormItem className="max-w-full">
-                      <FormLabel>Modelo</FormLabel>
-                      <Select
-                        {...field}
-                        onValueChange={field.onChange}
-                        name={field.name}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={"Selecione"} />
-                        </SelectTrigger>
-                        <SelectContent className="max-w-full">
-                          <SelectItem value="default">Selecione</SelectItem>
-                          {models.map((model: iModel, idx: number) => (
-                            <SelectItem
-                              value={model.name}
-                              key={idx}
-                              className="max-w-full text-sm"
-                            >
-                              {model.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="w-full flex gap-2">
-                  <div>
-                    <FormLabel>Ano</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_min"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="1970"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <FormLabel>Até</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="ano_modelo_max"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="2025"
-                              type="number"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex gap-2 ">
-                    <CustomInputValue
-                      form={form}
-                      label="Km"
-                      name="quilometragem_min"
-                      placeholder=""
-                    />
-                    <CustomInputValue
-                      form={form}
-                      label="Até"
-                      name="quilometragem_max"
-                      placeholder=""
-                    />
-                  </div>
-                </div>
-                <FormField
-                  control={form.control}
-                  name="portas"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Portas</FormLabel>
-                      <FormControl>
-                        <Select
-                          {...field}
-                          onValueChange={field.onChange}
-                          name={field.name}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue
-                              placeholder="Selecione"
-                              ref={field.ref}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="default">Selecione</SelectItem>
-                            <SelectItem value="1">1</SelectItem>
-                            <SelectItem value="2">2</SelectItem>
-                            <SelectItem value="3">3</SelectItem>
-                            <SelectItem value="4">4</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <ScrollArea className="h-72 w-full rounded-md border p-2">
-                  <FormField
-                    control={form.control}
-                    name="opcionais"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Opcionais</FormLabel>
-                        {getOptionals.data?.map((item: iOptional) => (
-                          <FormField
-                            key={item.name}
-                            control={form.control}
-                            name="opcionais"
-                            render={({ field }) => {
-                              return (
-                                <FormItem
-                                  key={item.name}
-                                  className="flex flex-row items-start space-x-3 space-y-0"
-                                >
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(item.name)}
-                                      onCheckedChange={(checked) => {
-                                        const currentItems =
-                                          form.getValues("opcionais") || [];
-                                        if (checked) {
-                                          form.setValue("opcionais", [
-                                            ...currentItems,
-                                            item.name,
-                                          ]);
-                                        } else
-                                          form.setValue(
-                                            "opcionais",
-                                            currentItems.filter(
-                                              (value) => value !== item.name
-                                            )
-                                          );
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="text-sm font-normal">
-                                    {item.name}
-                                  </FormLabel>
-                                </FormItem>
-                              );
-                            }}
-                          />
-                        ))}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </ScrollArea>
-                <Button type="submit" variant={"outline"}>
-                  Buscar
-                </Button>
-                <Button
-                  type="button"
-                  variant={"link"}
-                  className="text-black"
-                  onClick={() => form.reset()}
-                >
-                  Limpar
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
         <div className="w-full min-h-full">
           <Card className="w-full min-h-screen">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Resultados</CardTitle>
-              <div>
+              <div className="flex items-center gap-4">
+                <Sheet>
+                  <SheetTrigger className="text-sm transition-all cursor-pointer hover:underline">
+                    Filtrar
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="flex flex-col items-center h-fit"
+                  >
+                    <SheetHeader className="w-full">
+                      <SheetTitle>Escolha seus filtros</SheetTitle>
+                      <ScrollArea className="w-full h-fit">
+                        <div className="w-full">
+                          <div className="mt-5 px-4">
+                            <span className="font-medium">Filtros:</span>
+                            <div className="w-full flex items-center gap-2">
+                              <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
+                                {slug[0]}
+                                <Link href={`/stock/carros`}>
+                                  <X className="h-4 w-4" />
+                                </Link>
+                              </span>
+                              <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
+                                {slug[1]}
+                                <Link href={`/stock/${slug[0]}`}>
+                                  <X className="h-4 w-4" />
+                                </Link>
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-5">
+                            <Form {...form}>
+                              <form
+                                onSubmit={form.handleSubmit(onSubmit)}
+                                className="space-y-5 px-4"
+                              >
+                                <FormField
+                                  control={form.control}
+                                  name="estado"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Estado</FormLabel>
+                                      <FormControl>
+                                        <Select
+                                          {...field}
+                                          onValueChange={field.onChange}
+                                          name={field.name}
+                                        >
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="default">
+                                              Selecione
+                                            </SelectItem>
+                                            {QueryStates.data?.map((state) => (
+                                              <SelectItem
+                                                key={state.sigla}
+                                                value={state.sigla.toString()}
+                                              >
+                                                {state.nome}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name="cidade"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Cidade</FormLabel>
+                                      <FormControl>
+                                        <Select
+                                          {...field}
+                                          onValueChange={field.onChange}
+                                          name={field.name}
+                                        >
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="default">
+                                              Selecione
+                                            </SelectItem>
+                                            {QueryCities.data?.map((city) => (
+                                              <SelectItem
+                                                key={city.id}
+                                                value={city.nome}
+                                              >
+                                                {city.nome}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <div className="w-full flex flex-col gap-2">
+                                  <FormLabel>Buscar</FormLabel>
+                                  <FormField
+                                    control={form.control}
+                                    name="busca"
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            placeholder="Buscar"
+                                            type="text"
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                <div className="w-full flex gap-2 ">
+                                  <CustomInputValue
+                                    form={form}
+                                    label="R$"
+                                    isPrice
+                                    name="preco_min"
+                                    placeholder="R$ 99.999.999"
+                                  />
+                                  <CustomInputValue
+                                    form={form}
+                                    isPrice
+                                    label="Até"
+                                    name="preco_max"
+                                    placeholder="R$ 99.999.999"
+                                  />
+                                </div>
+
+                                <FormField
+                                  control={form.control}
+                                  name="modelo"
+                                  render={({ field }) => (
+                                    <FormItem className="max-w-full">
+                                      <FormLabel>Modelo</FormLabel>
+                                      <Select
+                                        {...field}
+                                        onValueChange={field.onChange}
+                                        name={field.name}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue
+                                            placeholder={"Selecione"}
+                                          />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-w-full">
+                                          <SelectItem value="default">
+                                            Selecione
+                                          </SelectItem>
+                                          {models.map(
+                                            (model: iModel, idx: number) => (
+                                              <SelectItem
+                                                value={model.name}
+                                                key={idx}
+                                                className="max-w-full text-sm"
+                                              >
+                                                {model.name}
+                                              </SelectItem>
+                                            )
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <div className="w-full flex gap-2">
+                                  <div>
+                                    <FormLabel>Ano</FormLabel>
+                                    <FormField
+                                      control={form.control}
+                                      name="ano_modelo_min"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormControl>
+                                            <Input
+                                              placeholder="1970"
+                                              type="number"
+                                              {...field}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                  <div>
+                                    <FormLabel>Até</FormLabel>
+                                    <FormField
+                                      control={form.control}
+                                      name="ano_modelo_max"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormControl>
+                                            <Input
+                                              placeholder="2025"
+                                              type="number"
+                                              {...field}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="w-full flex flex-col gap-2">
+                                  <div className="w-full flex gap-2 ">
+                                    <CustomInputValue
+                                      form={form}
+                                      label="Km"
+                                      name="quilometragem_min"
+                                      placeholder="0"
+                                    />
+                                    <CustomInputValue
+                                      form={form}
+                                      label="Até"
+                                      name="quilometragem_max"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                </div>
+                                <FormField
+                                  control={form.control}
+                                  name="portas"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Portas</FormLabel>
+                                      <FormControl>
+                                        <Select
+                                          {...field}
+                                          onValueChange={field.onChange}
+                                          name={field.name}
+                                        >
+                                          <SelectTrigger className="w-full">
+                                            <SelectValue
+                                              placeholder="Selecione"
+                                              ref={field.ref}
+                                            />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="default">
+                                              Selecione
+                                            </SelectItem>
+                                            <SelectItem value="1">1</SelectItem>
+                                            <SelectItem value="2">2</SelectItem>
+                                            <SelectItem value="3">3</SelectItem>
+                                            <SelectItem value="4">4</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <ScrollArea className="h-72 w-full rounded-md border p-2">
+                                  <FormField
+                                    control={form.control}
+                                    name="opcionais"
+                                    render={() => (
+                                      <FormItem>
+                                        <FormLabel>Opcionais</FormLabel>
+                                        {getOptionals.data?.map(
+                                          (item: iOptional) => (
+                                            <FormField
+                                              key={item.name}
+                                              control={form.control}
+                                              name="opcionais"
+                                              render={({ field }) => {
+                                                return (
+                                                  <FormItem
+                                                    key={item.name}
+                                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                                  >
+                                                    <FormControl>
+                                                      <Checkbox
+                                                        checked={field.value?.includes(
+                                                          item.name
+                                                        )}
+                                                        onCheckedChange={(
+                                                          checked
+                                                        ) => {
+                                                          const currentItems =
+                                                            form.getValues(
+                                                              "opcionais"
+                                                            ) || [];
+                                                          if (checked) {
+                                                            form.setValue(
+                                                              "opcionais",
+                                                              [
+                                                                ...currentItems,
+                                                                item.name,
+                                                              ]
+                                                            );
+                                                          } else
+                                                            form.setValue(
+                                                              "opcionais",
+                                                              currentItems.filter(
+                                                                (value) =>
+                                                                  value !==
+                                                                  item.name
+                                                              )
+                                                            );
+                                                        }}
+                                                      />
+                                                    </FormControl>
+                                                    <FormLabel className="text-sm font-normal">
+                                                      {item.name}
+                                                    </FormLabel>
+                                                  </FormItem>
+                                                );
+                                              }}
+                                            />
+                                          )
+                                        )}
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </ScrollArea>
+                                <Button type="submit" variant={"outline"}>
+                                  Buscar
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant={"link"}
+                                  className="text-black"
+                                  onClick={() => form.reset()}
+                                >
+                                  Limpar
+                                </Button>
+                              </form>
+                            </Form>
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </SheetHeader>
+                  </SheetContent>
+                </Sheet>
                 <Select
                   onValueChange={(e) => handleSorting(e)}
                   value={sort || "default"}
