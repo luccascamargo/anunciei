@@ -35,7 +35,6 @@ import { apiClient, colors, GetCities, GetStates } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
-import { Opcionai } from "@/@types/FilterAdverts";
 import { LoadingModal } from "@/components/loadingModal";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -366,7 +365,7 @@ export default function Page() {
 
   const getOptionals = useQuery({
     queryKey: ["getOptionals"],
-    queryFn: async (): Promise<Opcionai[]> => {
+    queryFn: async () => {
       const { data } = await apiClient.get("/optionals", {
         headers: {
           "Content-Type": "application/json",
@@ -965,7 +964,7 @@ export default function Page() {
                         ?.filter(Boolean)
                         .map((opcionalId) => {
                           const opcional = getOptionals.data?.find(
-                            (o) => o.id === opcionalId
+                            (o: any) => o.id === opcionalId
                           );
                           return <li key={opcionalId}>{opcional?.name}</li>;
                         })}

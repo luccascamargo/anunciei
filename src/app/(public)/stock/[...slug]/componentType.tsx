@@ -45,7 +45,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Opcionai } from "@/@types/FilterAdverts";
+
 import { useRouter, useSearchParams } from "next/navigation";
 
 export interface iTypes {
@@ -225,7 +225,7 @@ export function ComponentType({ slug }: { slug: string }) {
 
   const getOptionals = useQuery({
     queryKey: ["getOptionals"],
-    queryFn: async (): Promise<Opcionai[]> => {
+    queryFn: async () => {
       const { data } = await apiClient.get("/optionals", {
         headers: {
           "Content-Type": "application/json",

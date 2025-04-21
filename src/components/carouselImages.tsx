@@ -9,16 +9,11 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { Imagen } from "@/@types/FilterAdverts";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
-type ICarousel = {
-  images: Imagen[];
-};
-
-export function CarouselImages({ images }: ICarousel) {
+export function CarouselImages({ images }: { images: { url: string }[] }) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [isModalOpen, setIsModalOpen] = React.useState(false);

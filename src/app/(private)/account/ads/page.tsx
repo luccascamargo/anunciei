@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { AdvertByStatus } from "@/@types/FilterAdverts";
 import { apiClient, cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -23,13 +22,14 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingModal } from "@/components/loadingModal";
+import { Prisma } from "@prisma/client";
 
 export default function Page() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 
-  const getActiveAds = useQuery<AdvertByStatus[]>({
+  const getActiveAds = useQuery({
     queryKey: ["active", user?.id],
     queryFn: async () => {
       const { data } = await apiClient.get(`/adverts/filterbyactives`);
@@ -37,7 +37,7 @@ export default function Page() {
     },
   });
 
-  const getInactiveAds = useQuery<AdvertByStatus[]>({
+  const getInactiveAds = useQuery({
     queryKey: ["inactive", user?.id],
     queryFn: async () => {
       const { data } = await apiClient.get(`/adverts/filterbyinactives`);
@@ -45,7 +45,7 @@ export default function Page() {
     },
   });
 
-  const getRequestedAds = useQuery<AdvertByStatus[]>({
+  const getRequestedAds = useQuery({
     queryKey: ["requested", user?.id],
     queryFn: async () => {
       const { data } = await apiClient(`/adverts/filterbypending`);
@@ -151,75 +151,86 @@ export default function Page() {
                 )}
                 {getActiveAds.data &&
                   getActiveAds.data.length > 0 &&
-                  getActiveAds.data.map((ad) => (
-                    <Card
-                      key={ad.id}
-                      className={cn(
-                        "w-full h-fit md:h-[200px] flex flex-col items-center p-5 gap-6 md:flex-row"
-                      )}
-                    >
-                      <div className="relative w-full h-[150px] md:w-[150px]">
-                        <Image
-                          src={ad.images[0].url || "/default-car.png"}
-                          fill
-                          alt="1"
-                          className="object-cover rounded-md"
-                        />
-                      </div>
-                      <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.brand?.name}
-                              </span>
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.year_model}
-                              </span>
-                            </div>
-                            <p className="text-base max-w-[350px]">
-                              {ad.model.name}
-                            </p>
-                          </div>
-                          <span className="text-xl text-primary font-medium">
-                            {Number(ad.price).toLocaleString("pt-BR", {
-                              currency: "BRL",
-                              style: "currency",
-                            })}
-                          </span>
+                  getActiveAds.data.map(
+                    (
+                      ad: Prisma.AdvertsGetPayload<{
+                        include: { images: true; brand: true; model: true };
+                      }>
+                    ) => (
+                      <Card
+                        key={ad.id}
+                        className={cn(
+                          "w-full h-fit md:h-[200px] flex flex-col items-center p-5 gap-6 md:flex-row"
+                        )}
+                      >
+                        <div className="relative w-full h-[150px] md:w-[150px]">
+                          <Image
+                            src={ad.images[0].url || "/default-car.png"}
+                            fill
+                            alt="1"
+                            className="object-cover rounded-md"
+                          />
                         </div>
-
-                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
-                          <div className="space-x-8 flex items-center">
-                            <Link href={`/ad/${ad.slug}`} className="text-sm ">
-                              Ver
-                            </Link>
-                            <Link
-                              href={`/advert/update/${ad.id}`}
-                              className="text-sm"
-                            >
-                              Editar
-                            </Link>
-
-                            <div
-                              className="text-sm cursor-pointer"
-                              onClick={() => handleInactiveAdvert.mutate(ad.id)}
-                            >
-                              Desativar
+                        <div className="w-full flex flex-col justify-between gap-6 h-full">
+                          <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
+                            <div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.brand?.name}
+                                </span>
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.year_model}
+                                </span>
+                              </div>
+                              <p className="text-base max-w-[350px]">
+                                {ad.model.name}
+                              </p>
                             </div>
-                          </div>
-
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm">
-                              {Number(ad.mileage).toLocaleString("pt-BR")} km
+                            <span className="text-xl text-primary font-medium">
+                              {Number(ad.price).toLocaleString("pt-BR", {
+                                currency: "BRL",
+                                style: "currency",
+                              })}
                             </span>
-                            <span className="text-sm">{ad.color}</span>
-                            <span className="text-sm">{ad.city}</span>
+                          </div>
+
+                          <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
+                            <div className="space-x-8 flex items-center">
+                              <Link
+                                href={`/ad/${ad.slug}`}
+                                className="text-sm "
+                              >
+                                Ver
+                              </Link>
+                              <Link
+                                href={`/advert/update/${ad.id}`}
+                                className="text-sm"
+                              >
+                                Editar
+                              </Link>
+
+                              <div
+                                className="text-sm cursor-pointer"
+                                onClick={() =>
+                                  handleInactiveAdvert.mutate(ad.id)
+                                }
+                              >
+                                Desativar
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm">
+                                {Number(ad.mileage).toLocaleString("pt-BR")} km
+                              </span>
+                              <span className="text-sm">{ad.color}</span>
+                              <span className="text-sm">{ad.city}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  )}
                 {getActiveAds.data && getActiveAds.data.length === 0 && (
                   <span className="text-sm text-muted-foreground">
                     Nenhum anúncio encontrado
@@ -235,104 +246,110 @@ export default function Page() {
                 )}
                 {getInactiveAds.data &&
                   getInactiveAds.data.length > 0 &&
-                  getInactiveAds.data.map((ad) => (
-                    <Card
-                      key={ad.id}
-                      className={cn(
-                        "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-100 md:opacity-50 transition-all hover:opacity-100"
-                      )}
-                    >
-                      <div className="relative w-full md:w-[150px] h-[150px]">
-                        <Image
-                          src={ad.images[0].url || "/default-car.png"}
-                          fill
-                          alt="1"
-                          className="object-cover rounded-md"
-                        />
-                      </div>
-                      <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.brand?.name}
-                              </span>
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.year_model}
-                              </span>
-                            </div>
-                            <p className="text-base max-w-[350px]">
-                              {ad.model.name}
-                            </p>
-                          </div>
-                          <span className="text-xl text-primary font-medium">
-                            {Number(ad.price).toLocaleString("pt-BR", {
-                              currency: "BRL",
-                              style: "currency",
-                            })}
-                          </span>
+                  getInactiveAds.data.map(
+                    (
+                      ad: Prisma.AdvertsGetPayload<{
+                        include: { images: true; brand: true; model: true };
+                      }>
+                    ) => (
+                      <Card
+                        key={ad.id}
+                        className={cn(
+                          "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-100 md:opacity-50 transition-all hover:opacity-100"
+                        )}
+                      >
+                        <div className="relative w-full md:w-[150px] h-[150px]">
+                          <Image
+                            src={ad.images[0].url || "/default-car.png"}
+                            fill
+                            alt="1"
+                            className="object-cover rounded-md"
+                          />
                         </div>
-
-                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
-                          <div className="space-x-8 flex items-center">
-                            <Link
-                              href={`/advert/update/${ad.id}`}
-                              className="text-sm"
-                            >
-                              Editar
-                            </Link>
-
-                            <div
-                              className="text-sm cursor-pointer"
-                              onClick={() => handleActiveAdvert.mutate(ad.id)}
-                            >
-                              Ativar
+                        <div className="w-full flex flex-col justify-between gap-6 h-full">
+                          <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
+                            <div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.brand?.name}
+                                </span>
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.year_model}
+                                </span>
+                              </div>
+                              <p className="text-base max-w-[350px]">
+                                {ad.model.name}
+                              </p>
                             </div>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="text-red-500 hover:text-red-500"
-                                >
-                                  Excluir
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Você tem certeza que deseja deletar este
-                                    anúncio?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Esta ação não pode ser desfeita. Você tem
-                                    certeza que deseja continuar?
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>
-                                    Cancelar
-                                  </AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => deleteAd.mutate(ad.id)}
+                            <span className="text-xl text-primary font-medium">
+                              {Number(ad.price).toLocaleString("pt-BR", {
+                                currency: "BRL",
+                                style: "currency",
+                              })}
+                            </span>
+                          </div>
+
+                          <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
+                            <div className="space-x-8 flex items-center">
+                              <Link
+                                href={`/advert/update/${ad.id}`}
+                                className="text-sm"
+                              >
+                                Editar
+                              </Link>
+
+                              <div
+                                className="text-sm cursor-pointer"
+                                onClick={() => handleActiveAdvert.mutate(ad.id)}
+                              >
+                                Ativar
+                              </div>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="text-red-500 hover:text-red-500"
                                   >
                                     Excluir
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Você tem certeza que deseja deletar este
+                                      anúncio?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Esta ação não pode ser desfeita. Você tem
+                                      certeza que deseja continuar?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteAd.mutate(ad.id)}
+                                    >
+                                      Excluir
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
 
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm">
-                              {Number(ad.mileage).toLocaleString("pt-BR")} km
-                            </span>
-                            <span className="text-sm">{ad.color}</span>
-                            <span className="text-sm">{ad.city}</span>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm">
+                                {Number(ad.mileage).toLocaleString("pt-BR")} km
+                              </span>
+                              <span className="text-sm">{ad.color}</span>
+                              <span className="text-sm">{ad.city}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  )}
                 {getInactiveAds.data && getInactiveAds.data.length === 0 && (
                   <span className="text-sm text-muted-foreground">
                     Nenhum anúncio encontrado
@@ -348,56 +365,62 @@ export default function Page() {
                 )}
                 {getRequestedAds.data &&
                   getRequestedAds.data.length > 0 &&
-                  getRequestedAds.data.map((ad) => (
-                    <Card
-                      key={ad.id}
-                      className={cn(
-                        "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-50 "
-                      )}
-                    >
-                      <div className="relative w-full md:w-[150px] h-[150px]">
-                        <Image
-                          src={ad.images[0].url || "/default-car.png"}
-                          fill
-                          alt="1"
-                          className="object-cover rounded-md"
-                        />
-                      </div>
-                      <div className="w-full flex flex-col justify-between gap-6 h-full">
-                        <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.brand?.name}
-                              </span>
-                              <span className="text-2xl font-bold text-primary">
-                                {ad.year_model}
-                              </span>
+                  getRequestedAds.data.map(
+                    (
+                      ad: Prisma.AdvertsGetPayload<{
+                        include: { images: true; brand: true; model: true };
+                      }>
+                    ) => (
+                      <Card
+                        key={ad.id}
+                        className={cn(
+                          "w-full h-fit md:h-[200px] flex flex-col md:flex-row items-center p-5 gap-6 opacity-50 "
+                        )}
+                      >
+                        <div className="relative w-full md:w-[150px] h-[150px]">
+                          <Image
+                            src={ad.images[0].url || "/default-car.png"}
+                            fill
+                            alt="1"
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                        <div className="w-full flex flex-col justify-between gap-6 h-full">
+                          <div className="flex justify-between items-start gap-4 flex-col md:gap-0 md:flex-row md:items-center h-full">
+                            <div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.brand?.name}
+                                </span>
+                                <span className="text-2xl font-bold text-primary">
+                                  {ad.year_model}
+                                </span>
+                              </div>
+                              <p className="text-base max-w-[350px]">
+                                {ad.model.name}
+                              </p>
                             </div>
-                            <p className="text-base max-w-[350px]">
-                              {ad.model.name}
-                            </p>
-                          </div>
-                          <span className="text-xl text-primary font-medium">
-                            {Number(ad.price).toLocaleString("pt-BR", {
-                              currency: "BRL",
-                              style: "currency",
-                            })}
-                          </span>
-                        </div>
-
-                        <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm">
-                              {Number(ad.mileage).toLocaleString("pt-BR")} km
+                            <span className="text-xl text-primary font-medium">
+                              {Number(ad.price).toLocaleString("pt-BR", {
+                                currency: "BRL",
+                                style: "currency",
+                              })}
                             </span>
-                            <span className="text-sm">{ad.color}</span>
-                            <span className="text-sm">{ad.city}</span>
+                          </div>
+
+                          <div className="flex items-start flex-col gap-4 md:gap-0 md:flex-row md:items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm">
+                                {Number(ad.mileage).toLocaleString("pt-BR")} km
+                              </span>
+                              <span className="text-sm">{ad.color}</span>
+                              <span className="text-sm">{ad.city}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    )
+                  )}
                 {getRequestedAds.data && getRequestedAds.data.length === 0 && (
                   <span className="text-sm text-muted-foreground">
                     Nenhum anúncio encontrado

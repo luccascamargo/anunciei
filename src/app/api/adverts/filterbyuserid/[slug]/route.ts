@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { AsyncParams } from "@/@types/FilterAdverts";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: AsyncParams }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug: userId } = await params;

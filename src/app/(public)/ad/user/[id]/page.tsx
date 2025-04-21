@@ -11,12 +11,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardSeller } from "./Card";
-import { AdvertFull } from "@/@types/FilterAdverts";
+import { Prisma } from "@prisma/client";
 
 type Params = Promise<{ id: string }>;
 
 type UserReturn = {
-  adverts: AdvertFull[];
+  adverts: Prisma.AdvertsGetPayload<{
+    include: {
+      brand: true;
+      model: true;
+      optionals: true;
+      images: true;
+      user: true;
+    };
+  }>[];
   email: string;
   created_at: Date;
   name: string;

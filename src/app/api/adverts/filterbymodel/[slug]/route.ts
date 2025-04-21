@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeText } from "@/lib/utils";
-import { AsyncParams } from "@/@types/FilterAdverts";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: AsyncParams }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug: model } = await params;
 

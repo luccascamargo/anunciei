@@ -35,9 +35,9 @@ import { apiClient, colors, GetCities, GetStates } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomInputValue } from "@/components/customInputValue";
 import { ImageDragDrop } from "@/components/imageDragDrop";
-import { AdvertFull, Opcionai } from "@/@types/FilterAdverts";
 import { LoadingModal } from "@/components/loadingModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Prisma } from "@prisma/client";
 
 const formSchema = z.object({
   ano_modelo: z
@@ -101,7 +101,15 @@ const types = [
 ];
 
 type Props = {
-  advert: AdvertFull;
+  advert: Prisma.AdvertsGetPayload<{
+    include: {
+      brand: true;
+      model: true;
+      user: true;
+      images: true;
+      optionals: true;
+    };
+  }>;
 };
 
 export function UpdateAdvert({ advert }: Props) {
@@ -250,7 +258,7 @@ export function UpdateAdvert({ advert }: Props) {
 
   const getOptionals = useQuery({
     queryKey: ["getOptionals"],
-    queryFn: async (): Promise<Opcionai[]> => {
+    queryFn: async () => {
       const { data } = await apiClient.get("/optionals", {
         headers: {
           "Content-Type": "application/json",

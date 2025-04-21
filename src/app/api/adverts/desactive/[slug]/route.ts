@@ -1,11 +1,10 @@
-import { AsyncParams } from "@/@types/FilterAdverts";
 import { verifyJwt } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: AsyncParams }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug: id } = await params;

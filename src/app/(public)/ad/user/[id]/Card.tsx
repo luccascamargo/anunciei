@@ -2,10 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { AdvertFull } from "@/@types/FilterAdverts";
+import { Prisma } from "@prisma/client";
 
 type CardAdClient = {
-  advert: AdvertFull;
+  advert: Prisma.AdvertsGetPayload<{
+    include: {
+      brand: true;
+      model: true;
+      optionals: true;
+      images: true;
+      user: true;
+    };
+  }>;
 };
 
 export function CardSeller({ ...props }: CardAdClient) {

@@ -3,13 +3,13 @@ import { DeleteFiles, UploadFile } from "@/lib/upload-s3";
 import { normalizeText } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { verifyJwt } from "@/lib/auth";
-import { AsyncParams } from "@/@types/FilterAdverts";
+
 import slugify from "slugify";
 import { v4 as uuidv4 } from "uuid";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: AsyncParams }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug: id } = await params;

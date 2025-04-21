@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { notFound } from "next/navigation";
-import { AdvertFull } from "@/@types/FilterAdverts";
 import { apiClient } from "@/lib/utils";
 import { AdvertClient } from "./advertClient";
 
@@ -9,14 +9,11 @@ export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
 
   try {
-    const { data: advert } = await apiClient.get<AdvertFull>(
-      `/adverts/${slug}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const { data: advert } = await apiClient.get(`/adverts/${slug}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!advert) {
       return {
@@ -34,7 +31,7 @@ export async function generateMetadata({ params }: { params: Params }) {
         description: advert.description,
         url: `https://www.igarage.com/ad/${slug}`,
         images:
-          advert.images?.map((image) => ({
+          advert.images?.map((image: any) => ({
             url: image.url,
             alt: advert.model,
           })) || [],
@@ -56,7 +53,7 @@ export async function generateMetadata({ params }: { params: Params }) {
 }
 
 export default async function Anuncio({ params }: { params: Params }) {
-  let advert: AdvertFull | null = null;
+  let advert: any | null = null;
   const { slug } = await params;
 
   try {

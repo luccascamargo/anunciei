@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { AsyncParams } from "@/@types/FilterAdverts";
+
 import { Category } from "@prisma/client";
 
 const categoryMap: Record<string, Category> = {
@@ -11,7 +11,7 @@ const categoryMap: Record<string, Category> = {
 
 export async function GET(
   request: Request,
-  { params }: { params: AsyncParams }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug: type } = await params;
 

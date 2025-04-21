@@ -1,12 +1,14 @@
-import { AdvertFull } from "@/@types/FilterAdverts";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
+import { Prisma } from "@prisma/client";
 
 interface iCardAd {
   className?: string;
-  data: AdvertFull;
+  data: Prisma.AdvertsGetPayload<{
+    include: { model: true; brand: true; images: true; user: true };
+  }>;
 }
 
 export function CardAdvert({ className, data }: iCardAd) {

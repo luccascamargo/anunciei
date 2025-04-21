@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,13 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { AdvertFull, Opcionai } from "@/@types/FilterAdverts";
 import { CarouselImages } from "@/components/carouselImages";
 import { ComponentFavorite } from "./componentFavorite";
 import { FormAdvertContact } from "@/components/formAdvertContact";
+import { Prisma } from "@prisma/client";
 
 interface iContentAD {
-  advert: AdvertFull;
+  advert: Prisma.AdvertsGetPayload<{
+    include: {
+      brand: true;
+      model: true;
+      optionals: true;
+      images: true;
+      user: true;
+    };
+  }>;
 }
 
 export function AdvertClient({ advert }: iContentAD) {
@@ -123,7 +132,7 @@ export function AdvertClient({ advert }: iContentAD) {
                     Nenhum opcional cadastrado
                   </span>
                 )}
-                {advert.optionals?.map((opt: Opcionai, index: number) => (
+                {advert.optionals?.map((opt: any, index: number) => (
                   <li key={index}>{opt.name}</li>
                 ))}
               </ul>
