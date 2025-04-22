@@ -11,11 +11,11 @@ export function Footer() {
             <Image src={"/appgarage.svg"} width={52} height={52} alt="" />
           </Link>
           <Link href={"/"}>Home</Link>
-          <Link href={"politica-de-privacidade"}>Politica de privacidade</Link>
+          <Link href={"politicas-de-privacidade"}>Politica de privacidade</Link>
           <Link href={"/termos-de-uso"}>Termos de uso</Link>
         </div>
         <p className="text-sm font-normal">
-          © 2025 iGarage. Todos os direitos reservados.
+          © 2025 Anunciei. Todos os direitos reservados.
         </p>
       </Wrapper>
     </div>

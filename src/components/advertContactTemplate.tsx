@@ -65,6 +65,6 @@ export const AdvertContactTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
       </a>
     </p>
     <p>Atenciosamente,</p>
-    <p>A equipe do iGarage</p>
+    <p>A equipe do Anunciei</p>
   </div>
 );

@@ -41,6 +41,7 @@ export function Navbar() {
               <Link href="/">Home</Link>
               <Link href="/stock/carros">Buscar</Link>
               <Link href="/pricing">Preços</Link>
+              <Link href="/contato">Contato</Link>
             </div>
           </div>
 

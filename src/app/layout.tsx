@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AppGarage - Facilite sua venda",
+  title: "Anunciei - Facilite sua venda",
   keywords: [
     "Anúncios de veículos Rio Grande do Sul",
     "Compra e venda de carros RS",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "Anúncios automotivos RS",
   ],
   description:
-    "AppGarage - Encontre os melhores anúncios de veículos no Rio Grande do Sul. Compre e venda carros, motos e caminhões na nossa plataforma especializada.",
+    "Anunciei - Encontre os melhores anúncios de veículos no Rio Grande do Sul. Compre e venda carros, motos e caminhões na nossa plataforma especializada.",
 };
 
 export default async function RootLayout({
