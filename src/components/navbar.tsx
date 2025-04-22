@@ -46,6 +46,13 @@ export function Navbar() {
 
           {/* Ações do Usuário */}
           <div className="hidden md:flex items-center gap-6">
+            {user && user.plan === "FREE" && (
+              <Badge className="bg-accent text-black hover:bg-accent">
+                Grátis
+              </Badge>
+            )}
+            {user && user.plan === "BASIC" && <Badge>Básico</Badge>}
+            {user && user.plan === "PRO" && <Badge>Pro</Badge>}
             {user && (
               <div className="flex items-center gap-5">
                 <DropdownMenu>

@@ -18,11 +18,13 @@ import { apiClient } from "@/lib/utils";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { LoadingModal } from "./loadingModal";
 
 type PlanoTipo = "FREE" | "BASIC" | "PRO";
 type FaturamentoTipo = "month" | "year";
 
 export function PaginaPrecos() {
+  const [isLoading, setIsLoading] = useState(false);
   const { user: userData } = useAuth();
   const router = useRouter();
   const [cicloFaturamento, setCicloFaturamento] =
@@ -48,6 +50,7 @@ export function PaginaPrecos() {
 
   // Função para lidar com a assinatura ou upgrade
   const handleAssinatura = async (plano: PlanoTipo) => {
+    setIsLoading(true);
     const { data } = await apiClient.get(
       `/stripe/create?plan=${plano.toLowerCase()}&cycle=${cicloFaturamento}`,
       {
@@ -56,10 +59,12 @@ export function PaginaPrecos() {
         },
       }
     );
+    setIsLoading(false);
     window.location.href = data.url;
   };
 
   const abrirPortalCliente = async () => {
+    setIsLoading(true);
     const { data } = await apiClient.get("/stripe/portal", {
       params: {
         returnUrl: `${window.location.origin}/pricing`,
@@ -68,6 +73,7 @@ export function PaginaPrecos() {
         "Content-Type": "application/json",
       },
     });
+    setIsLoading(false);
     window.location.href = data.url;
   };
 
@@ -400,6 +406,13 @@ export function PaginaPrecos() {
           <CardFooter>{renderizarBotao("PRO")}</CardFooter>
         </Card>
       </div>
+
+      <LoadingModal
+        title="Aguarde, isso pode levar alguns segundos."
+        subTitle="Processando..."
+        description="Vamos te levar para nossa plataforma de pagamentos. Fique tranquilo, é um ambiente simples e seguro."
+        isOpen={isLoading}
+      />
     </div>
   );
 }

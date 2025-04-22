@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
         },
       ],
       mode: "subscription",
-      success_url: `${process.env.NEXT_PUBLIC_API_URL}/assinatura/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_API_URL}/?succes=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_API_URL}/pricing`,
       subscription_data: {
         metadata: {

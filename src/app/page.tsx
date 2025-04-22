@@ -16,10 +16,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SearchBox } from "@/components/searchBox";
+import SuccessModal from "@/components/succesModal";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
+      <SuccessModal />
       {/* Hero Section */}
       <section className="relative pt-24 md:h-[800px] flex items-center justify-center">
         <div className="container px-4 relative z-10">
