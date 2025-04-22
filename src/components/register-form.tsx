@@ -22,6 +22,7 @@ import {
 } from "./ui/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { LoadingModal } from "./loadingModal";
 
 const formSchema = z.object({
   name: z
@@ -159,6 +160,12 @@ export function RegisterForm({
           </Form>
         </CardContent>
       </Card>
+      <LoadingModal
+        description="Estamos validando suas informações."
+        isOpen={form.formState.isSubmitting}
+        subTitle="Aguarde, isso pode demorar um pouco"
+        title="Validando..."
+      />
     </div>
   );
 }

@@ -66,8 +66,8 @@ export async function POST(request: Request) {
 
   cookieStore.set("accessToken", accessToken, {
     httpOnly: true,
-    sameSite: "strict",
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     path: "/",
   });

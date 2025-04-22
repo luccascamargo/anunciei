@@ -31,7 +31,7 @@ export default function Page() {
         </CardHeader>
         <CardContent className="flex flex-col gap-8 items-center">
           {favorites.length <= 0 || favorites === undefined ? (
-            <span className="text-sm">
+            <span className="text-sm text-muted-foreground">
               Você não tem nenhum anúncio favoritado.
             </span>
           ) : (

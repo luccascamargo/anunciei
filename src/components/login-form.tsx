@@ -23,6 +23,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { LoadingModal } from "./loadingModal";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido." }),
@@ -128,6 +129,12 @@ export function SiginForm({
           </Form>
         </CardContent>
       </Card>
+      <LoadingModal
+        description="Estamos validando suas informações."
+        isOpen={form.formState.isSubmitting}
+        subTitle="Aguarde, isso pode demorar um pouco"
+        title="Validando..."
+      />
     </div>
   );
 }
