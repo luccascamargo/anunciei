@@ -8,8 +8,8 @@ async function getAccessToken(): Promise<string | null> {
   return accessToken.get("accessToken")?.value || null;
 }
 
-export async function verifyJwt(): Promise<string | null> {
-  const accessToken = await getAccessToken();
+export async function verifyJwt(token?: string): Promise<string | null> {
+  const accessToken = token || (await getAccessToken());
 
   if (!accessToken) {
     console.warn("Token de acesso não encontrado.");
