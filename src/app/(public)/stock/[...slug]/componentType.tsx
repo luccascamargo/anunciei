@@ -690,7 +690,7 @@ export function ComponentType({ slug }: { slug: string }) {
                 </Select>
               </div>
             </CardHeader>
-            <CardContent className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
+            <CardContent className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
               {status === "pending" ? (
                 Array.from({ length: 24 }).map((_, index) => (
                   <Skeleton className="h-4 w-full" key={index} />

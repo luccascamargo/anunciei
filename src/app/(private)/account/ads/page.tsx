@@ -198,7 +198,7 @@ export default function Page() {
                             <div className="space-x-8 flex items-center">
                               <Link
                                 href={`/ad/${ad.slug}`}
-                                className="text-sm "
+                                className="text-sm underline"
                               >
                                 Ver
                               </Link>

@@ -1,5 +1,5 @@
 "use client";
-import { apiClient, cn } from "@/lib/utils";
+import { apiClient } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,10 +32,7 @@ const formSchema = z.object({
   }),
 });
 
-export function SiginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SiginForm() {
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,7 +71,7 @@ export function SiginForm({
       });
   }
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Entrar</CardTitle>
@@ -115,9 +112,9 @@ export function SiginForm({
                 <Button type="submit" className="w-full">
                   {form.formState.isSubmitting ? "Enviando..." : "Entrar"}
                 </Button>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   Entrar com Google
-                </Button>
+                </Button> */}
               </div>
               <div className="mt-4 text-center text-sm">
                 Ainda não tem uma conta?{" "}
