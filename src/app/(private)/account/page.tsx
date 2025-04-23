@@ -30,7 +30,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Wrapper } from "@/components/wrapper";
 import { useAuth } from "@/hooks/useAuth";
 import { notFound } from "next/navigation";
 import { useMask, format } from "@react-input/mask";
@@ -167,7 +166,7 @@ export default function Page() {
   }
 
   return (
-    <Wrapper className="flex flex-col justify-center pt-10">
+    <div className="container mx-auto flex flex-col justify-center pt-10 px-6">
       <Card className="flex flex-col justify-center w-full p-6 m-auto">
         <CardContent className="space-y-10 flex flex-col items-center w-full">
           <Tabs
@@ -400,6 +399,6 @@ export default function Page() {
           </Tabs>
         </CardContent>
       </Card>
-    </Wrapper>
+    </div>
   );
 }

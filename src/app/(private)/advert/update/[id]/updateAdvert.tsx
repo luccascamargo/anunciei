@@ -638,7 +638,7 @@ export function UpdateAdvert({ advert }: Props) {
                   )}
                 />
 
-                <ScrollArea className="h-72 w-96 rounded-md border p-2">
+                <ScrollArea className="h-72 w-full md:w-96 rounded-md border p-2">
                   <FormField
                     control={form.control}
                     name="opcionais"

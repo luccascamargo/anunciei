@@ -4,8 +4,8 @@ import axios from "axios";
 import slugify from "slugify";
 
 // 👇 Configure os limites aqui
-const LIMIT_BRANDS = 25;
-const LIMIT_MODELS = 10;
+//const LIMIT_BRANDS = 25;
+//const LIMIT_MODELS = 10;
 
 const categories = {
   CARS: "https://brasilapi.com.br/api/fipe/marcas/v1/carros",
@@ -26,47 +26,29 @@ async function syncFipe() {
     console.log(`🔄 Sincronizando dados para: ${category}...`);
 
     const { data: allBrands } = await axios.get(url);
-    const brands = allBrands.slice(0, LIMIT_BRANDS); // 👈 Limita marcas
+    // const brands = allBrands.slice(0, LIMIT_BRANDS); // 👈 Limita marcas
 
-    for (const brand of brands) {
+    for (const brand of allBrands) {
       const slug = slugify(brand.nome, { lower: true, strict: true });
 
-      // Primeiro verifica se a marca já existe pelo nome
+      // Verifica se a marca já existe com o mesmo slug
       const existingBrand = await prisma.brands.findUnique({
-        where: { name: brand.nome },
+        where: { slug },
       });
 
-      let brandCreated;
-
       if (existingBrand) {
-        // Se existir, atualiza apenas se necessário
-        brandCreated = await prisma.brands.update({
-          where: { id: existingBrand.id },
-          data: {
-            category: category as Category,
-          },
-        });
-      } else {
-        // Se não existir, cria com um slug único
-        let uniqueSlug = slug;
-        let counter = 1;
-
-        // Verifica se o slug já existe e adiciona um número se necessário
-        while (
-          await prisma.brands.findUnique({ where: { slug: uniqueSlug } })
-        ) {
-          uniqueSlug = `${slug}-${counter}`;
-          counter++;
-        }
-
-        brandCreated = await prisma.brands.create({
-          data: {
-            name: brand.nome,
-            slug: uniqueSlug,
-            category: category as Category,
-          },
-        });
+        console.log(`🔄 Marca já existe com o slug: ${slug}. Ignorando.`);
+        continue; // Pula para a próxima marca
       }
+
+      // Cria a marca apenas se o slug não existir
+      const brandCreated = await prisma.brands.create({
+        data: {
+          name: brand.nome,
+          slug,
+          category: category as Category,
+        },
+      });
 
       const { data: allModels } = await axios.get(
         `https://brasilapi.com.br/api/fipe/veiculos/v1/${
@@ -74,19 +56,26 @@ async function syncFipe() {
         }/${brand.valor}`
       );
 
-      const models = allModels.slice(0, LIMIT_MODELS); // 👈 Limita modelos
+      // const models = allModels.slice(0, LIMIT_MODELS); // 👈 Limita modelos
 
-      for (const model of models) {
+      for (const model of allModels) {
         const modelSlug = slugify(model.modelo, { lower: true, strict: true });
 
-        await prisma.models.upsert({
-          where: { name: model.modelo },
-          update: {
-            name: model.modelo,
-            category: category as Category,
-            slug: modelSlug,
-          },
-          create: {
+        // Verifica se o modelo já existe com o mesmo slug
+        const existingModel = await prisma.models.findUnique({
+          where: { slug: modelSlug },
+        });
+
+        if (existingModel) {
+          console.log(
+            `🔄 Modelo já existe com o slug: ${modelSlug}. Ignorando.`
+          );
+          continue; // Pula para o próximo modelo
+        }
+
+        // Cria o modelo apenas se o slug não existir
+        await prisma.models.create({
+          data: {
             name: model.modelo,
             slug: modelSlug,
             brand_id: brandCreated.id,

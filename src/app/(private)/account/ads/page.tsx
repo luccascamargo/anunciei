@@ -121,7 +121,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="container m-auto px-5 flex items-center justify-center">
+      <div className="container m-auto px-6 flex items-center justify-center">
         <Card className="mt-10 w-full min-h-screen">
           <CardHeader>
             <CardTitle>Meus anúncios</CardTitle>
