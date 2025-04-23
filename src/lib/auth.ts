@@ -1,18 +1,18 @@
 import { JwtPayload, verify } from "jsonwebtoken";
-
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 import { Prisma } from "@prisma/client";
 
-async function getAccessToken() {
+async function getAccessToken(): Promise<string | null> {
   const accessToken = await cookies();
-  return accessToken.get("accessToken")?.value;
+  return accessToken.get("accessToken")?.value || null;
 }
 
-export async function verifyJwt(token?: string): Promise<null | string> {
-  const accessToken = token || (await getAccessToken());
+export async function verifyJwt(): Promise<string | null> {
+  const accessToken = await getAccessToken();
 
   if (!accessToken) {
+    console.warn("Token de acesso não encontrado.");
     return null;
   }
 
@@ -23,16 +23,20 @@ export async function verifyJwt(token?: string): Promise<null | string> {
     ) as JwtPayload;
 
     if (!userId) {
+      console.warn("Token inválido: userId não encontrado.");
       return null;
     }
+
     return userId;
-  } catch {
+  } catch (error) {
+    console.error("Erro ao verificar o token JWT:", error);
     return null;
   }
 }
 
-export function isAuthenticated() {
-  return !!verifyJwt();
+export async function isAuthenticated(): Promise<boolean> {
+  const userId = await verifyJwt();
+  return !!userId;
 }
 
 export async function auth(): Promise<null | Prisma.UserGetPayload<{
@@ -41,6 +45,7 @@ export async function auth(): Promise<null | Prisma.UserGetPayload<{
   const userId = await verifyJwt();
 
   if (!userId) {
+    console.warn("Usuário não autenticado.");
     return null;
   }
 
@@ -52,8 +57,14 @@ export async function auth(): Promise<null | Prisma.UserGetPayload<{
       },
     });
 
+    if (!user) {
+      console.warn("Usuário não encontrado no banco de dados.");
+      return null;
+    }
+
     return user;
-  } catch {
+  } catch (error) {
+    console.error("Erro ao buscar o usuário no banco de dados:", error);
     return null;
   }
 }

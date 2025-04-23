@@ -22,11 +22,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
   const { user } = useAuth();
+  const path = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [path]);
 
   return (
     <div className="w-screen py-4 border-b bg-white">
