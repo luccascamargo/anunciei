@@ -51,7 +51,7 @@ export function CardFavorites({ toggleFavorite, ...props }: CardAdClient) {
 
         <div className="flex flex-col items-start gap-5 md:gap-0 md:flex-row md:items-center justify-between">
           <div className="flex items-center gap-7">
-            <Link href={`/ad/${props.slug}`} className="text-sm ">
+            <Link href={`/ad/${props.slug}`} className="text-sm underline">
               Ver
             </Link>
             <div

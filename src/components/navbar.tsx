@@ -35,7 +35,7 @@ export function Navbar() {
   }, [path]);
 
   return (
-    <div className="w-screen py-4 border-b">
+    <div className="w-screen py-6 md:py-4 border-b">
       <Wrapper>
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -119,7 +119,7 @@ export function Navbar() {
               <SheetTrigger asChild>
                 <Menu size={28} />
               </SheetTrigger>
-              <SheetContent side="left" className="w-64 px-5">
+              <SheetContent side="left" className="w-fit px-5">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
@@ -155,6 +155,8 @@ export function Navbar() {
                       </button>
                     </>
                   )}
+                </div>
+                <SheetFooter className="w-full flex flex-row items-end">
                   {!user && (
                     <>
                       <Link href="/signin">
@@ -165,8 +167,6 @@ export function Navbar() {
                       </Link>
                     </>
                   )}
-                </div>
-                <SheetFooter className="w-full flex flex-row items-end">
                   {user && (
                     <>
                       <span>
