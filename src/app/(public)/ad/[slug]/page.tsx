@@ -23,13 +23,13 @@ export async function generateMetadata({ params }: { params: Params }) {
     }
 
     return {
-      title: `${advert.brand.name} - ${advert.model.name} - ${advert.city}, ${advert.state} | AppGarage`,
+      title: `${advert.brand.name} - ${advert.model.name} - ${advert.city}, ${advert.state} | Anunciei`,
       description:
-        advert.description || "Confira este anúncio incrível no AppGarage!",
+        advert.description || "Confira este anúncio incrível no Anunciei!",
       openGraph: {
         title: advert.model,
         description: advert.description,
-        url: `https://www.igarage.com/ad/${slug}`,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/${slug}`,
         images:
           advert.images?.map((image: any) => ({
             url: image.url,

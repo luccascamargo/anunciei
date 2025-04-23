@@ -434,7 +434,7 @@ export default function Page() {
 
   const renderStepContent = () => {
     return (
-      <div className="space-y-5">
+      <div className="space-y-5 w-full">
         {currentStep === 0 && (
           <>
             <FormField
@@ -997,8 +997,8 @@ export default function Page() {
   };
 
   return (
-    <div className="container m-auto flex items-center justify-center px-2">
-      <Card className="mt-10 w-full min-h-screen">
+    <div className="container m-auto flex items-center justify-center px-6">
+      <Card className="mt-10 w-full h-auto">
         <CardHeader>
           <CardTitle>Crie seu anúncio</CardTitle>
           <div className="mt-4 hidden md:block">
@@ -1025,7 +1025,7 @@ export default function Page() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-5 min-w-[450px] mx-auto"
+                className="space-y-5 w-full md:w-[450px] mx-auto"
               >
                 {renderStepContent()}
 

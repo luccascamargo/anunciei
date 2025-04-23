@@ -6,7 +6,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isAuth = isAuthenticated();
+  const isAuth = await isAuthenticated();
 
   if (!isAuth) {
     // Redirect to the sign-in page if the user is not authenticated
