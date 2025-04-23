@@ -289,15 +289,15 @@ export function ComponentType({ slug }: { slug: string }) {
                   </SheetTrigger>
                   <SheetContent
                     side="right"
-                    className="flex flex-col items-center"
+                    className="flex flex-col items-center h-full"
                   >
                     <SheetHeader className="w-full">
                       <SheetTitle>Escolha seus filtros</SheetTitle>
                     </SheetHeader>
-                    <ScrollArea className="w-full">
+                    <ScrollArea className="w-full h-[95%]">
                       <div className="w-full h-fit">
                         <CardHeader>
-                          <div className="mt-5 w-full flex items-center gap-3">
+                          <div className=" w-full h-full flex items-center gap-3">
                             <Button
                               variant={
                                 slug === "carros" ? "default" : "outline"

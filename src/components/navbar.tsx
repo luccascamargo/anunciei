@@ -35,15 +35,15 @@ export function Navbar() {
   }, [path]);
 
   return (
-    <div className="w-screen py-4 border-b bg-white">
+    <div className="w-screen py-4 border-b">
       <Wrapper>
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-end gap-4">
             <Link href="/">
-              <Image src={"/appgarage.svg"} width={52} height={52} alt="Logo" />
+              <Image src={"/anunciei.svg"} width={52} height={37} alt="Logo" />
             </Link>
-            <div className="hidden md:flex items-center justify-center gap-12">
+            <div className="hidden ml-7 md:flex items-center justify-center gap-12">
               <Link href="/">Home</Link>
               <Link href="/stock/carros">Buscar</Link>
               <Link href="/pricing">Preços</Link>
@@ -121,15 +121,7 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="left" className="w-64 px-5">
                 <SheetHeader>
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={"/appgarage.svg"}
-                      width={40}
-                      height={40}
-                      alt="Logo"
-                    />
-                    <SheetTitle>Menu</SheetTitle>
-                  </div>
+                  <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col items-start gap-4">
                   <Link href="/">Home</Link>
@@ -174,8 +166,15 @@ export function Navbar() {
                     </>
                   )}
                 </div>
-                <SheetFooter className="w-full flex items-end">
-                  {user && <Badge variant="default">{user?.plan}</Badge>}
+                <SheetFooter className="w-full flex flex-row items-end">
+                  {user && (
+                    <>
+                      <span>
+                        {user.name} {user.lastname}
+                      </span>
+                      <Badge variant="default">{user.plan}</Badge>
+                    </>
+                  )}
                 </SheetFooter>
               </SheetContent>
             </Sheet>
