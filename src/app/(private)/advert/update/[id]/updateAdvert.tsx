@@ -294,53 +294,58 @@ export function UpdateAdvert({ advert }: Props) {
         </CardHeader>
         <CardContent>
           <div className="w-full flex flex-col gap-16 pt-10">
-            <div className="flex flex-col lg:flex-row gap-8 w-full">
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileSelection}
-                  className="hidden"
-                  id="photoInput"
-                />
-                <label
-                  htmlFor="photoInput"
-                  className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow-sm"
-                >
-                  <span className="text-base">
-                    Adicionar <br />
-                    Foto
-                  </span>
-                </label>
-              </div>
-              <div className="w-full flex items-center flex-wrap">
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable
-                    droppableId="images"
-                    type="list"
-                    direction="horizontal"
+            <div className="flex flex-col gap-6">
+              <p className="text-muted-foreground text-sm">
+                Dica: Fotos tiradas no formato horizontal são mais profissonais.
+              </p>
+              <div className="flex flex-col lg:flex-row gap-8 w-full">
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileSelection}
+                    className="hidden"
+                    id="photoInput"
+                  />
+                  <label
+                    htmlFor="photoInput"
+                    className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow-sm"
                   >
-                    {(provided: any) => (
-                      <article
-                        className="max-w-[1000px] flex flex-wrap items-center gap-9"
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                      >
-                        {selectedFiles.map((file, index) => (
-                          <ImageDragDrop
-                            id={file.id}
-                            key={index}
-                            index={index}
-                            thumb={file.url}
-                            handleRemoveImage={handleRemoveImage}
-                          />
-                        ))}
-                        {provided.placeholder}
-                      </article>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                    <span className="text-base">
+                      Adicionar <br />
+                      Foto
+                    </span>
+                  </label>
+                </div>
+                <div className="w-full flex items-center flex-wrap">
+                  <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable
+                      droppableId="images"
+                      type="list"
+                      direction="horizontal"
+                    >
+                      {(provided: any) => (
+                        <article
+                          className="max-w-[1000px] flex flex-wrap items-center gap-9"
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                        >
+                          {selectedFiles.map((file, index) => (
+                            <ImageDragDrop
+                              id={file.id}
+                              key={index}
+                              index={index}
+                              thumb={file.url}
+                              handleRemoveImage={handleRemoveImage}
+                            />
+                          ))}
+                          {provided.placeholder}
+                        </article>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
               </div>
             </div>
             <Form {...form}>

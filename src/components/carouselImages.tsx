@@ -50,7 +50,7 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
     <div className="w-full">
       <Carousel setApi={setApi} className="w-full max-w-full">
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/90 z-40 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/90 z-40 flex items-center justify-center p-6">
             <button
               onClick={handleModalClose}
               className="absolute top-4 right-4 text-white hover:text-gray-300 z-50 cursor-pointer"
@@ -58,17 +58,15 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
               <X size={32} />
             </button>
 
-            <div className="relative w-full h-full flex flex-col items-center justify-center">
-              <div className="w-full relative flex justify-center">
-                <div className="relative w-full max-w-4xl h-[80vh]">
-                  <Image
-                    src={images[modalCurrent].url}
-                    fill
-                    objectFit="contain"
-                    alt="Imagem em tamanho maior"
-                    className="rounded-lg"
-                  />
-                </div>
+            <div className="relative w-full h-full flex flex-col items-center justify-center gap-6">
+              <div className="relative w-full max-w-4xl h-[400px] lg:h-full">
+                <Image
+                  src={images[modalCurrent].url}
+                  fill
+                  objectFit="contain"
+                  alt="Imagem em tamanho maior"
+                  className="rounded-lg"
+                />
               </div>
               <ScrollArea className="w-full">
                 <div className="w-full flex justify-center">

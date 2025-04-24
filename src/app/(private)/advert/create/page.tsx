@@ -829,53 +829,58 @@ export default function Page() {
         )}
 
         {currentStep === 4 && (
-          <div className="flex gap-8 w-full flex-wrap md:flex-nowrap">
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileSelection}
-                className="hidden"
-                id="photoInput"
-              />
-              <label
-                htmlFor="photoInput"
-                className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow-sm"
-              >
-                <span className="text-base">
-                  Adicionar <br />
-                  Foto
-                </span>
-              </label>
-            </div>
-            <div className="w-full flex items-center">
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable
-                  droppableId="images"
-                  type="list"
-                  direction="horizontal"
+          <div className="flex flex-col gap-6">
+            <p className="text-muted-foreground text-sm">
+              Dica: Fotos tiradas no formato horizontal são mais profissonais.
+            </p>
+            <div className="flex gap-8 w-full flex-wrap md:flex-nowrap">
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelection}
+                  className="hidden"
+                  id="photoInput"
+                />
+                <label
+                  htmlFor="photoInput"
+                  className="cursor-pointer w-32 h-32 bg-primary-foreground border flex items-center justify-center text-center rounded-md shadow-sm"
                 >
-                  {(provided: any) => (
-                    <article
-                      className="w-full max-w-[1000px] flex-wrap md:flex-nowrap flex items-center gap-9"
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                    >
-                      {selectedFiles.map((file, index) => (
-                        <ImageDragDrop
-                          id={file.id}
-                          key={index}
-                          index={index}
-                          thumb={file.url}
-                          handleRemoveImage={handleRemoveImage}
-                        />
-                      ))}
-                      {provided.placeholder}
-                    </article>
-                  )}
-                </Droppable>
-              </DragDropContext>
+                  <span className="text-base">
+                    Adicionar <br />
+                    Foto
+                  </span>
+                </label>
+              </div>
+              <div className="w-full flex items-center">
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable
+                    droppableId="images"
+                    type="list"
+                    direction="horizontal"
+                  >
+                    {(provided: any) => (
+                      <article
+                        className="w-full max-w-[1000px] flex-wrap md:flex-nowrap flex items-center gap-9"
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                      >
+                        {selectedFiles.map((file, index) => (
+                          <ImageDragDrop
+                            id={file.id}
+                            key={index}
+                            index={index}
+                            thumb={file.url}
+                            handleRemoveImage={handleRemoveImage}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </article>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
             </div>
           </div>
         )}

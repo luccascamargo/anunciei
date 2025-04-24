@@ -159,7 +159,7 @@ export function ComponentType({ slug }: { slug: string }) {
   });
 
   async function fetchAdverts({ pageParam = 1 }: { pageParam: number }) {
-    const limit = 5;
+    const limit = 25;
     const params = new URLSearchParams(searchParams);
     params.set("limit", limit.toString());
     params.set("pageParam", pageParam.toString());
@@ -253,7 +253,7 @@ export function ComponentType({ slug }: { slug: string }) {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ["adsbytype", searchParams.toString()],
+    queryKey: ["adsbytype", slug, searchParams.toString()],
     queryFn: ({ pageParam }) => fetchAdverts({ pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
