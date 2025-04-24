@@ -31,12 +31,12 @@ export function ImageDragDrop({
             fill
             className=" object-cover absolute top-0 left-0 rounded-md"
           />
-          <button
+          <div
             onClick={() => handleRemoveImage(thumb)}
             className="absolute -right-4 -top-4 p-1 rounded-full bg-primary-foreground shadow-sm cursor-pointer"
           >
             <X />
-          </button>
+          </div>
         </div>
       )}
     </Draggable>

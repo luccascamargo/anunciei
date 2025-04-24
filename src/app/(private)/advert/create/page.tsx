@@ -311,9 +311,9 @@ export default function Page() {
     }
   };
 
-  const handleRemoveImage = (id: string) => {
+  const handleRemoveImage = (thumb: string) => {
     setSelectedFiles((prevFiles) => {
-      const updatedFiles = prevFiles.filter((file) => file.id !== id);
+      const updatedFiles = prevFiles.filter((file) => file.url !== thumb);
       return [...updatedFiles];
     });
 
