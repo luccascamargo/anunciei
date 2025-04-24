@@ -4,6 +4,7 @@ import {
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
+import sharp from "sharp"; // Importa a biblioteca sharp
 
 if (
   !process.env.AWS_REGION ||
@@ -29,16 +30,25 @@ export async function UploadFile(
     throw new Error("Arquivo não encontrado.");
   }
 
-  const fileKey = `${uuidv4()}-${file.name}`;
-  const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: fileKey,
-    Body: new Uint8Array(await file.arrayBuffer()),
-    ContentType: file.type,
-  });
+  const fileKey = `${uuidv4()}-${file.name.split(".")[0]}.webp`; // Define o nome do arquivo com extensão .webp
 
   try {
+    // Converte a imagem para WebP usando sharp
+    const webpBuffer = await sharp(await file.arrayBuffer())
+      .webp({ quality: 80 }) // Define a qualidade da conversão (80 é um bom valor padrão)
+      .toBuffer();
+
+    // Cria o comando para upload no S3
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: fileKey,
+      Body: webpBuffer, // Usa o buffer da imagem convertida
+      ContentType: "image/webp", // Define o tipo de conteúdo como WebP
+    });
+
+    // Envia o arquivo para o S3
     await client.send(command);
+
     return {
       url: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`,
       key: fileKey,

@@ -276,7 +276,7 @@ export function ComponentType({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="w-screen px-6 max-w-[1920px] pt-10">
+    <div className="w-full px-6 max-w-[1920px] pt-10">
       <div className="w-full flex gap-8 justify-center">
         <div className="w-full min-h-full">
           <Card className="container mx-auto w-full min-h-screen">

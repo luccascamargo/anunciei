@@ -8,7 +8,7 @@ interface iWrapper {
 
 export function Wrapper({ children, className }: iWrapper) {
   return (
-    <div className={twMerge(className, "w-screen max-w-[1280px] px-4 m-auto")}>
+    <div className={twMerge(className, "w-full max-w-[1280px] px-4 m-auto")}>
       {children}
     </div>
   );
