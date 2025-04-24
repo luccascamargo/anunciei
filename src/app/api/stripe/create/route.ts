@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
     // Mapear planos para preços do Stripe
     const precoIds: Record<string, Record<string, string>> = {
       basic: {
-        month: "price_1QcsHDA20bcBSMLHiaI67GY8",
-        year: "price_1QcsFIA20bcBSMLHzZTwiadO",
+        month: process.env.STRIPE_BASIC_MONTH as string,
+        year: process.env.STRIPE_BASIC_YEAR as string,
       },
       pro: {
-        month: "price_1QcsDlA20bcBSMLH6U1zAB0t",
-        year: "price_1QcsDNA20bcBSMLHleAyKwOj",
+        month: process.env.STRIPE_PRO_MONTH as string,
+        year: process.env.STRIPE_PRO_YEAR as string,
       },
     };
 

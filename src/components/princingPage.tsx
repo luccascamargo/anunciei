@@ -32,8 +32,8 @@ export function PaginaPrecos() {
 
   const precosMensais = {
     gratuito: 0,
-    basico: 39,
-    profissional: 247,
+    basico: 39.9,
+    profissional: 247.9,
   };
 
   const precosAnuais = {
@@ -370,7 +370,12 @@ export function PaginaPrecos() {
               {cicloFaturamento === "year" && (
                 <div className="flex items-center mt-2 text-sm text-emerald-600">
                   <span>
-                    Economia de R${economiaAnual.profissional} por ano
+                    Economia de R$
+                    {economiaAnual.profissional.toLocaleString("pt-BR", {
+                      currency: "BRL",
+                      style: "currency",
+                    })}{" "}
+                    por ano
                   </span>
                 </div>
               )}
@@ -387,7 +392,7 @@ export function PaginaPrecos() {
               </li>
               <li className="flex items-center">
                 <Check className="w-4 h-4 mr-2 text-primary" />
-                <span>Estatísticas premium com relatórios (em breve)</span>
+                <span>Estatísticas premium (em breve)</span>
               </li>
               <li className="flex items-center">
                 <Check className="w-4 h-4 mr-2 text-primary" />
