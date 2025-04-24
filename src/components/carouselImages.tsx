@@ -46,14 +46,6 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
     setIsModalOpen(false);
   };
 
-  const handleModalPrev = () => {
-    setModalCurrent((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const handleModalNext = () => {
-    setModalCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
   return (
     <div className="w-full">
       <Carousel setApi={setApi} className="w-full max-w-full">
@@ -67,14 +59,7 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
             </button>
 
             <div className="relative w-full h-full flex flex-col items-center justify-center">
-              <div className="w-full">
-                <button
-                  onClick={handleModalPrev}
-                  className="absolute left-4 text-white hover:text-gray-300 z-10"
-                >
-                  {/* <CarouselPrevious className="static" /> */}
-                </button>
-
+              <div className="w-full relative flex justify-center">
                 <div className="relative w-full max-w-4xl h-[80vh]">
                   <Image
                     src={images[modalCurrent].url}
@@ -84,16 +69,9 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
                     className="rounded-lg"
                   />
                 </div>
-
-                <button
-                  onClick={handleModalNext}
-                  className="absolute right-4 text-white hover:text-gray-300 z-10"
-                >
-                  {/* <CarouselNext className="static" /> */}
-                </button>
               </div>
               <ScrollArea className="w-full">
-                <div className="flex">
+                <div className="w-full flex justify-center">
                   {images.map((image, index) => (
                     <div
                       key={index}
@@ -142,7 +120,7 @@ export function CarouselImages({ images }: { images: { url: string }[] }) {
         <CarouselNext className="right-1.5" />
       </Carousel>
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="w-full flex mt-4">
+        <div className="w-full flex justify-center mt-4">
           {images.map((image, index) => (
             <div
               key={index}

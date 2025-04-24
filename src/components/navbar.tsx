@@ -35,7 +35,7 @@ export function Navbar() {
   }, [path]);
 
   return (
-    <div className="w-screen py-6 md:py-4 border-b">
+    <div className="w-full py-6 md:py-4 border-b">
       <Wrapper>
         <div className="flex items-center justify-between">
           {/* Logo */}

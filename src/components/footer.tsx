@@ -4,8 +4,8 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <div className="w-screen py-5 border-t mt-10">
-      <Wrapper className="flex flex-col items-center justify-between h-full gap-4 md:flex-row">
+    <div className="w-full py-5 border-t mt-10">
+      <Wrapper className="flex flex-col items-center justify-between h-full gap-4 flex-wrap md:flex-row">
         <div className="flex flex-col items-end gap-6 md:flex-row">
           <Link href="#" className=" text-3xl font-semibold">
             <Image src={"/anunciei.svg"} width={52} height={37} alt="" />
