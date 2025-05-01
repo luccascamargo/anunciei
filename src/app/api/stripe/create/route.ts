@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Não autorizado", { status: 401 });
     }
 
-    // Mapear planos para preços do Stripe
+    // Mapear planos para planos do Stripe
     const precoIds: Record<string, Record<string, string>> = {
       basic: {
         month: process.env.STRIPE_BASIC_MONTH as string,
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       ],
       mode: "subscription",
       success_url: `${process.env.NEXT_PUBLIC_API_URL}/?succes=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_API_URL}/pricing`,
+      cancel_url: `${process.env.NEXT_PUBLIC_API_URL}/planos`,
       subscription_data: {
         metadata: {
           user: user.id,

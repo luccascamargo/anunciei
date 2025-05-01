@@ -14,7 +14,7 @@ interface iCardAd {
 export function CardAdvert({ className, data }: iCardAd) {
   return (
     <Link
-      href={`/ad/${data.slug}`}
+      href={`/anuncio/${data.slug}`}
       className={cn(
         className,
         "rounded-md border pb-5 h-fit min-w-60 transition-all hover:shadow-md"

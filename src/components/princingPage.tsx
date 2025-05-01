@@ -67,7 +67,7 @@ export function PaginaPrecos() {
     setIsLoading(true);
     const { data } = await apiClient.get("/stripe/portal", {
       params: {
-        returnUrl: `${window.location.origin}/pricing`,
+        returnUrl: `${window.location.origin}/planos`,
       },
       headers: {
         "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export function PaginaPrecos() {
     if (!userData) {
       return (
         <Button variant="outline" className="w-full">
-          <Link href="/signin">Entrar</Link>
+          <Link href="/entrar">Entrar</Link>
         </Button>
       );
     }
@@ -93,7 +93,7 @@ export function PaginaPrecos() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => router.push("/advert/create")}
+            onClick={() => router.push("/anuncio/criar")}
           >
             Começar Agora
           </Button>

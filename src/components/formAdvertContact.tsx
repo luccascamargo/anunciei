@@ -47,9 +47,10 @@ const formSchema = z.object({
 
 type Props = {
   slug: string;
+  id: string;
 };
 
-export function FormAdvertContact({ slug }: Props) {
+export function FormAdvertContact({ slug, id }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,6 +68,7 @@ export function FormAdvertContact({ slug }: Props) {
         data: {
           values,
           slug,
+          id,
         },
         headers: {
           "Content-Type": "application/json",

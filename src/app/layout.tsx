@@ -3,11 +3,10 @@ import { AuthProvider } from "@/contexts/userContext";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/lib/auth";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { Providers } from "@/provider/queryClientProvider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { UpdatePhone } from "@/components/update-phone";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -44,11 +43,8 @@ export default async function RootLayout({
       <body className={`${inter.className} antialiased`}>
         <Providers>
           <AuthProvider user={user}>
-            <Navbar />
-            <main className="min-h-screen">
-              {children} <Analytics />
-            </main>
-            <Footer />
+            {children} <Analytics />
+            {user && !user.phone && <UpdatePhone />}
             <Toaster />
           </AuthProvider>
         </Providers>

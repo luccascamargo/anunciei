@@ -2,7 +2,7 @@
 import { Prisma } from "@prisma/client";
 import { createContext, ReactNode } from "react";
 
-interface iAuthContext {
+export interface iAuthContext {
   user: null | Prisma.UserGetPayload<{
     include: { subscriptions: true };
   }> | null;

@@ -4,8 +4,8 @@ import axios from "axios";
 import slugify from "slugify";
 
 // 👇 Configure os limites aqui
-//const LIMIT_BRANDS = 25;
-//const LIMIT_MODELS = 10;
+const LIMIT_BRANDS = 25;
+const LIMIT_MODELS = 10;
 
 const categories = {
   CARS: "https://brasilapi.com.br/api/fipe/marcas/v1/carros",
@@ -26,9 +26,9 @@ async function syncFipe() {
     console.log(`🔄 Sincronizando dados para: ${category}...`);
 
     const { data: allBrands } = await axios.get(url);
-    // const brands = allBrands.slice(0, LIMIT_BRANDS); // 👈 Limita marcas
+    const brands = allBrands.slice(0, LIMIT_BRANDS); // 👈 Limita marcas
 
-    for (const brand of allBrands) {
+    for (const brand of brands) {
       const slug = slugify(brand.nome, { lower: true, strict: true });
 
       // Verifica se a marca já existe com o mesmo slug
@@ -56,9 +56,9 @@ async function syncFipe() {
         }/${brand.valor}`
       );
 
-      // const models = allModels.slice(0, LIMIT_MODELS); // 👈 Limita modelos
+      const models = allModels.slice(0, LIMIT_MODELS); // 👈 Limita modelos
 
-      for (const model of allModels) {
+      for (const model of models) {
         const modelSlug = slugify(model.modelo, { lower: true, strict: true });
 
         // Verifica se o modelo já existe com o mesmo slug
