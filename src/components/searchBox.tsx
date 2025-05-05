@@ -23,7 +23,7 @@ export function SearchBox() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!values.seacrh) return router.push("/stock/carros");
+    if (!values.seacrh) return router.push("/estoque/carros");
     return router.push(`/stock/carros?busca=${values.seacrh}`);
   }
   return (
@@ -42,15 +42,15 @@ export function SearchBox() {
                   <Input
                     type="text"
                     placeholder="O que você está procurando? Ex: Honda Civic 2022"
-                    className=" h-12"
+                    className="h-12"
                     {...field}
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button className="h-12 px-6" type="submit">
-            <Search className="mr-2 h-4 w-4" />
+          <Button className="h-12" type="submit">
+            <Search className="h-4 w-4" />
             Buscar
           </Button>
         </form>
@@ -58,25 +58,25 @@ export function SearchBox() {
       <div className="flex flex-wrap justify-center gap-2 mt-4 text-sm text-muted-foreground">
         <span>Buscas populares:</span>
         <Link
-          href="/stock/carros/?busca=honda+civic"
+          href="/estoque/carros/?busca=honda+civic"
           className="hover:text-primary hover:underline"
         >
           Honda Civic
         </Link>
         <Link
-          href="/stock/carros/?busca=toyota+corolla"
+          href="/estoque/carros/?busca=toyota+corolla"
           className="hover:text-primary hover:underline"
         >
           Toyota Corolla
         </Link>
         <Link
-          href="/stock/carros/?busca=jeep+compass"
+          href="/estoque/carros/?busca=jeep+compass"
           className="hover:text-primary hover:underline"
         >
           Jeep Compass
         </Link>
         <Link
-          href="/stock/carros/?busca=volkswagen+t-cross"
+          href="/estoque/carros/?busca=volkswagen+t-cross"
           className="hover:text-primary hover:underline"
         >
           Volkswagen T-Cross

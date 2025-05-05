@@ -118,7 +118,7 @@ export function SiginForm() {
               </div>
               <div className="mt-4 text-center text-sm">
                 Ainda não tem uma conta?{" "}
-                <a href="/register" className="underline underline-offset-4">
+                <a href="/registrar" className="underline underline-offset-4">
                   Registrar
                 </a>
               </div>

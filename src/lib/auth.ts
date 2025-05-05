@@ -40,7 +40,7 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export async function auth(): Promise<null | Prisma.UserGetPayload<{
-  include: { subscriptions: true };
+  include: { subscriptions: true; _count: { select: { adverts: true } } };
 }>> {
   const userId = await verifyJwt();
 
@@ -54,6 +54,11 @@ export async function auth(): Promise<null | Prisma.UserGetPayload<{
       where: { id: userId },
       include: {
         subscriptions: true,
+        _count: {
+          select: {
+            adverts: true,
+          },
+        },
       },
     });
 

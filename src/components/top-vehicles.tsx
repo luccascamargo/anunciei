@@ -1,0 +1,73 @@
+"use client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "lucide-react";
+
+type Advert = {
+  id: string;
+  view_count: number;
+  model: string;
+  brand: string;
+  year_model: number;
+  contact_count: number;
+  conversion_rate: number;
+};
+
+type Props = {
+  startDate: string | null;
+  endDate: string | null;
+};
+
+export function TopVehicles({ endDate, startDate }: Props) {
+  const { user } = useAuth();
+  const { data, isFetching } = useQuery<Advert[]>({
+    enabled: !!user,
+    queryKey: ["adverts", user?.id, startDate, endDate],
+    queryFn: async () => {
+      const response = await apiClient.get("/adverts/stats/top-vehicles", {
+        params: {
+          start: startDate,
+          end: endDate,
+        },
+      });
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 5000,
+  });
+
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-8">
+      {data?.map((advert) => (
+        <div className="flex items-center" key={advert.id}>
+          <Avatar className="h-9 w-9">
+            <AvatarImage
+              src="/placeholder.svg?height=36&width=36"
+              alt="Avatar"
+            />
+            <AvatarFallback>HC</AvatarFallback>
+          </Avatar>
+          <div className="ml-4 space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {advert.model} - {advert.brand} - {advert.year_model}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              CTR: {advert.conversion_rate}% | Contatos: {advert.contact_count}
+            </p>
+          </div>
+          <div className="ml-auto font-medium">{advert.view_count} views</div>
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -1,19 +1,11 @@
 "use client";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { CircleUserRound, Menu } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Menu } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Wrapper } from "./wrapper";
 import { SignOut } from "@/app/(public)/(auth)/signout";
-import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -40,13 +32,13 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-end gap-4">
-            <Link href="/">
-              <Image src={"/anunciei.svg"} width={52} height={37} alt="Logo" />
+            <Link href="/" className="text-xl font-bold">
+              anunciei.app
             </Link>
             <div className="hidden ml-7 md:flex items-center justify-center gap-12">
               <Link href="/">Home</Link>
-              <Link href="/stock/carros">Buscar</Link>
-              <Link href="/pricing">Preços</Link>
+              <Link href="/estoque/carros">Buscar</Link>
+              <Link href="/planos">planos</Link>
               <Link href="/contato">Contato</Link>
             </div>
           </div>
@@ -61,52 +53,16 @@ export function Navbar() {
             {user && user.plan === "BASIC" && <Badge>Básico</Badge>}
             {user && user.plan === "PRO" && <Badge>Pro</Badge>}
             {user && (
-              <div className="flex items-center gap-5">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
-                    <CircleUserRound />
-                    <span className="text-sm">
-                      {user?.name} {user?.lastname}
-                    </span>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>Minhas configurações</DropdownMenuLabel>
-                    <Link href="/account">
-                      <DropdownMenuItem className="cursor-pointer">
-                        Meu perfil
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/advert/create">
-                      <DropdownMenuItem className="cursor-pointer">
-                        Criar anúncio
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/account/ads">
-                      <DropdownMenuItem className="cursor-pointer">
-                        Meus anúncios
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/favorites">
-                      <DropdownMenuItem className="cursor-pointer">
-                        Meus favoritos
-                      </DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuItem
-                      className="cursor-pointer text-red-700 hover:text-red-700"
-                      onClick={SignOut}
-                    >
-                      Sair
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <Button variant={"outline"} asChild>
+                <Link href="/painel">Administração</Link>
+              </Button>
             )}
             {!user && (
               <div className="flex items-center gap-6">
-                <Link href="/signin">
+                <Link href="/entrar">
                   <Button variant={"link"}>Entrar</Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/registrar">
                   <Button variant={"default"}>Crie sua conta</Button>
                 </Link>
               </div>
@@ -125,26 +81,26 @@ export function Navbar() {
                 </SheetHeader>
                 <div className="mt-4 flex flex-col items-start gap-4">
                   <Link href="/">Home</Link>
-                  <Link href="/stock/carros">Buscar</Link>
-                  <Link href="/pricing">Preços</Link>
+                  <Link href="/estoque/carros">Buscar</Link>
+                  <Link href="/planos">planos</Link>
                   {user && (
                     <>
-                      <Link href="/account" onClick={() => setIsOpen(false)}>
+                      <Link href="/conta" onClick={() => setIsOpen(false)}>
                         Meu perfil
                       </Link>
                       <Link
-                        href="/advert/create"
+                        href="/anuncio/criar"
                         onClick={() => setIsOpen(false)}
                       >
                         Criar anúncio
                       </Link>
                       <Link
-                        href="/account/ads"
+                        href="/conta/anuncios"
                         onClick={() => setIsOpen(false)}
                       >
                         Meus anúncios
                       </Link>
-                      <Link href="/favorites" onClick={() => setIsOpen(false)}>
+                      <Link href="/favoritos" onClick={() => setIsOpen(false)}>
                         Meus favoritos
                       </Link>
                       <button
@@ -159,10 +115,10 @@ export function Navbar() {
                 <SheetFooter className="w-full flex flex-row items-end">
                   {!user && (
                     <>
-                      <Link href="/signin">
+                      <Link href="/entrar">
                         <Button variant={"link"}>Entrar</Button>
                       </Link>
-                      <Link href="/register">
+                      <Link href="/registrar">
                         <Button variant={"default"}>Crie sua conta</Button>
                       </Link>
                     </>

@@ -72,8 +72,34 @@ model Adverts {
   model_id              String
   brand                 Brands     @relation(fields: [brand_id], references: [id], onDelete: Cascade)
   brand_id              String
+  view_count            Int        @default(0)
+  contact_count         Int        @default(0)
+
+  visits   Visit[]
+  contacts Contact[]
 
   @@map("adverts")
+}
+
+model Visit {
+  id         String   @id @default(uuid())
+  visitor_id String
+  created_ad DateTime @default(now()) @db.Timestamp(6)
+  adverts    Adverts? @relation(fields: [advert_id], references: [id])
+  advert_id  String?
+
+  @@unique([advert_id, created_ad])
+  @@map("visits")
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  visitor_id String   @unique
+  created_ad DateTime @default(now()) @db.Timestamp(6)
+  adverts    Adverts? @relation(fields: [advert_id], references: [id])
+  advert_id  String?
+
+  @@map("contacts")
 }
 
 model Brands {
