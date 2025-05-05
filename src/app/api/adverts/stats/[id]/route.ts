@@ -36,9 +36,6 @@ export async function GET(
       );
     }
 
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-
     // Verifica se o anúncio existe e pertence ao usuário
     const advert = await prisma.adverts.findFirst({
       where: {
@@ -54,38 +51,14 @@ export async function GET(
       );
     }
 
-    // Busca visitas e contatos no período
-    const visits = await prisma.visit.findMany({
-      where: {
-        advert_id: id,
-        created_ad: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-    });
-
-    const contacts = await prisma.contact.findMany({
-      where: {
-        advert_id: id,
-        created_ad: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-    });
-
-    const totalViews = visits.reduce((sum, visit) => sum + visit.views, 0);
-    const totalContacts = contacts.reduce(
-      (sum, contact) => sum + contact.contacts,
-      0
-    );
     const conversionRate =
-      totalViews > 0 ? (totalContacts / totalViews) * 100 : 0;
+      advert.view_count > 0
+        ? (advert.contact_count / advert.view_count) * 100
+        : 0;
 
     const stats = {
-      totalViews,
-      totalContacts,
+      totalViews: advert.view_count,
+      totalContacts: advert.contact_count,
       conversionRate: conversionRate.toFixed(2) + "%",
     };
 

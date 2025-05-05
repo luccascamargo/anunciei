@@ -14,6 +14,7 @@ import { ComponentFavorite } from "./componentFavorite";
 import { FormAdvertContact } from "@/components/formAdvertContact";
 import { Prisma } from "@prisma/client";
 import { HandleVisitTracker } from "./handlevisit";
+import { ButtonWhatsapp } from "./button-whatsapp";
 
 interface iContentAD {
   advert: Prisma.AdvertsGetPayload<{
@@ -27,7 +28,7 @@ interface iContentAD {
   }>;
 }
 
-export async function AdvertClient({ advert }: iContentAD) {
+export function AdvertClient({ advert }: iContentAD) {
   function FormatDate(value: string) {
     const date = new Date(value);
 
@@ -174,18 +175,12 @@ export async function AdvertClient({ advert }: iContentAD) {
                   </span>
                 </div>
                 {advert.user.phone && (
-                  <a
-                    href={`https://wa.me/${advert.user.phone.replace(
-                      /\D/g,
-                      ""
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Button variant={"default"} className="w-full">
-                      Chamar no WhatsApp
-                    </Button>
-                  </a>
+                  <ButtonWhatsapp
+                    brand={advert.brand.name}
+                    model={advert.model.name}
+                    id={advert.id}
+                    phone={advert.user.phone}
+                  />
                 )}
               </div>
 

@@ -35,8 +35,12 @@ export default function DashboardPage() {
         </div>
       </header>
       <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h1>Bem-vindo à painel de Administração!</h1>
-        <p>Gerencie suas informações de forma simples e eficiente.</p>
+        <h1 className="text-muted-foreground">
+          Bem-vindo à painel de Administração!
+        </h1>
+        <p className="text-muted-foreground">
+          Gerencie suas informações de forma simples e eficiente.
+        </p>
       </div>
     </>
   );

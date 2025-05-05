@@ -310,6 +310,16 @@ export default function Page() {
     await createAdvert.mutateAsync(formData);
   }
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) {
+      return;
+    }
+    const filesLength = e.target.files?.length + selectedFiles.length;
+    if (filesLength > 3 && user?.plan === "FREE") {
+      return toast("Seu plano não permite mais que 3 fotos");
+    }
+    if (filesLength > 10 && user?.plan === "BASIC") {
+      return toast("Seu plano não permite mais que 10 fotos");
+    }
     const files = Array.from(e.target.files || []);
     if (files && files.length > 0) {
       const newImagesWithId = files.map((file) => ({
@@ -441,6 +451,44 @@ export default function Page() {
       getCities.mutate(state);
     }
   }, [form.watch("estado")]);
+
+  if (user && user.plan === "FREE" && user._count.adverts >= 3) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <h1 className="text-2xl font-bold">Limite de anúncios atingido</h1>
+        <p className="text-muted-foreground">
+          Você atingiu o limite de anúncios do seu plano. Para criar mais
+          anúncios, considere atualizar seu plano.
+        </p>
+        <Button
+          onClick={() => push("/planos")}
+          className="mt-4"
+          variant="outline"
+        >
+          Adquira um plano
+        </Button>
+      </div>
+    );
+  }
+
+  if (user && user.plan === "BASIC" && user._count.adverts >= 10) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <h1 className="text-2xl font-bold">Limite de anúncios atingido</h1>
+        <p className="text-muted-foreground">
+          Você atingiu o limite de anúncios do seu plano. Para criar mais
+          anúncios, considere atualizar seu plano.
+        </p>
+        <Button
+          onClick={() => push("/assinaturas")}
+          className="mt-4"
+          variant="outline"
+        >
+          Atualizar plano
+        </Button>
+      </div>
+    );
+  }
 
   const renderStepContent = () => {
     return (

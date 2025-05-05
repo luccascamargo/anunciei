@@ -195,6 +195,16 @@ export function UpdateAdvert({ advert }: Props) {
   }
 
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) {
+      return;
+    }
+    const filesLength = e.target.files?.length + selectedFiles.length;
+    if (filesLength > 3 && user?.plan === "FREE") {
+      return toast("Seu plano não permite mais que 3 fotos");
+    }
+    if (filesLength > 10 && user?.plan === "BASIC") {
+      return toast("Seu plano não permite mais que 10 fotos");
+    }
     const files = Array.from(e.target.files || []);
     if (files && files.length > 0) {
       const newImagesWithId = files.map((file) => ({

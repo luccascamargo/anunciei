@@ -1,5 +1,8 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import {
   Line,
   LineChart,
@@ -9,52 +12,27 @@ import {
   YAxis,
 } from "recharts";
 
-const data = [
-  {
-    name: "Jan",
-    visualizacoes: 6000,
-    contatos: 1800,
-    favoritados: 2400,
-  },
-  {
-    name: "Fev",
-    visualizacoes: 7000,
-    contatos: 2200,
-    favoritados: 2800,
-  },
-  {
-    name: "Mar",
-    visualizacoes: 8000,
-    contatos: 2600,
-    favoritados: 3200,
-  },
-  {
-    name: "Abr",
-    visualizacoes: 10000,
-    contatos: 3100,
-    favoritados: 3800,
-  },
-  {
-    name: "Mai",
-    visualizacoes: 11000,
-    contatos: 3500,
-    favoritados: 4200,
-  },
-  {
-    name: "Jun",
-    visualizacoes: 12000,
-    contatos: 3900,
-    favoritados: 4600,
-  },
-  {
-    name: "Jul",
-    visualizacoes: 15000,
-    contatos: 4300,
-    favoritados: 5000,
-  },
-];
-
 export function Overview() {
+  const { user } = useAuth();
+
+  const { data, isFetching } = useQuery({
+    enabled: !!user,
+    queryKey: ["stats-over-time", user?.id],
+    queryFn: async () => {
+      const response = await apiClient.get("/adverts/stats/over-time");
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  if (isFetching) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <span className="text-muted-foreground">Carregando...</span>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <LineChart data={data}>
@@ -92,14 +70,6 @@ export function Overview() {
                       </span>
                       <span className="font-bold text-muted-foreground">
                         {payload[1].value?.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[0.70rem] uppercase text-muted-foreground">
-                        Favoritados
-                      </span>
-                      <span className="font-bold text-muted-foreground">
-                        {payload[2].value?.toLocaleString()}
                       </span>
                     </div>
                   </div>

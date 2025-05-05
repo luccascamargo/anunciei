@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { Badge, EllipsisVerticalIcon } from "lucide-react";
 
 export default function Page() {
   const { user } = useAuth();
@@ -181,88 +181,93 @@ export default function Page() {
                         include: { images: true; brand: true; model: true };
                       }>
                     ) => (
-                      <Card
+                      <div
                         key={ad.id}
                         className={cn(
-                          "h-fit flex flex-col items-center p-5 gap-6"
+                          "rounded-md border pb-5 h-fit transition-all hover:shadow-md"
                         )}
                       >
-                        <div className="relative w-full h-[150px]">
+                        <div className="w-full h-[125px] relative">
+                          {ad.emphasis && (
+                            <Badge className="absolute z-10 top-2 right-2">
+                              Destaque
+                            </Badge>
+                          )}
                           <Image
                             src={ad.images[0].url || "/default-car.png"}
                             fill
-                            alt="1"
-                            className="object-cover rounded-md"
+                            quality={100}
+                            alt={ad.model.name}
+                            className="object-cover rounded-t"
                           />
                         </div>
-                        <div className="w-full flex flex-col justify-between gap-6 h-full">
-                          <div className="flex justify-between items-start gap-4 flex-col h-full">
-                            <div className="w-full min-h-24">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="text-2xl font-bold text-primary">
-                                    {ad.brand?.name}
-                                  </span>
-                                  <span className="text-2xl font-bold text-primary ml-2">
-                                    {ad.year_model}
-                                  </span>
-                                </div>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger className="cursor-pointer">
-                                    <EllipsisVerticalIcon size={20} />
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent>
-                                    <DropdownMenuItem
-                                      asChild
-                                      className="cursor-pointer"
-                                    >
-                                      <Link href={`/anuncio/${ad.slug}`}>
-                                        Ver
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="cursor-pointer"
-                                      asChild
-                                    >
-                                      <Link href={`/anuncio/editar/${ad.id}`}>
-                                        Editar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="cursor-pointer"
-                                      variant="destructive"
-                                      onClick={() =>
-                                        handleInactiveAdvert.mutate(ad.id)
-                                      }
-                                    >
-                                      Desativar
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                              <p className="text-base max-w-[350px]">
-                                {ad.model.name}
-                              </p>
-                            </div>
-                            <span className="text-xl text-primary font-medium">
+                        <div className="mt-3 px-3 w-full flex flex-col gap-5">
+                          <div className="w-full flex items-center justify-between">
+                            <span className="text-muted-foreground text-lg font-bold">
                               {Number(ad.price).toLocaleString("pt-BR", {
                                 currency: "BRL",
                                 style: "currency",
                               })}
                             </span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="cursor-pointer">
+                                <EllipsisVerticalIcon
+                                  size={20}
+                                  className="text-muted-foreground"
+                                />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem
+                                  asChild
+                                  className="cursor-pointer"
+                                >
+                                  <Link href={`/anuncio/${ad.slug}`}>Ver</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  asChild
+                                >
+                                  <Link href={`/anuncio/editar/${ad.id}`}>
+                                    Editar
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  variant="destructive"
+                                  onClick={() =>
+                                    handleInactiveAdvert.mutate(ad.id)
+                                  }
+                                >
+                                  Desativar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-
-                          <div className="flex items-start flex-col gap-4 justify-between">
-                            <div className="flex items-center gap-4">
-                              <span className="text-sm">
-                                {Number(ad.mileage).toLocaleString("pt-BR")} km
-                              </span>
-                              <span className="text-sm">{ad.color}</span>
-                              <span className="text-sm">{ad.city}</span>
-                            </div>
+                          <div className="flex flex-col min-h-20">
+                            <span className="text-muted-foreground text-lg font-bold">
+                              {ad.brand.name}
+                            </span>
+                            <span className="text-muted-foreground font-normal text-xs uppercase">
+                              {ad.model.name}
+                            </span>
                           </div>
+                          <div className="w-full flex items-center justify-between">
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.year_model}
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.color}
+                            </span>
+                          </div>
+                          <div className="border w-full" />
+                          <span className="text-muted-foreground font-semibold text-xs w-full text-center">
+                            {ad.city} - {ad.state}
+                          </span>
                         </div>
-                      </Card>
+                      </div>
                     )
                   )}
                 {getActiveAds.data && getActiveAds.data.length === 0 && (
@@ -286,80 +291,86 @@ export default function Page() {
                         include: { images: true; brand: true; model: true };
                       }>
                     ) => (
-                      <Card
+                      <div
                         key={ad.id}
                         className={cn(
-                          "h-fit flex flex-col items-center p-5 gap-6 md:opacity-50 hover:opacity-100 transition-opacity duration-200"
+                          "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md hover:opacity-100"
                         )}
                       >
-                        <div className="relative w-full h-[150px]">
+                        <div className="w-full h-[125px] relative">
+                          {ad.emphasis && (
+                            <Badge className="absolute z-10 top-2 right-2">
+                              Destaque
+                            </Badge>
+                          )}
                           <Image
                             src={ad.images[0].url || "/default-car.png"}
                             fill
-                            alt="1"
-                            className="object-cover rounded-md"
+                            quality={100}
+                            alt={ad.model.name}
+                            className="object-cover rounded-t"
                           />
                         </div>
-                        <div className="w-full flex flex-col justify-between gap-6 h-full">
-                          <div className="flex justify-between items-start gap-4 flex-col h-full">
-                            <div className="w-full min-h-24">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="text-2xl font-bold text-primary">
-                                    {ad.brand?.name}
-                                  </span>
-                                  <span className="text-2xl font-bold text-primary ml-2">
-                                    {ad.year_model}
-                                  </span>
-                                </div>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger className="cursor-pointer">
-                                    <EllipsisVerticalIcon size={20} />
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent>
-                                    <DropdownMenuItem
-                                      className="cursor-pointer"
-                                      asChild
-                                    >
-                                      <Link href={`/anuncio/editar/${ad.id}`}>
-                                        Editar
-                                      </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="cursor-pointer"
-                                      variant="default"
-                                      onClick={() =>
-                                        handleActiveAdvert.mutate(ad.id)
-                                      }
-                                    >
-                                      Ativar
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                              <p className="text-base max-w-[350px]">
-                                {ad.model.name}
-                              </p>
-                            </div>
-                            <span className="text-xl text-primary font-medium">
+                        <div className="mt-3 px-3 w-full flex flex-col gap-5">
+                          <div className="w-full flex items-center justify-between">
+                            <span className="text-muted-foreground text-lg font-bold">
                               {Number(ad.price).toLocaleString("pt-BR", {
                                 currency: "BRL",
                                 style: "currency",
                               })}
                             </span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="cursor-pointer">
+                                <EllipsisVerticalIcon
+                                  size={20}
+                                  className="text-muted-foreground"
+                                />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  asChild
+                                >
+                                  <Link href={`/anuncio/editar/${ad.id}`}>
+                                    Editar
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    handleActiveAdvert.mutate(ad.id)
+                                  }
+                                >
+                                  Ativar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-
-                          <div className="flex items-start flex-col gap-4 justify-between">
-                            <div className="flex items-center gap-4">
-                              <span className="text-sm">
-                                {Number(ad.mileage).toLocaleString("pt-BR")} km
-                              </span>
-                              <span className="text-sm">{ad.color}</span>
-                              <span className="text-sm">{ad.city}</span>
-                            </div>
+                          <div className="flex flex-col min-h-20">
+                            <span className="text-muted-foreground text-lg font-bold">
+                              {ad.brand.name}
+                            </span>
+                            <span className="text-muted-foreground font-normal text-xs uppercase">
+                              {ad.model.name}
+                            </span>
                           </div>
+                          <div className="w-full flex items-center justify-between">
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.year_model}
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.color}
+                            </span>
+                          </div>
+                          <div className="border w-full" />
+                          <span className="text-muted-foreground font-semibold text-xs w-full text-center">
+                            {ad.city} - {ad.state}
+                          </span>
                         </div>
-                      </Card>
+                      </div>
                     )
                   )}
                 {getInactiveAds.data && getInactiveAds.data.length === 0 && (
@@ -383,54 +394,58 @@ export default function Page() {
                         include: { images: true; brand: true; model: true };
                       }>
                     ) => (
-                      <Card
+                      <div
                         key={ad.id}
                         className={cn(
-                          "w-full h-fit flex flex-col items-center p-5 gap-6 opacity-50 "
+                          "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md"
                         )}
                       >
-                        <div className="relative w-full h-[150px]">
+                        <div className="w-full h-[125px] relative">
+                          {ad.emphasis && (
+                            <Badge className="absolute z-10 top-2 right-2">
+                              Destaque
+                            </Badge>
+                          )}
                           <Image
                             src={ad.images[0].url || "/default-car.png"}
                             fill
-                            alt="1"
-                            className="object-cover rounded-md"
+                            quality={100}
+                            alt={ad.model.name}
+                            className="object-cover rounded-t"
                           />
                         </div>
-                        <div className="w-full flex flex-col justify-between gap-6 h-full">
-                          <div className="flex justify-between items-start gap-4 flex-col h-full">
-                            <div className="w-full min-h-24">
-                              <div className="flex items-center gap-3">
-                                <span className="text-2xl font-bold text-primary">
-                                  {ad.brand?.name}
-                                </span>
-                                <span className="text-2xl font-bold text-primary">
-                                  {ad.year_model}
-                                </span>
-                              </div>
-                              <p className="text-base max-w-[350px]">
-                                {ad.model.name}
-                              </p>
-                            </div>
-                            <span className="text-xl text-primary font-medium">
-                              {Number(ad.price).toLocaleString("pt-BR", {
-                                currency: "BRL",
-                                style: "currency",
-                              })}
+                        <div className="mt-3 px-3 w-full flex flex-col gap-5">
+                          <span className="text-muted-foreground text-lg font-bold">
+                            {Number(ad.price).toLocaleString("pt-BR", {
+                              currency: "BRL",
+                              style: "currency",
+                            })}
+                          </span>
+                          <div className="flex flex-col min-h-20">
+                            <span className="text-muted-foreground text-lg font-bold">
+                              {ad.brand.name}
+                            </span>
+                            <span className="text-muted-foreground font-normal text-xs uppercase">
+                              {ad.model.name}
                             </span>
                           </div>
-
-                          <div className="flex items-start flex-col gap-4 justify-between">
-                            <div className="flex items-center gap-4">
-                              <span className="text-sm">
-                                {Number(ad.mileage).toLocaleString("pt-BR")} km
-                              </span>
-                              <span className="text-sm">{ad.color}</span>
-                              <span className="text-sm">{ad.city}</span>
-                            </div>
+                          <div className="w-full flex items-center justify-between">
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.year_model}
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {Number(ad.mileage).toLocaleString("pt-BR")} km
+                            </span>
+                            <span className="text-muted-foreground font-semibold text-xs">
+                              {ad.color}
+                            </span>
                           </div>
+                          <div className="border w-full" />
+                          <span className="text-muted-foreground font-semibold text-xs w-full text-center">
+                            {ad.city} - {ad.state}
+                          </span>
                         </div>
-                      </Card>
+                      </div>
                     )
                   )}
                 {getRequestedAds.data && getRequestedAds.data.length === 0 && (

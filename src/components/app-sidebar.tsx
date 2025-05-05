@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { ChartSpline, CreditCard, Folder, UserCog } from "lucide-react";
+import {
+  ChartSpline,
+  CreditCard,
+  Folder,
+  Sparkles,
+  UserCog,
+} from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -15,6 +21,7 @@ import {
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { NavLinks } from "./nav-links";
+import { useAuth } from "@/hooks/useAuth";
 
 const data = {
   links: [
@@ -22,26 +29,32 @@ const data = {
       name: "Estatísticas",
       url: "/estatisticas",
       icon: ChartSpline,
+      icon_plus: Sparkles,
+      its_protected: true,
     },
     {
       name: "Minha Conta",
       url: "/conta",
       icon: UserCog,
+      its_protected: false,
     },
     {
       name: "Meus anúncios",
       url: "/conta/anuncios",
       icon: Folder,
+      its_protected: false,
     },
     {
       name: "Assinaturas",
       url: "/assinaturas",
       icon: CreditCard,
+      its_protected: false,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -51,7 +64,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavLinks links={data.links} />
       </SidebarContent>
       <SidebarFooter>
-        <Button>
+        <Button
+          className="w-full"
+          disabled={
+            user && user._count.adverts >= 3 && user.plan === "FREE"
+              ? true
+              : user && user._count.adverts >= 10 && user.plan === "BASIC"
+                ? true
+                : false
+          }
+        >
           <Link href={"/anuncio/criar"}>Criar anúncio</Link>
         </Button>
         <NavUser />

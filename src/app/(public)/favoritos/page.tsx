@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { iComponentFavorite } from "../ad/[slug]/componentFavorite";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CardFavorites } from "@/components/cardfavorites";
 import { toast } from "sonner";
+import { iComponentFavorite } from "../anuncio/[slug]/componentFavorite";
 
 export default function Page() {
   const [favorites, setIsFavorites] = useState<iComponentFavorite[]>([]);

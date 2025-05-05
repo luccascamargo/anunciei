@@ -6,7 +6,6 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Wrapper } from "./wrapper";
 import { SignOut } from "@/app/(public)/(auth)/signout";
-import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -33,8 +32,8 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-end gap-4">
-            <Link href="/">
-              <Image src={"/anunciei.svg"} width={52} height={37} alt="Logo" />
+            <Link href="/" className="text-xl font-bold">
+              anunciei.app
             </Link>
             <div className="hidden ml-7 md:flex items-center justify-center gap-12">
               <Link href="/">Home</Link>

@@ -18,6 +18,7 @@ import { AlertTriangle, BarChart } from "lucide-react";
 
 export default function Page() {
   const { user } = useAuth();
+
   const abrirPortalCliente = async () => {
     const { data } = await apiClient.get("/stripe/portal", {
       params: {
@@ -29,6 +30,7 @@ export default function Page() {
     });
     window.location.href = data.url;
   };
+
   return (
     <>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -54,8 +56,8 @@ export default function Page() {
         </div>
       </header>
       <div className="w-full px-6 flex items-center justify-center">
-        <Card className="w-full h-full">
-          <CardContent>
+        <Card className="w-full h-full flex items-center justify-center">
+          <CardContent className="pt-6">
             {user && user.subscriptions.length > 0 && user.plan !== "FREE" ? (
               <div className="max-w-3xl mx-auto">
                 <Alert

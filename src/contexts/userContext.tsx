@@ -4,7 +4,7 @@ import { createContext, ReactNode } from "react";
 
 export interface iAuthContext {
   user: null | Prisma.UserGetPayload<{
-    include: { subscriptions: true };
+    include: { subscriptions: true; _count: { select: { adverts: true } } };
   }> | null;
 }
 
@@ -16,7 +16,7 @@ export function AuthProvider({
 }: {
   children: ReactNode;
   user: null | Prisma.UserGetPayload<{
-    include: { subscriptions: true };
+    include: { subscriptions: true; _count: { select: { adverts: true } } };
   }> | null;
 }) {
   return (

@@ -9,7 +9,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export function NavLinks({
   links,
@@ -18,19 +19,30 @@ export function NavLinks({
     name: string;
     url: string;
     icon: LucideIcon;
+    its_protected: boolean;
+    icon_plus?: LucideIcon;
   }[];
 }) {
+  const router = useRouter();
+  const { user } = useAuth();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {links.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <Link href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </Link>
+            <SidebarMenuButton
+              disabled={
+                user && user.plan === "FREE" && item.its_protected
+                  ? true
+                  : false
+              }
+              onClick={() => router.push(item.url)}
+              className="cursor-pointer"
+            >
+              <item.icon />
+              <span>{item.name}</span>
+              {item.icon_plus && <item.icon_plus className="mr-2" />}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

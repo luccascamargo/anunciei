@@ -1,77 +1,73 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client";
 
-export function TopVehicles() {
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "lucide-react";
+
+type Advert = {
+  id: string;
+  view_count: number;
+  model: string;
+  brand: string;
+  year_model: number;
+  contact_count: number;
+  conversion_rate: number;
+};
+
+type Props = {
+  startDate: string | null;
+  endDate: string | null;
+};
+
+export function TopVehicles({ endDate, startDate }: Props) {
+  const { user } = useAuth();
+  const { data, isFetching } = useQuery<Advert[]>({
+    enabled: !!user,
+    queryKey: ["adverts", user?.id, startDate, endDate],
+    queryFn: async () => {
+      const response = await apiClient.get("/adverts/stats/top-vehicles", {
+        params: {
+          start: startDate,
+          end: endDate,
+        },
+      });
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 5000,
+  });
+
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
   return (
     <div className="space-y-8">
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>HC</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Honda Civic 2022</p>
-          <p className="text-sm text-muted-foreground">
-            CTR: 5.8% | Contatos: 78
-          </p>
+      {data?.map((advert) => (
+        <div className="flex items-center" key={advert.id}>
+          <Avatar className="h-9 w-9">
+            <AvatarImage
+              src="/placeholder.svg?height=36&width=36"
+              alt="Avatar"
+            />
+            <AvatarFallback>HC</AvatarFallback>
+          </Avatar>
+          <div className="ml-4 space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {advert.model} - {advert.brand} - {advert.year_model}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              CTR: {advert.conversion_rate}% | Contatos: {advert.contact_count}
+            </p>
+          </div>
+          <div className="ml-auto font-medium">{advert.view_count} views</div>
         </div>
-        <div className="ml-auto font-medium">3,245 views</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>JC</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Jeep Compass 2023</p>
-          <p className="text-sm text-muted-foreground">
-            CTR: 6.1% | Contatos: 92
-          </p>
-        </div>
-        <div className="ml-auto font-medium">4,123 views</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>VG</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">
-            Volkswagen Golf GTI 2020
-          </p>
-          <p className="text-sm text-muted-foreground">
-            CTR: 5.5% | Contatos: 81
-          </p>
-        </div>
-        <div className="ml-auto font-medium">3,567 views</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>TC</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">
-            Toyota Corolla 2021
-          </p>
-          <p className="text-sm text-muted-foreground">
-            CTR: 5.2% | Contatos: 65
-          </p>
-        </div>
-        <div className="ml-auto font-medium">2,987 views</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>HB</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Hyundai HB20 2022</p>
-          <p className="text-sm text-muted-foreground">
-            CTR: 5.1% | Contatos: 62
-          </p>
-        </div>
-        <div className="ml-auto font-medium">2,845 views</div>
-      </div>
+      ))}
     </div>
   );
 }

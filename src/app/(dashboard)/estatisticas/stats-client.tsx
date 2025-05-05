@@ -174,7 +174,10 @@ export function StatsClient() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <TopVehicles />
+                <TopVehicles
+                  startDate={defaultStartDate}
+                  endDate={defaultEndDate}
+                />
               </CardContent>
             </Card>
           </div>
