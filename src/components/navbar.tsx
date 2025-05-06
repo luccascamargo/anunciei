@@ -5,7 +5,6 @@ import { Menu } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Wrapper } from "./wrapper";
-import { SignOut } from "@/app/(public)/(auth)/signout";
 import {
   Sheet,
   SheetContent,
@@ -84,32 +83,9 @@ export function Navbar() {
                   <Link href="/estoque/carros">Buscar</Link>
                   <Link href="/planos">planos</Link>
                   {user && (
-                    <>
-                      <Link href="/conta" onClick={() => setIsOpen(false)}>
-                        Meu perfil
-                      </Link>
-                      <Link
-                        href="/anuncio/criar"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Criar anúncio
-                      </Link>
-                      <Link
-                        href="/conta/anuncios"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Meus anúncios
-                      </Link>
-                      <Link href="/favoritos" onClick={() => setIsOpen(false)}>
-                        Meus favoritos
-                      </Link>
-                      <button
-                        onClick={SignOut}
-                        className="text-red-700 hover:text-red-800"
-                      >
-                        Sair
-                      </button>
-                    </>
+                    <Button variant={"outline"} asChild>
+                      <Link href="/painel">Administração</Link>
+                    </Button>
                   )}
                 </div>
                 <SheetFooter className="w-full flex flex-row items-end">

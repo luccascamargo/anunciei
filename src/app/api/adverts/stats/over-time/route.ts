@@ -20,9 +20,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+
+    if (!start || !end) {
+      return NextResponse.json(
+        { error: "Parâmetros de período (start e end) são obrigatórios" },
+        { status: 400 }
+      );
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
     // Buscar anúncios do usuário no banco de dados
     const adverts = await prisma.adverts.findMany({
-      where: { user_id: user_id },
+      where: {
+        user_id: user_id,
+        status: { not: "REQUESTED" },
+        created_at: { gte: startDate, lte: endDate },
+      },
+      orderBy: { created_at: "asc" },
       select: {
         created_at: true,
         view_count: true,
@@ -40,7 +59,6 @@ export async function GET(request: NextRequest) {
             name: month,
             visualizacoes: 0,
             contatos: 0,
-            favoritados: 0,
           };
         }
         acc[month].visualizacoes += advert.view_count;
@@ -53,7 +71,6 @@ export async function GET(request: NextRequest) {
           name: string;
           visualizacoes: number;
           contatos: number;
-          favoritados: number;
         }
       >
     );

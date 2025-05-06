@@ -27,7 +27,7 @@ import type { DateRange } from "react-day-picker";
 
 export function StatsClient() {
   const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(new Date().setDate(new Date().getDate() - 15)),
+    from: new Date(new Date().setDate(new Date().getDate() - 90)),
     to: new Date(new Date().setHours(23, 59, 59, 999)),
   });
 
@@ -69,7 +69,7 @@ export function StatsClient() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
       <Tabs defaultValue="geral" className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <TabsList>
             <TabsTrigger value="geral">Visão Geral</TabsTrigger>
             <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
@@ -157,13 +157,16 @@ export function StatsClient() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
             <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Desempenho ao Longo do Tempo</CardTitle>
               </CardHeader>
-              <CardContent className="pl-2">
-                <Overview />
+              <CardContent>
+                <Overview
+                  startDate={defaultStartDate}
+                  endDate={defaultEndDate}
+                />
               </CardContent>
             </Card>
             <Card className="col-span-3">

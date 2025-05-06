@@ -3,7 +3,9 @@
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import {
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -12,14 +14,24 @@ import {
   YAxis,
 } from "recharts";
 
-export function Overview() {
+type Props = {
+  startDate: string | null;
+  endDate: string | null;
+};
+
+export function Overview({ endDate, startDate }: Props) {
   const { user } = useAuth();
 
   const { data, isFetching } = useQuery({
     enabled: !!user,
     queryKey: ["stats-over-time", user?.id],
     queryFn: async () => {
-      const response = await apiClient.get("/adverts/stats/over-time");
+      const response = await apiClient.get("/adverts/stats/over-time", {
+        params: {
+          start: startDate,
+          end: endDate,
+        },
+      });
       return response.data;
     },
     refetchOnWindowFocus: false,
@@ -27,8 +39,8 @@ export function Overview() {
 
   if (isFetching) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
-        <span className="text-muted-foreground">Carregando...</span>
+      <div className="flex h- w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -92,12 +104,7 @@ export function Overview() {
           stroke="#82ca9d"
           strokeWidth={2}
         />
-        <Line
-          type="monotone"
-          dataKey="favoritados"
-          stroke="#ffc658"
-          strokeWidth={2}
-        />
+        <Legend />
       </LineChart>
     </ResponsiveContainer>
   );

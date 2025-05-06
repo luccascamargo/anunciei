@@ -27,7 +27,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge, EllipsisVerticalIcon } from "lucide-react";
+import { EllipsisVerticalIcon, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function Page() {
   const { user } = useAuth();
@@ -184,7 +185,7 @@ export default function Page() {
                       <div
                         key={ad.id}
                         className={cn(
-                          "rounded-md border pb-5 h-fit transition-all hover:shadow-md"
+                          "rounded-md border pb-5 h-fit transition-all hover:shadow-md relative"
                         )}
                       >
                         <div className="w-full h-[125px] relative">
@@ -262,11 +263,17 @@ export default function Page() {
                               {ad.color}
                             </span>
                           </div>
-                          <div className="border w-full" />
+                          <Separator className="w-full" />
                           <span className="text-muted-foreground font-semibold text-xs w-full text-center">
                             {ad.city} - {ad.state}
                           </span>
                         </div>
+                        {user?.plan !== "FREE" && (
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 text-muted-foreground">
+                            <Users size={16} />
+                            <span className="text-sm">{ad.view_count}</span>
+                          </div>
+                        )}
                       </div>
                     )
                   )}
@@ -294,7 +301,7 @@ export default function Page() {
                       <div
                         key={ad.id}
                         className={cn(
-                          "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md hover:opacity-100"
+                          "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md hover:opacity-100 relative"
                         )}
                       >
                         <div className="w-full h-[125px] relative">
@@ -370,6 +377,12 @@ export default function Page() {
                             {ad.city} - {ad.state}
                           </span>
                         </div>
+                        {user?.plan !== "FREE" && (
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 text-muted-foreground">
+                            <Users size={16} />
+                            <span className="text-sm">{ad.view_count}</span>
+                          </div>
+                        )}
                       </div>
                     )
                   )}

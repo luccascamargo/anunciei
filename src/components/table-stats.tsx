@@ -262,7 +262,7 @@ export function TableStats() {
       const response = await apiClient.get("/adverts/stats/all-adverts");
       return response.data;
     },
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     staleTime: 5000,
   });
 
