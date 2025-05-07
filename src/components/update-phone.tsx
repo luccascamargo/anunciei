@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 
 const formSchema = z.object({
   phone: z.string().refine(
@@ -49,7 +50,11 @@ export function UpdatePhone() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
+    handleRegisterPhone.mutate(values);
+  }
+
+  const handleRegisterPhone = useMutation({
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
       const formdata = new FormData();
 
       formdata.append("phone", values.phone.replace(/\D/g, ""));
@@ -57,13 +62,19 @@ export function UpdatePhone() {
       await apiClient.patch("/users/update-phone", formdata, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+    },
+    onSuccess: () => {
       toast("Alterações concluidas com sucesso!");
       router.refresh();
-    } catch (error) {
-      console.log(error);
+    },
+    onError: () => {
       toast("Não foi possível realizar esta ação, tente novamente mais tarde.");
-    }
-  }
+    },
+    onMutate: () => {
+      toast("Salvando informações...");
+      form.reset();
+    },
+  });
 
   return (
     <div className="fixed p-6 flex items-center justify-center w-screen h-screen top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2 bg-primary/20 rounded-lg border border-gray-200">
