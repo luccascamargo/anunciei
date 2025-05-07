@@ -1,8 +1,24 @@
+import { verifyJwt } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("accessToken")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { message: "Token de autenticação não encontrado" },
+        { status: 401 }
+      );
+    }
+
+    const user_id = await verifyJwt(token);
+    if (!user_id) {
+      return NextResponse.json(
+        { message: "Token de autenticação inválido" },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const start = searchParams.get("start");
     const end = searchParams.get("end");
@@ -19,7 +35,16 @@ export async function GET(request: NextRequest) {
 
     const adverts = await prisma.adverts.findMany({
       take: 5,
+      orderBy: [
+        {
+          view_count: "desc",
+        },
+        {
+          contact_count: "desc",
+        },
+      ],
       where: {
+        user_id,
         created_at: {
           gte: startDate,
           lte: endDate,
@@ -53,7 +78,9 @@ export async function GET(request: NextRequest) {
       contact_count: advert.contact_count,
       conversion_rate:
         advert.view_count > 0
-          ? (advert.contact_count / advert.view_count) * 100
+          ? parseFloat(
+              ((advert.contact_count / advert.view_count) * 100).toFixed(2)
+            )
           : 0,
     }));
 

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 type Advert = {
   id: string;
@@ -41,8 +41,8 @@ export function TopVehicles({ endDate, startDate }: Props) {
 
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center">
-        <Loader />
+      <div className="flex h- w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

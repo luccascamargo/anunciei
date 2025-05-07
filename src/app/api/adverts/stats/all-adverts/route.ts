@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
       );
     }
     const adverts = await prisma.adverts.findMany({
+      where: {
+        user_id,
+      },
       orderBy: {
         created_at: "desc",
       },
