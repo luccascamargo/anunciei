@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate && prisma migrate deploy",
     "sync:fipe": "tsx src/scripts/sync-fipe.ts",
     "sync:optionals": "tsx src/scripts/sync-optionals.ts"
   },
