@@ -111,7 +111,7 @@ export function AdvertClient({ advert }: iContentAD) {
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-secondary-foreground text-secondary">
-                      CN
+                      AN
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">

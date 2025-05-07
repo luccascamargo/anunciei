@@ -206,7 +206,7 @@ export default function Page() {
                   </span>
                   <Avatar className="w-32 h-32">
                     <AvatarImage src={profileUrl} className="object-cover" />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarFallback>AN</AvatarFallback>
                   </Avatar>
                 </label>
               </div>

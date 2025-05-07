@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LoadingModal } from "./loadingModal";
+import { useMutation } from "@tanstack/react-query";
 
 const formSchema = z.object({
   name: z
@@ -50,30 +51,29 @@ export function RegisterForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await apiClient
-      .post("/auth/register", {
+    handleRegister.mutate(values);
+  }
+
+  const handleRegister = useMutation({
+    mutationKey: ["register", form.getValues("email")],
+    mutationFn: async (values: z.infer<typeof formSchema>) => {
+      return await apiClient.post("/auth/register", {
         data: {
           name: values.name,
           lastname: values.lastName,
           email: values.email,
           password: values.password,
         },
-      })
-      .then(() => {
-        toast("Conta criada com sucesso!");
-        router.refresh();
-      })
-      .catch((err) => {
-        console.log(err);
-        if (err.response.status === 409) {
-          toast.error("Usuário já existe.");
-        } else if (err.response.status === 422) {
-          toast.error("Dados inválidos.");
-        } else {
-          toast.error("Erro ao criar conta.");
-        }
       });
-  }
+    },
+    onSuccess: () => {
+      toast("Conta criada com sucesso!");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Erro ao criar conta.");
+    },
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -140,8 +140,12 @@ export function RegisterForm() {
                 )}
               />
               <div className="space-y-2">
-                <Button type="submit" className="w-full">
-                  {form.formState.isSubmitting ? "Enviando..." : "Registrar"}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={handleRegister.isPending}
+                >
+                  {handleRegister.isPending ? "Enviando..." : "Registrar"}
                 </Button>
                 {/* <Button variant="outline" className="w-full">
                   Entrar com Google
@@ -159,7 +163,7 @@ export function RegisterForm() {
       </Card>
       <LoadingModal
         description="Estamos validando suas informações."
-        isOpen={form.formState.isSubmitting}
+        isOpen={handleRegister.isPending}
         subTitle="Aguarde, isso pode demorar um pouco"
         title="Validando..."
       />

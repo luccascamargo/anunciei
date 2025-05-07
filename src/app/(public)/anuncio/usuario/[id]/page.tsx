@@ -69,7 +69,7 @@ export default async function Page({ params }: { params: Params }) {
           <div className="flex flex-col items-center gap-5">
             <Avatar className="w-20 h-20">
               <AvatarImage src={data.image!} className="object-cover" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarFallback>AN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">
               <span className="text-xl">

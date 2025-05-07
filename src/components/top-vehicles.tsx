@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -51,11 +51,8 @@ export function TopVehicles({ endDate, startDate }: Props) {
       {data?.map((advert) => (
         <div className="flex items-center" key={advert.id}>
           <Avatar className="h-9 w-9">
-            <AvatarImage
-              src="/placeholder.svg?height=36&width=36"
-              alt="Avatar"
-            />
-            <AvatarFallback>HC</AvatarFallback>
+            {advert.brand[0]}
+            {advert.model[0]}
           </Avatar>
           <div className="ml-4 space-y-1">
             <p className="text-sm font-medium leading-none">
