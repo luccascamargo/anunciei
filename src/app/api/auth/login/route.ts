@@ -58,6 +58,7 @@ export async function POST(request: Request) {
 
   const payload = {
     sub: userAlreadyExists.id,
+    role: userAlreadyExists.role,
   };
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET as string, {

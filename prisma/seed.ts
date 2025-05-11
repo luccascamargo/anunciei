@@ -12,6 +12,18 @@ function getRandomDate(start: Date, end: Date): Date {
 async function main() {
   console.log("Seeding database...");
 
+  await prisma.user.create({
+    data: {
+      name: "Lucas",
+      lastname: "Camargo",
+      email: "lucascamargo.dev@gmail.com",
+      active: true,
+      plan: "PRO",
+      password: "$2a$12$.wgToqTs1JBAAB1TosiJauqc2cDqsARUKiPm7J8qER.0Y6aNT3x3S",
+      role: "ADMIN",
+    },
+  });
+
   // Criar usuários
   const user = await prisma.user.create({
     data: {
@@ -21,7 +33,7 @@ async function main() {
       phone: "123456789",
       active: true,
       plan: "PRO",
-      password: "$2a$12$.wgToqTs1JBAAB1TosiJauqc2cDqsARUKiPm7J8qER.0Y6aNT3x3S", // Substitua por uma senha hash real
+      password: "$2a$12$.wgToqTs1JBAAB1TosiJauqc2cDqsARUKiPm7J8qER.0Y6aNT3x3S",
     },
   });
 

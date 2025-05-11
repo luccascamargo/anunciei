@@ -64,6 +64,7 @@ export async function POST(request: Request) {
 
   const payload = {
     sub: user.id,
+    role: user.role,
   };
 
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET as string, {

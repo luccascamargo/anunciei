@@ -15,7 +15,13 @@ const formSchema = z.object({
     phone: z.string(),
     message: z.string(),
   }),
+  emailTo: z.string().email(),
+  brand: z.string(),
+  model: z.string(),
+  price: z.number(),
+  year: z.number(),
   slug: z.string(),
+  imageUrl: z.string(),
   id: z.string(),
 });
 
@@ -34,20 +40,25 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: parsedData.error.format() }, { status: 400 });
   }
 
-  const { values, slug, id } = parsedData.data;
-  const { email } = values;
+  const { values, slug, id, emailTo, brand, model, price, year, imageUrl } =
+    parsedData.data;
 
   try {
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
-      to: [email],
+      from: "Equipe Anunciei.app <contato@anunciei.app>",
+      to: [emailTo],
       subject: "Olá, tem alguém interessado em um anúncio seu!",
-      react: await AdvertContactTemplate({
+      react: AdvertContactTemplate({
         name: values.name,
         email: values.email,
         message: values.message,
         phone: values.phone,
+        brand,
+        model,
+        price,
+        year,
         slug,
+        imageUrl,
       }),
     });
 

@@ -7,6 +7,7 @@ import { Providers } from "@/provider/queryClientProvider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { UpdatePhone } from "@/components/update-phone";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,6 +15,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
   title: "Anunciei - Facilite sua venda",
   keywords: [
     "Anúncios de veículos Rio Grande do Sul",
@@ -40,6 +45,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <GoogleTagManager gtmId="G-2CSLSBPVMT" />
       <body
         className={`${inter.className} antialiased`}
         suppressHydrationWarning

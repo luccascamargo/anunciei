@@ -76,8 +76,8 @@ export async function submitContactForm(
 
   try {
     await resend.emails.send({
-      from: "Anuncie.app - Contato <onboarding@resend.dev>",
-      to: ["lucascamargo.dev@gmail.com"],
+      from: "Anuncie.app - Contato <contato.anunciei.app>",
+      to: ["contato.anunciei.app"],
       subject: "Olá, temos um contato vindo do site Anuncie.app",
       react: await ContactTemplate({
         name,

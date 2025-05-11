@@ -20,6 +20,7 @@ model User {
   created_at    DateTime       @default(now()) @db.Timestamp(6)
   image         String?
   password      String
+  role          Role           @default(USER)
   adverts       Adverts[]
   subscriptions Subscription[]
 
@@ -94,7 +95,7 @@ model Visit {
 
 model Contact {
   id         String   @id @default(uuid())
-  visitor_id String   @unique
+  visitor_id String
   created_ad DateTime @default(now()) @db.Timestamp(6)
   adverts    Adverts? @relation(fields: [advert_id], references: [id])
   advert_id  String?
@@ -159,4 +160,9 @@ enum Category {
   CARS
   TRUCKS
   MOTORCYCLES
+}
+
+enum Role {
+  USER
+  ADMIN
 }

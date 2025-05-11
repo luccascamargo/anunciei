@@ -189,7 +189,16 @@ export function AdvertClient({ advert }: iContentAD) {
                   {advert.user.phone && "ou, envie uma mensagem ao vendedor"}
                   {!advert.user.phone && "envie uma mensagem ao vendedor"}
                 </span>
-                <FormAdvertContact slug={advert.slug} id={advert.id} />
+                <FormAdvertContact
+                  slug={advert.slug}
+                  brand={advert.brand.name}
+                  model={advert.model.name}
+                  price={advert.price}
+                  year={advert.year_model}
+                  imageUrl={advert.images[0].url}
+                  id={advert.id}
+                  emailTo={advert.user.email}
+                />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col items-center p-4">

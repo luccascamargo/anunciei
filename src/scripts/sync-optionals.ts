@@ -63,69 +63,6 @@ const optionals = [
   {
     name: "Retrovisor Elétrico",
   },
-  {
-    name: "Retrovisor com Desembaçador",
-  },
-  {
-    name: "Banco de Couro",
-  },
-  {
-    name: "Banco Elétrico",
-  },
-  {
-    name: "Banco com Aquecimento",
-  },
-  {
-    name: "Volante Multifuncional",
-  },
-  {
-    name: "Volante com Regulagem de Altura",
-  },
-  {
-    name: "Computador de Bordo",
-  },
-  {
-    name: "Chave Presencial",
-  },
-  {
-    name: "Partida por Botão",
-  },
-  {
-    name: "Isofix",
-  },
-  {
-    name: "Encosto de Cabeça Traseiro",
-  },
-  {
-    name: "Porta-Copos",
-  },
-  {
-    name: "Tapete de Borracha",
-  },
-  {
-    name: "Kit Multimídia",
-  },
-  {
-    name: "Carregador USB",
-  },
-  {
-    name: "Wi-Fi",
-  },
-  {
-    name: "Apple CarPlay",
-  },
-  {
-    name: "Android Auto",
-  },
-  {
-    name: "Sistema de Som Premium",
-  },
-  {
-    name: "Subwoofer",
-  },
-  {
-    name: "Amplificador",
-  },
 ];
 
 async function syncOptionals() {
