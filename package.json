@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "sync:fipe": "tsx src/scripts/sync-fipe.ts",
-    "sync:optionals": "tsx src/scripts/sync-optionals.ts",
-    "postinstall": "prisma generate && prisma migrate deploy"
+    "sync:optionals": "tsx src/scripts/sync-optionals.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",
