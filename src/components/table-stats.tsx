@@ -146,6 +146,11 @@ export const columns: ColumnDef<Advert>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href={`/estatisticas/${advert.slug}`} target="_blank">
+                Ver estatísticas
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link href={`/anuncio/${advert.slug}`} target="_blank">
                 Ver anúncio
               </Link>

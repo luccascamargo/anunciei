@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV === "production") {
+  console.log("O script de seed não deve ser executado em produção.");
+  process.exit(0);
+}
+
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -16,7 +21,7 @@ async function main() {
     data: {
       name: "Lucas",
       lastname: "Camargo",
-      email: "lucascamargo.dev@gmail.com",
+      email: "contato@anunciei.app",
       active: true,
       plan: "PRO",
       password: "$2a$12$.wgToqTs1JBAAB1TosiJauqc2cDqsARUKiPm7J8qER.0Y6aNT3x3S",
