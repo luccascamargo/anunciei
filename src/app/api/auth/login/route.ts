@@ -5,12 +5,10 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 const registerSchema = z.object({
-  data: z.object({
-    email: z.string().email("E-mail inválido"),
-    password: z
-      .string()
-      .min(8, { message: "Senha deve ter pelo menos 8 caracteres." }),
-  }),
+  email: z.string().email("E-mail inválido"),
+  password: z
+    .string()
+    .min(8, { message: "Senha deve ter pelo menos 8 caracteres." }),
 });
 
 export async function POST(request: Request) {
@@ -19,41 +17,53 @@ export async function POST(request: Request) {
   const parsed = registerSchema.safeParse(res);
 
   if (!parsed.success) {
-    return new Response(JSON.stringify(parsed.error.format()), {
-      status: 422,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    return Response.json(
+      { message: JSON.stringify(parsed.error.format()) },
+      {
+        status: 422,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
 
   const userAlreadyExists = await prisma.user.findUnique({
     where: {
-      email: parsed.data.data.email,
+      email: parsed.data.email,
     },
   });
 
   if (!userAlreadyExists) {
-    return new Response("Usuário não encontrado", {
-      status: 404,
-    });
+    return Response.json(
+      { message: "Usuário não encontrado" },
+      {
+        status: 404,
+      }
+    );
   }
 
   if (userAlreadyExists.active === false) {
-    return new Response("Usuário inativo", {
-      status: 409,
-    });
+    return Response.json(
+      { message: "Usuário inativo" },
+      {
+        status: 409,
+      }
+    );
   }
 
   const comparePassword = await bcrypt.compare(
-    parsed.data.data.password,
+    parsed.data.password,
     userAlreadyExists.password
   );
 
   if (!comparePassword) {
-    return new Response("E-mail ou senha incorreta", {
-      status: 401,
-    });
+    return Response.json(
+      { message: "E-mail ou senha incorreta" },
+      {
+        status: 401,
+      }
+    );
   }
 
   const payload = {
@@ -73,10 +83,13 @@ export async function POST(request: Request) {
     path: "/",
   });
 
-  return new Response(null, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  return Response.json(
+    { message: "Login realizado com sucesso" },
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 }

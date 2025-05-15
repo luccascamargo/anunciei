@@ -1,5 +1,5 @@
 "use client";
-import { apiClient } from "@/lib/utils";
+import { fetchApi } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +24,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LoadingModal } from "./loadingModal";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido." }),
@@ -35,6 +35,7 @@ const formSchema = z.object({
 
 export function SiginForm() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,27 +45,26 @@ export function SiginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    handleLogin.mutate(values);
-  }
-
-  const handleLogin = useMutation({
-    mutationKey: ["login", form.getValues("email")],
-    mutationFn: async (values: z.infer<typeof formSchema>) => {
-      return await apiClient.post("/auth/login", {
-        data: { email: values.email, password: values.password },
-        headers: {
-          "Content-Type": "application/json",
-        },
+    try {
+      setIsLoading(true);
+      const res = await fetchApi("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
       });
-    },
-    onSuccess: () => {
+      console.log(res);
+      setIsLoading(false);
       toast("Login bem sucedido!");
       router.refresh();
-    },
-    onError: () => {
+    } catch (error) {
       toast.error("E-mail ou senha incorretos.");
-    },
-  });
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,12 +105,8 @@ export function SiginForm() {
                 )}
               />
               <div className="space-y-2">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={handleLogin.isPending}
-                >
-                  {handleLogin.isPending ? "Enviando..." : "Entrar"}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Enviando..." : "Entrar"}
                 </Button>
                 {/* <Button variant="outline" className="w-full">
                   Entrar com Google
@@ -128,7 +124,7 @@ export function SiginForm() {
       </Card>
       <LoadingModal
         description="Estamos validando suas informações."
-        isOpen={handleLogin.isPending}
+        isOpen={isLoading}
         subTitle="Aguarde, isso pode demorar um pouco"
         title="Validando..."
       />

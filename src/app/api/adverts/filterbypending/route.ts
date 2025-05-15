@@ -5,16 +5,25 @@ import { verifyJwt } from "@/lib/auth";
 export async function GET(request: NextRequest) {
   try {
     // Verifica o token do cabeçalho Authorization
-    const token = request.cookies.get("accessToken")?.value;
-    if (!token) {
-      return NextResponse.json(
+    const authorizationHeader = request.headers.get("Authorization");
+    if (!authorizationHeader) {
+      return Response.json(
         { message: "Token de autenticação não encontrado" },
         { status: 401 }
       );
     }
+
+    const token = authorizationHeader.replace("Bearer ", "");
+    if (!token) {
+      return Response.json(
+        { message: "Token de autenticação inválido" },
+        { status: 401 }
+      );
+    }
+
     const user_id = await verifyJwt(token);
     if (!user_id) {
-      return NextResponse.json(
+      return Response.json(
         { message: "Token de autenticação inválido" },
         { status: 401 }
       );

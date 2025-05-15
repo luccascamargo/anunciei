@@ -22,6 +22,49 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
+export async function fetchApi<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {}),
+    },
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+
+  if (!res.ok) {
+    throw new Error(`API fetch failed with status ${res.status}`);
+  }
+
+  return res.json();
+}
+
+export async function fetchApiWithFormData<T>(
+  endpoint: string,
+  formData: FormData,
+  options?: RequestInit
+): Promise<T> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api${endpoint}`, {
+    method: "POST",
+    body: formData,
+    ...options,
+    headers: {
+      ...(options?.headers || {}),
+    },
+    credentials: "same-origin",
+  });
+
+  if (!res.ok) {
+    throw new Error(`API fetch failed with status ${res.status}`);
+  }
+
+  return res.json();
+}
+
 export const colors = [
   {
     name: "Branco",
