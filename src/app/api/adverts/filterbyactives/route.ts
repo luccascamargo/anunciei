@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     // Verifica o token do cabeçalho Authorization
     const authorizationHeader = request.headers.get("Authorization");
+
     if (!authorizationHeader) {
       return Response.json(
         { message: "Token de autenticação não encontrado" },

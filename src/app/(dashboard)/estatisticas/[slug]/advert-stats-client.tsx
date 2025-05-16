@@ -85,7 +85,7 @@ export function AdvertStatsClient({ slug }: { slug: string }) {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/">
+                <BreadcrumbLink href="/estatisticas">
                   <span className="text-muted-foreground">Estatisticas</span>
                 </BreadcrumbLink>
               </BreadcrumbItem>
