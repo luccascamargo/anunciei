@@ -16,6 +16,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function FormatDate(value: string) {
+  const date = new Date(value);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  return date.toLocaleDateString("pt-BR", options);
+}
+
 export const apiClient = axios.create({
   baseURL:
     `${process.env.NEXT_PUBLIC_API_URL}/api` || "http://localhost:3000/api",

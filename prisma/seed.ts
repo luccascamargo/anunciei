@@ -79,7 +79,7 @@ async function main() {
   // Criar primeiro anúncio
   const advert1 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2022,
       color: "Preto",
       city: "São Paulo",
@@ -128,7 +128,7 @@ async function main() {
   // Criar segundo anúncio
   const advert2 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2021,
       color: "Branco",
       city: "Rio de Janeiro",
@@ -177,7 +177,7 @@ async function main() {
   // Criar mais 5 anúncios
   const advert3 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2020,
       color: "Vermelho",
       city: "Belo Horizonte",
@@ -225,7 +225,7 @@ async function main() {
 
   const advert4 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2019,
       color: "Azul",
       city: "Curitiba",
@@ -273,7 +273,7 @@ async function main() {
 
   const advert5 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2023,
       color: "Prata",
       city: "Porto Alegre",
@@ -321,7 +321,7 @@ async function main() {
 
   const advert6 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2018,
       color: "Preto",
       city: "Salvador",
@@ -369,7 +369,7 @@ async function main() {
 
   const advert7 = await prisma.adverts.create({
     data: {
-      type: "Carro",
+      type: "carros",
       year_model: 2024,
       color: "Branco",
       city: "Fortaleza",

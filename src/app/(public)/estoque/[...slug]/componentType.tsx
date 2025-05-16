@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, FilterIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -189,7 +189,7 @@ export function ComponentType({ slug }: { slug: string }) {
       }
     });
 
-    router.push(`/stock/${slug}?${params.toString()}`);
+    router.push(`/estoque/${slug}?${params.toString()}`);
   }
 
   const { data: brands } = useQuery<IBrand[]>({
@@ -272,7 +272,7 @@ export function ComponentType({ slug }: { slug: string }) {
     if (e === "default") return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", e);
-    router.push(`/stock/${slug}?${params.toString()}`);
+    router.push(`/estoque/${slug}?${params.toString()}`);
   }
 
   return (
@@ -285,7 +285,9 @@ export function ComponentType({ slug }: { slug: string }) {
               <div className="flex items-center gap-4">
                 <Sheet>
                   <SheetTrigger className="text-sm transition-all cursor-pointer hover:underline">
-                    Filtrar
+                    <Button variant={"outline"}>
+                      <FilterIcon /> Filtros
+                    </Button>
                   </SheetTrigger>
                   <SheetContent
                     side="right"
@@ -447,7 +449,7 @@ export function ComponentType({ slug }: { slug: string }) {
                                     ].map((brand, idx) => (
                                       <Link
                                         key={idx}
-                                        href={`/stock/${slug}/${brand.slug}`}
+                                        href={`/estoque/${slug}/${brand.slug}`}
                                         className="w-full rounded-md border border-input py-3 shadow-xs flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all"
                                       >
                                         <Image
@@ -486,7 +488,7 @@ export function ComponentType({ slug }: { slug: string }) {
                                         <div className="flex flex-col">
                                           {brandsFiltered.map((brand, idx) => (
                                             <Link
-                                              href={`/stock/${slug}/${brand.slug}`}
+                                              href={`/estoque/${slug}/${brand.slug}`}
                                               key={idx}
                                               className="text-sm hover:bg-accent py-2 pl-2"
                                             >

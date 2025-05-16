@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CardAdvert } from "@/components/cardAdvert";
 import { apiClient, GetCities, GetStates, normalizeText } from "@/lib/utils";
 import { CustomInputValue } from "@/components/customInputValue";
-import { X } from "lucide-react";
+import { FilterIcon, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -152,7 +152,7 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
       }
     });
 
-    router.push(`/stock/${slug[0]}/${slug[1]}?${params.toString()}`);
+    router.push(`/estoque/${slug[0]}/${slug[1]}?${params.toString()}`);
   }
 
   const getOptionals = useQuery({
@@ -204,7 +204,7 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
     if (e === "default") return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", e);
-    router.push(`/stock/${slug}?${params.toString()}`);
+    router.push(`/estoque/${slug}?${params.toString()}`);
   }
 
   return (
@@ -217,7 +217,9 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
               <div className="flex items-center gap-4">
                 <Sheet>
                   <SheetTrigger className="text-sm transition-all cursor-pointer hover:underline">
-                    Filtrar
+                    <Button variant={"outline"}>
+                      <FilterIcon /> Filtros
+                    </Button>
                   </SheetTrigger>
                   <SheetContent
                     side="right"
@@ -234,13 +236,13 @@ export function ComponentBrand({ slug, models }: IFilterBrand) {
                             <div className="w-full flex items-center gap-2">
                               <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
                                 {slug[0]}
-                                <Link href={`/stock/carros`}>
+                                <Link href={`/estoque/carros`}>
                                   <X className="h-4 w-4" />
                                 </Link>
                               </span>
                               <span className="flex items-center gap-2 bg-primary/10 p-2 w-fit rounded-md text-black/80 text-sm">
                                 {slug[1]}
-                                <Link href={`/stock/${slug[0]}`}>
+                                <Link href={`/estoque/${slug[0]}`}>
                                   <X className="h-4 w-4" />
                                 </Link>
                               </span>

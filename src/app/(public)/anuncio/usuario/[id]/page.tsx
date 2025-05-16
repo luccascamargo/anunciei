@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { apiClient } from "@/lib/utils";
+import { fetchApi } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -35,7 +35,8 @@ type UserReturn = {
 export default async function Page({ params }: { params: Params }) {
   const { id } = await params;
 
-  const { data } = await apiClient.get<UserReturn>(`/users/adverts/${id}`, {
+  const data = await fetchApi<Promise<UserReturn>>(`/users/adverts/${id}`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
