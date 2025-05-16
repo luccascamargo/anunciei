@@ -24,7 +24,7 @@ export function SearchBox() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!values.seacrh) return router.push("/estoque/carros");
-    return router.push(`/stock/carros?busca=${values.seacrh}`);
+    return router.push(`/estoque/carros?busca=${values.seacrh}`);
   }
   return (
     <div className="max-w-xl mx-auto">
