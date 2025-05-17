@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn, fetchApi } from "@/lib/utils";
 import Image from "next/image";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Prisma } from "@prisma/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { auth } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { DropdownInactivesOptions } from "./dropdown-inactives-options";
 import { InactivesButtonRefresh } from "./inactives-button-refresh";
 
@@ -32,18 +30,27 @@ export default async function Page() {
     return notFound();
   }
 
-  const inactiveAdsData = await fetchApi<
-    Promise<
-      Prisma.AdvertsGetPayload<{
-        include: { images: true; brand: true; model: true };
-      }>[]
-    >
-  >("/adverts/filterbyinactives", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken?.value}`,
-    },
-  });
+  let inactiveAdsData: Prisma.AdvertsGetPayload<{
+    include: { images: true; brand: true; model: true };
+  }>[] = [];
+
+  try {
+    inactiveAdsData = await fetchApi<
+      Promise<
+        Prisma.AdvertsGetPayload<{
+          include: { images: true; brand: true; model: true };
+        }>[]
+      >
+    >("/adverts/filterbyinactives", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken?.value}`,
+      },
+    });
+  } catch (err) {
+    console.error("Erro ao buscar anúncios inativos:", err);
+    return notFound(); // ou uma UI de fallback
+  }
 
   return (
     <>
@@ -76,86 +83,80 @@ export default async function Page() {
             <InactivesButtonRefresh />
           </CardHeader>
           <CardContent className="w-full grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
-            <Suspense
-              fallback={
-                <Skeleton className="w-full h-[200px] flex items-center p-5 gap-6" />
-              }
-            >
-              {inactiveAdsData.map(
-                (
-                  ad: Prisma.AdvertsGetPayload<{
-                    include: { images: true; brand: true; model: true };
-                  }>
-                ) => (
-                  <div
-                    key={ad.id}
-                    className={cn(
-                      "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md hover:opacity-100 relative"
+            {inactiveAdsData.map(
+              (
+                ad: Prisma.AdvertsGetPayload<{
+                  include: { images: true; brand: true; model: true };
+                }>
+              ) => (
+                <div
+                  key={ad.id}
+                  className={cn(
+                    "rounded-md border pb-5 h-fit transition-all opacity-70 hover:shadow-md hover:opacity-100 relative"
+                  )}
+                >
+                  <div className="w-full h-[125px] relative">
+                    {ad.emphasis && (
+                      <Badge className="absolute z-10 top-2 right-2">
+                        Destaque
+                      </Badge>
                     )}
-                  >
-                    <div className="w-full h-[125px] relative">
-                      {ad.emphasis && (
-                        <Badge className="absolute z-10 top-2 right-2">
-                          Destaque
-                        </Badge>
-                      )}
-                      <Image
-                        src={ad.images[0].url || "/default-car.png"}
-                        fill
-                        quality={100}
-                        alt={ad.model.name}
-                        className="object-cover rounded-t"
-                      />
+                    <Image
+                      src={ad.images[0].url || "/default-car.png"}
+                      fill
+                      quality={100}
+                      alt={ad.model.name}
+                      className="object-cover rounded-t"
+                    />
+                  </div>
+                  <div className="mt-3 px-3 w-full flex flex-col gap-5">
+                    <div className="w-full flex items-center justify-between">
+                      <span className="text-muted-foreground text-lg font-bold">
+                        {Number(ad.price).toLocaleString("pt-BR", {
+                          currency: "BRL",
+                          style: "currency",
+                        })}
+                      </span>
+                      <DropdownInactivesOptions id={ad.id} slug={ad.slug} />
                     </div>
-                    <div className="mt-3 px-3 w-full flex flex-col gap-5">
-                      <div className="w-full flex items-center justify-between">
-                        <span className="text-muted-foreground text-lg font-bold">
-                          {Number(ad.price).toLocaleString("pt-BR", {
-                            currency: "BRL",
-                            style: "currency",
-                          })}
-                        </span>
-                        <DropdownInactivesOptions id={ad.id} slug={ad.slug} />
-                      </div>
-                      <div className="flex flex-col min-h-20">
-                        <span className="text-muted-foreground text-lg font-bold">
-                          {ad.brand.name}
-                        </span>
-                        <span className="text-muted-foreground font-normal text-xs uppercase">
-                          {ad.model.name}
-                        </span>
-                      </div>
-                      <div className="w-full flex items-center justify-between">
-                        <span className="text-muted-foreground font-semibold text-xs">
-                          {ad.year_model}
-                        </span>
-                        <span className="text-muted-foreground font-semibold text-xs">
-                          {Number(ad.mileage).toLocaleString("pt-BR")} km
-                        </span>
-                        <span className="text-muted-foreground font-semibold text-xs">
-                          {ad.color}
-                        </span>
-                      </div>
-                      <div className="border w-full" />
-                      <span className="text-muted-foreground font-semibold text-xs w-full text-center">
-                        {ad.city} - {ad.state}
+                    <div className="flex flex-col min-h-20">
+                      <span className="text-muted-foreground text-lg font-bold">
+                        {ad.brand.name}
+                      </span>
+                      <span className="text-muted-foreground font-normal text-xs uppercase">
+                        {ad.model.name}
                       </span>
                     </div>
-                    {user?.plan !== "FREE" && (
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1 text-muted-foreground">
-                        <Users size={16} />
-                        <span className="text-sm">{ad.view_count}</span>
-                      </div>
-                    )}
+                    <div className="w-full flex items-center justify-between">
+                      <span className="text-muted-foreground font-semibold text-xs">
+                        {ad.year_model}
+                      </span>
+                      <span className="text-muted-foreground font-semibold text-xs">
+                        {Number(ad.mileage).toLocaleString("pt-BR")} km
+                      </span>
+                      <span className="text-muted-foreground font-semibold text-xs">
+                        {ad.color}
+                      </span>
+                    </div>
+                    <div className="border w-full" />
+                    <span className="text-muted-foreground font-semibold text-xs w-full text-center">
+                      {ad.city} - {ad.state}
+                    </span>
                   </div>
-                )
-              )}
-              {inactiveAdsData.length === 0 && (
-                <span className="text-muted-foreground">
-                  Nenhuma anúncio encontrado
-                </span>
-              )}
-            </Suspense>
+                  {user?.plan !== "FREE" && (
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 text-muted-foreground">
+                      <Users size={16} />
+                      <span className="text-sm">{ad.view_count}</span>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
+            {inactiveAdsData.length === 0 && (
+              <span className="text-muted-foreground">
+                Nenhuma anúncio encontrado
+              </span>
+            )}
           </CardContent>
         </Card>
       </div>
