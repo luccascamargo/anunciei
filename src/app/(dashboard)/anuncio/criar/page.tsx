@@ -359,7 +359,7 @@ export default function Page() {
       });
       setPhotos([]);
       form.reset();
-      return push("/conta/anuncios/pendentes");
+      return push("/meus-anuncios/pendentes");
     },
     onError: (err) => {
       console.log(err);

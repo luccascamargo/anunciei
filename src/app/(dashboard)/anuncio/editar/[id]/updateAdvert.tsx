@@ -252,7 +252,7 @@ export function UpdateAdvert({ advert }: Props) {
         },
       });
       form.reset();
-      push("/conta/anuncios/pendentes");
+      push("/meus-anuncios/pendentes");
     },
     onError: (error: any) => {
       console.error("Update Advert Error:", error);

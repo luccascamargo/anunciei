@@ -40,13 +40,13 @@ const data = {
     },
     {
       name: "Meus anúncios",
-      url: "/conta/anuncios/ativos",
+      url: "/meus-anuncios/ativos",
       icon: Folder,
       its_protected: false,
       items: [
-        { url: "/conta/anuncios/ativos", label: "Ativos" },
-        { url: "/conta/anuncios/inativos", label: "Inativos" },
-        { url: "/conta/anuncios/pendentes", label: "Pendentes" },
+        { url: "/meus-anuncios/ativos", label: "Ativos" },
+        { url: "/meus-anuncios/inativos", label: "Inativos" },
+        { url: "/meus-anuncios/pendentes", label: "Pendentes" },
       ],
     },
     {
