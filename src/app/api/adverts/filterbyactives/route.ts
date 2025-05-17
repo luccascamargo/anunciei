@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const authorizationHeader = request.headers.get("Authorization");
 
     if (!authorizationHeader) {
+      console.log("authorization", authorizationHeader);
       return Response.json(
         { message: "Token de autenticação não encontrado" },
         { status: 401 }
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
 
     const token = authorizationHeader.replace("Bearer ", "");
     if (!token) {
+      console.log("token", token);
       return Response.json(
         { message: "Token de autenticação inválido" },
         { status: 401 }
@@ -24,6 +26,7 @@ export async function GET(request: NextRequest) {
 
     const user_id = await verifyJwt(token);
     if (!user_id) {
+      console.log("user_id", user_id);
       return Response.json(
         { message: "Token de autenticação inválido" },
         { status: 401 }
